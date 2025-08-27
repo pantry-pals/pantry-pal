@@ -17,11 +17,11 @@ enum Role {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String   // hashed password only
-  role          Role     @default(USER)
-  emailVerified Boolean  @default(false) // set true once verification is complete
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            Int      @id @default(autoincrement())  // primary key
+  email         String   @unique                        // valid email address
+  password      String                                  // hashed password only
+  role          Role     @default(USER)                 // whether they are an admin or user
+  emailVerified Boolean  @default(false)                // set true once verification is complete
+  createdAt     DateTime @default(now())                // when they created their account
+  updatedAt     DateTime @updatedAt                     // last time account was modified
 }
