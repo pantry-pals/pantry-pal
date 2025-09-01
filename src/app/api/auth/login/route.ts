@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -26,15 +27,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Compare password
-    if (user.password !== password) {
+    // Compare hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return NextResponse.json(
         { message: 'Invalid email or password' },
         { status: 401 },
       );
     }
 
-    // Login is successful
+    // Login successful
     return NextResponse.json(
       { message: 'Login successful', userId: user.id },
       { status: 200 },
