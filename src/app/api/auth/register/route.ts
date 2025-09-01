@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { message: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { message: 'User already exists' },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -38,13 +38,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { message: 'User created', userId: user.id },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { message: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
