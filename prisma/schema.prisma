@@ -4,11 +4,17 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // for local development
   url      = env("DATABASE_URL")
-  // for Vercel
-  // url       = env("POSTGRES_PRISMA_URL")
-  // directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  role          Role     @default(USER)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum Role {
@@ -16,12 +22,17 @@ enum Role {
   ADMIN
 }
 
-model User {
-  id            Int      @id @default(autoincrement())  // primary key
-  email         String   @unique                        // valid email address
-  password      String                                  // hashed password only
-  role          Role     @default(USER)                 // whether they are an admin or user
-  emailVerified Boolean  @default(false)                // set true once verification is complete
-  createdAt     DateTime @default(now())                // when they created their account
-  updatedAt     DateTime @updatedAt                     // last time account was modified
+enum Condition {
+  excellent
+  good
+  fair
+  poor
+}
+
+model Stuff {
+  id        Int       @id @default(autoincrement())
+  name      String
+  quantity  Int
+  condition Condition @default(good)
+  owner     String
 }
