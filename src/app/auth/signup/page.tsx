@@ -14,7 +14,6 @@ type SignUpForm = {
   // acceptTerms: boolean;
 };
 
-/** The sign up page. */
 const SignUp = () => {
   const validationSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email is invalid'),
@@ -36,12 +35,17 @@ const SignUp = () => {
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = async (data: SignUpForm) => {
-    // console.log(JSON.stringify(data, null, 2));
-    await createUser(data);
-    // After creating, signIn with redirect to the add page
-    await signIn('credentials', { callbackUrl: '/add', ...data });
-  };
+const onSubmit = async (data: SignUpForm) => {
+  const { email, password } = data;
+
+  try {
+    await createUser({ email, password });
+    // Sign in right after registration
+    await signIn('credentials', { email, password, callbackUrl: '/add' });
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <main>

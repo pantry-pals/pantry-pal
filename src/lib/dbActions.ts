@@ -1,6 +1,6 @@
 'use server';
 
-import { Stuff, Condition } from '@prisma/client';
+import { Stuff, Condition, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
@@ -10,15 +10,11 @@ import { prisma } from './prisma';
  * @param stuff, an object with the following properties: name, quantity, owner, condition.
  */
 export async function addStuff(stuff: { name: string; quantity: number; owner: string; condition: string }) {
-  // console.log(`addStuff data: ${JSON.stringify(stuff, null, 2)}`);
-  let condition: Condition = 'good';
-  if (stuff.condition === 'poor') {
-    condition = 'poor';
-  } else if (stuff.condition === 'excellent') {
-    condition = 'excellent';
-  } else {
-    condition = 'fair';
-  }
+  const inputCondition = stuff.condition.toLowerCase() as Condition;
+  const condition: Condition = ['poor', 'fair', 'excellent', 'good'].includes(inputCondition)
+    ? (inputCondition as Condition)
+    : 'good';
+
   await prisma.stuff.create({
     data: {
       name: stuff.name,
@@ -35,19 +31,11 @@ export async function addStuff(stuff: { name: string; quantity: number; owner: s
  * Edits an existing stuff in the database.
  * @param stuff, an object with the following properties: id, name, quantity, owner, condition.
  */
-export async function editStuff(stuff: Stuff) {
-  // console.log(`editStuff data: ${JSON.stringify(stuff, null, 2)}`);
+export async function editStuff(stuff: Prisma.StuffUpdateInput & { id: number }) {
   await prisma.stuff.update({
     where: { id: stuff.id },
-    data: {
-      name: stuff.name,
-      quantity: stuff.quantity,
-      owner: stuff.owner,
-      condition: stuff.condition,
-    },
+    data: stuff,
   });
-  // After updating, redirect to the list page
-  redirect('/list');
 }
 
 /**
@@ -67,15 +55,19 @@ export async function deleteStuff(id: number) {
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
-export async function createUser(credentials: { email: string; password: string }) {
-  // console.log(`createUser data: ${JSON.stringify(credentials, null, 2)}`);
-  const password = await hash(credentials.password, 10);
-  await prisma.user.create({
+export async function createUser(data: { email: string; password: string }) {
+  const hashedPassword = await hash(data.password, 10);
+
+  const user = await prisma.user.create({
     data: {
-      email: credentials.email,
-      password,
+      email: data.email,
+      password: hashedPassword,
+      role: 'USER',
+      emailVerified: false,
     },
   });
+
+  return { message: 'User created', userId: user.id };
 }
 
 /**
