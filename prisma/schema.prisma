@@ -36,3 +36,21 @@ model Stuff {
   condition Condition @default(good)
   owner     String
 }
+
+enum ProductType {
+  vegetable
+  fruit
+  meat
+  dairy
+  misc
+}
+
+
+model Produce {
+  id          Int       @id @default(autoincrement())
+  name        String
+  type        ProductType @default(Vegetable)
+  location    Location @default(fridge)
+  quantity    Int
+  expiration  DateTime
+}

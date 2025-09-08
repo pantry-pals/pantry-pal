@@ -92,3 +92,36 @@ export async function changePassword(credentials: { email: string; password: str
     },
   });
 }
+
+export async function addProduce(produce: { name: string; type: string; location: string; quantity: number; expiration: Date }) {
+  await prisma.produce.create({
+    data: {
+      name: produce.name,
+      type: produce.type as 'fruit' | 'vegetable',
+      location: produce.location as 'pantry' | 'fridge' | 'freezer',
+      quantity: produce.quantity,
+      expiration: produce.expiration,
+    },
+  });
+  redirect('/list');
+}
+
+export async function editProduce(produce: { name: string; type: string; location: string; quantity: number; expiration: Date }) {
+  await prisma.produce.update({
+    where: { name: produce.name },
+    data: {
+      type: produce.type as 'fruit' | 'vegetable',
+      location: produce.location as 'pantry' | 'fridge' | 'freezer',
+      quantity: produce.quantity,
+      expiration: produce.expiration,
+    },
+  });
+  redirect('/list');
+}
+
+export async function deleteProduce(name: string) {
+  await prisma.produce.delete({
+    where: { name },
+  });
+  redirect('/list');
+}
