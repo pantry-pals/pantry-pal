@@ -52,6 +52,10 @@ const NavBar: React.FC = () => {
                   <Lock />
                   Change Password
                 </NavDropdown.Item>
+                <NavDropdown.Item id="login-dropdown-profile-settings" href="/auth/profile-settings">
+                  <Lock />
+                  Profile Settings
+                </NavDropdown.Item>
               </NavDropdown>
             ) : (
               <NavDropdown id="login-dropdown" title="Login">
