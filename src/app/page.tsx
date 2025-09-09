@@ -1,4 +1,3 @@
-import { Col, Container, Image, Row } from 'react-bootstrap';
 import Hero from '@/components/landing/Hero';
 
 /** The Home page. */
