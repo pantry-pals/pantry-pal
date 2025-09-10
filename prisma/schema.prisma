@@ -7,16 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String
-  role          Role     @default(USER)
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
 model Stuff {
   id        Int       @id @default(autoincrement())
   name      String
@@ -37,4 +27,25 @@ enum Condition {
   good
   fair
   poor
+}
+
+model User {
+  id            Int                      @id @default(autoincrement())
+  email         String                   @unique
+  password      String
+  role          Role                     @default(USER)
+  emailVerified Boolean                  @default(false)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  emailVerificationToken EmailVerificationToken?
+}
+
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }

@@ -1,20 +1,22 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
+import { Card, Col, Container, Button, Form, Row, Alert } from 'react-bootstrap';
 import { createUser } from '@/lib/dbActions';
 
 type SignUpForm = {
   email: string;
   password: string;
   confirmPassword: string;
-  // acceptTerms: boolean;
 };
 
 const SignUp = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const validationSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email is invalid'),
     password: Yup.string()
@@ -40,12 +42,35 @@ const SignUp = () => {
 
     try {
       await createUser({ email, password });
-      // Sign in right after registration
-      await signIn('credentials', { email, password, callbackUrl: '/add' });
-    } catch (err) {
+      setSubmitted(true);
+      setErrorMessage('');
+    } catch (err: any) {
       console.error(err);
+      setErrorMessage(err.message || 'Something went wrong. Please try again.');
     }
   };
+
+  if (submitted) {
+    return (
+      <main>
+        <Container>
+          <Row className="justify-content-center">
+            <Col xs={5}>
+              <Card>
+                <Card.Body>
+                  <h3 className="text-center">Verify Your Email</h3>
+                  <p>
+                    Thanks for signing up! We sent a verification link to your email. Click the link to activate your
+                    account before signing in.
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -53,6 +78,7 @@ const SignUp = () => {
         <Row className="justify-content-center">
           <Col xs={5}>
             <h1 className="text-center">Sign Up</h1>
+            {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
             <Card>
               <Card.Body>
                 <Form onSubmit={handleSubmit(onSubmit)}>
@@ -75,6 +101,7 @@ const SignUp = () => {
                     />
                     <div className="invalid-feedback">{errors.password?.message}</div>
                   </Form.Group>
+
                   <Form.Group className="form-group">
                     <Form.Label>Confirm Password</Form.Label>
                     <input
@@ -84,6 +111,7 @@ const SignUp = () => {
                     />
                     <div className="invalid-feedback">{errors.confirmPassword?.message}</div>
                   </Form.Group>
+
                   <Form.Group className="form-group py-3">
                     <Row>
                       <Col>
@@ -102,6 +130,7 @@ const SignUp = () => {
               </Card.Body>
               <Card.Footer>
                 Already have an account?
+                {' '}
                 <a href="/auth/signin">Sign in</a>
               </Card.Footer>
             </Card>
