@@ -1,32 +1,39 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get('token');
+  try {
+    const url = new URL(req.url);
+    const token = url.searchParams.get('token');
+    if (!token) throw new Error('No token');
 
-  if (!token) return NextResponse.json({ error: 'Token required' }, { status: 400 });
+    // Find token record and include user
+    const record = await prisma.emailVerificationToken.findUnique({
+      where: { token },
+      include: { user: true },
+    });
 
-  const record = await prisma.emailVerificationToken.findUnique({
-    where: { token },
-    include: { user: true },
-  });
+    if (!record || record.expiresAt < new Date()) throw new Error('Invalid or expired token');
 
-  if (!record) return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
-  if (record.expiresAt < new Date()) return NextResponse.json({ error: 'Token expired' }, { status: 400 });
+    // Mark email as verified
+    await prisma.user.update({
+      where: { id: record.user.id },
+      data: { emailVerified: true },
+    });
 
-  // Mark user as verified
-  await prisma.user.update({
-    where: { id: record.userId },
-    data: { emailVerified: true },
-  });
+    // Delete the token
+    await prisma.emailVerificationToken.delete({ where: { id: record.id } });
 
-  // Delete the token after use
-  await prisma.emailVerificationToken.delete({ where: { id: record.id } });
-
-  // Get absolute URL for redirect
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const redirectUrl = `${baseUrl}/auth/signin`;
-
-  return NextResponse.redirect(redirectUrl);
+    // Redirect to frontend with token + email
+    const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    return NextResponse.redirect(
+      `${frontendUrl}/auth/verify-client?token=${token}&email=${encodeURIComponent(record.user.email)}`,
+    );
+  } catch (err) {
+    console.error('Verification error:', err);
+    const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    return NextResponse.redirect(`${frontendUrl}/auth/error`);
+  }
 }
