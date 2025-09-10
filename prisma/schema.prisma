@@ -35,4 +35,6 @@ model Stuff {
   quantity  Int
   condition Condition @default(good)
   owner     String
+
+  @@map("stuff")
 }
