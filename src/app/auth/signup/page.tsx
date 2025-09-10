@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { Card, Col, Container, Button, Form, Row, Alert } from 'react-bootstrap';
-import { createUser } from '@/lib/dbActions';
 
 type SignUpForm = {
   email: string;
@@ -41,7 +40,18 @@ const SignUp = () => {
     const { email, password } = data;
 
     try {
-      await createUser({ email, password });
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || 'Registration failed');
+      }
+
       setSubmitted(true);
       setErrorMessage('');
     } catch (err: any) {
