@@ -9,5 +9,14 @@
     { "name": "Bicycle", "quantity": 2, "owner": "john@foo.com", "condition": "poor" },
     { "name": "Banana", "quantity": 2, "owner": "admin@foo.com", "condition": "good" },
     { "name": "Boogie Board", "quantity": 2, "owner": "admin@foo.com", "condition": "excellent" }
+  ],
+
+  "defaultProduce": [
+    {"name": "Banana", "type": "fruit", "location": "pantry", "quantity": 20, "expiration": "2025-12-31T00:00:00.000Z"},
+    {"name": "Apple", "type": "fruit", "location": "pantry", "quantity": 15, "expiration": "2025-11-30T00:00:00.000Z"},
+    {"name": "Carrot", "type": "vegetable", "location": "fridge", "quantity": 10, "expiration": "2025-10-15T00:00:00.000Z"},
+    {"name": "Broccoli", "type": "vegetable", "location": "fridge", "quantity": 8, "expiration": "2025-10-10T00:00:00.000Z"},
+    {"name": "Chicken Breast", "type": "meat", "location": "freezer", "quantity": 5, "expiration": "2026-01-20T00:00:00.000Z"},
+    {"name": "Salmon Fillet", "type": "meat", "location": "freezer", "quantity": 4, "expiration": "2026-02-15T00:00:00.000Z"}
   ]
 }

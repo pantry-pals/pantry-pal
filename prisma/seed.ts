@@ -43,6 +43,24 @@ async function main() {
     });
   }
 
+  // Seed produce
+  for (let index = 0; index < config.defaultProduce.length; index++) {
+    const produce = config.defaultProduce[index];
+    console.log(`  Adding produce: ${JSON.stringify(produce)}`);
+
+    await prisma.produce.upsert({
+      where: { id: index + 1 },
+      update: {},
+      create: {
+        name: produce.name,
+        type: produce.type,
+        location: produce.location,
+        quantity: produce.quantity,
+        expiration: new Date(produce.expiration),
+      },
+    });
+  }
+
   console.log('Seeding complete!');
 }
 

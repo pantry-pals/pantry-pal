@@ -92,3 +92,49 @@ export async function changePassword(credentials: { email: string; password: str
     },
   });
 }
+
+/** * Adds a new produce to the database.
+ * @param produce, an object with the following properties: name, type, location, quantity, expiration.
+ */
+export async function addProduce(produce: {
+  name: string;
+  type: string;
+  location: string;
+  quantity: number;
+  expiration: string | Date;
+}) {
+  await prisma.produce.create({
+    data: {
+      name: produce.name,
+      type: produce.type,
+      location: produce.location,
+      quantity: produce.quantity,
+      expiration: new Date(produce.expiration),
+    },
+  });
+  // After adding, redirect to the list page
+  redirect('/list');
+}
+/** * Edits an existing produce in the database.
+ * @param produce, an object with the following properties: id, name, type, location, quantity, expiration.
+ */ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: number }) {
+  await prisma.produce.update({
+    where: { id: produce.id },
+    data: {
+      name: produce.name,
+      type: produce.type,
+      location: produce.location,
+      quantity: produce.quantity,
+      expiration: produce.expiration ? new Date(produce.expiration) : undefined,
+    },
+  });
+}
+/** * Deletes an existing produce from the database.
+ * @param id, the id of the produce to delete.
+ */ export async function deleteProduce(id: number) {
+  await prisma.produce.delete({
+    where: { id },
+  });
+  // After deleting, redirect to the list page
+  redirect('/list');
+}
