@@ -1,9 +1,10 @@
+// src/lib/mailer.ts
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
-  secure: true, // SSL
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
@@ -11,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendVerificationEmail(to: string, token: string) {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const verificationUrl = `${baseUrl}/auth/verify?token=${token}`;
 
   await transporter.sendMail({
@@ -20,10 +21,7 @@ export async function sendVerificationEmail(to: string, token: string) {
     subject: '[Pantry Pal] Verify Your Email',
     html: `
       <p>Hi there!</p>
-      <p>
-        Thanks for signing up for <strong>Pantry Pal</strong>. Please verify your email by
-        clicking the button below:
-      </p>
+      <p>Thanks for signing up for <strong>Pantry Pal</strong>. Please verify your email by clicking below:</p>
       <p style="text-align: center; margin: 20px 0;">
         <a href="${verificationUrl}" style="
           background-color: #28a745;
