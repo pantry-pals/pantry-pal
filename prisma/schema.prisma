@@ -17,6 +17,16 @@ model User {
   updatedAt     DateTime @updatedAt
 }
 
+model Stuff {
+  id        Int       @id @default(autoincrement())
+  name      String
+  quantity  Int
+  condition Condition @default(good)
+  owner     String
+
+  @@map("stuff")
+}
+
 enum Role {
   USER
   ADMIN
@@ -27,14 +37,4 @@ enum Condition {
   good
   fair
   poor
-}
-
-model Stuff {
-  id        Int       @id @default(autoincrement())
-  name      String
-  quantity  Int
-  condition Condition @default(good)
-  owner     String
-
-  @@map("stuff")
 }
