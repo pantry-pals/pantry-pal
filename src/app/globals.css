@@ -5,6 +5,7 @@ body {
   height: 100%;
   padding: 0;
   margin: 0;
+  background-color: var(--timberwolf);
 }
 .wrapper {
   box-sizing: border-box;
@@ -18,4 +19,9 @@ body {
   --fern-green: #588157; /* Deep green */
   --hunter-green: #3A5A40; /* Dark green */
   --brunswick-green: #344E41; /* Very dark green */
+}
+.navbar {
+  background-color: var(--hunter-green);
+  color: white;
+  padding: 1rem;
 }
