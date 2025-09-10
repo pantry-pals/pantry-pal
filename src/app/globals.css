@@ -12,3 +12,10 @@ body {
   display: flex;
   flex-direction: column;
 }
+:root {
+  --timberwolf: #DAD7CD; /* Light grayish yellow */
+  --sage: #A3B18A; /* Muted green */
+  --fern-green: #588157; /* Deep green */
+  --hunter-green: #3A5A40; /* Dark green */
+  --brunswick-green: #344E41; /* Very dark green */
+}
