@@ -3,7 +3,9 @@
 import { Condition, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
+import crypto from 'crypto';
 import { prisma } from './prisma';
+import { sendVerificationEmail } from './mailer';
 
 /**
  * Adds a new stuff to the database.
@@ -55,19 +57,25 @@ export async function deleteStuff(id: number) {
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
-export async function createUser(data: { email: string; password: string }) {
-  const hashedPassword = await hash(data.password, 10);
+export async function createUser({ email, password }: { email: string; password: string }) {
+  const hashedPassword = await hash(password, 10);
 
   const user = await prisma.user.create({
-    data: {
-      email: data.email,
-      password: hashedPassword,
-      role: 'USER',
-      emailVerified: false,
-    },
+    data: { email, password: hashedPassword },
   });
 
-  return { message: 'User created', userId: user.id };
+  // Generate verification token
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+  await prisma.emailVerificationToken.create({
+    data: { token, userId: user.id, expiresAt },
+  });
+
+  // Send email
+  await sendVerificationEmail(email, token);
+
+  return user;
 }
 
 /**
