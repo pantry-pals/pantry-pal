@@ -35,17 +35,17 @@ const SignUp = () => {
     resolver: yupResolver(validationSchema),
   });
 
-const onSubmit = async (data: SignUpForm) => {
-  const { email, password } = data;
+  const onSubmit = async (data: SignUpForm) => {
+    const { email, password } = data;
 
-  try {
-    await createUser({ email, password });
-    // Sign in right after registration
-    await signIn('credentials', { email, password, callbackUrl: '/add' });
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      await createUser({ email, password });
+      // Sign in right after registration
+      await signIn('credentials', { email, password, callbackUrl: '/add' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <main>
