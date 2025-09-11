@@ -50,3 +50,12 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
   used      Boolean  @default(false)
 }
+
+model Produce {
+  id          Int           @id  @default(autoincrement())
+  name        String
+  type        String
+  location    String
+  quantity    Int
+  expiration  DateTime      @default(now())
+}
