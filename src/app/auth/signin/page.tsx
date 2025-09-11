@@ -1,11 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button, Card, Col, Container, Form, Row, Alert } from 'react-bootstrap';
 
 const SignIn = () => {
+  const { status } = useSession();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+
+  // redirect if already logged in
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/list');
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,6 +42,9 @@ const SignIn = () => {
       window.location.href = result.url;
     }
   };
+
+  // show nothing while redirecting
+  if (status === 'loading' || status === 'authenticated') return null;
 
   return (
     <main>
