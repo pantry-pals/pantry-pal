@@ -52,10 +52,10 @@ model EmailVerificationToken {
 }
 
 model Produce {
-  id          Int           @id  @default(autoincrement())
-  name        String
-  type        String
-  location    String
-  quantity    Int
-  expiration  DateTime      @default(now())
+  id         Int      @id @default(autoincrement())
+  name       String
+  type       String
+  location   String
+  quantity   Int
+  expiration DateTime?
 }

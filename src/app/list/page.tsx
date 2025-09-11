@@ -41,7 +41,14 @@ const ListPage = async () => {
               </thead>
               <tbody>
                 {stuff.map((item) => (
-                  <StuffItem key={item.id} {...item} />
+                  <StuffItem
+                    key={item.id}
+                    id={item.id}
+                    name={item.name}
+                    quantity={item.quantity}
+                    condition={item.condition}
+                    owner={item.owner}
+                  />
                 ))}
               </tbody>
             </Table>
