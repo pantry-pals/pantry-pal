@@ -53,18 +53,7 @@ const NavBar: React.FC = () => {
                   Change Password
                 </NavDropdown.Item>
               </NavDropdown>
-            ) : (
-              <NavDropdown id="login-dropdown" title="Login">
-                <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
-                  <PersonFill />
-                  Sign in
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
-                  <PersonPlusFill />
-                  Sign up
-                </NavDropdown.Item>
-              </NavDropdown>
-            )}
+            ) : null}
           </Nav>
         </Navbar.Collapse>
       </Container>
