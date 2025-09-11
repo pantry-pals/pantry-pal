@@ -15,8 +15,9 @@ export async function GET(req: Request) {
       include: { user: true },
     });
 
-    if (!record || record.expiresAt < new Date()) {
-      throw new Error('Invalid or expired token');
+    // Check if token exists, expired, or already used
+    if (!record || record.expiresAt < new Date() || record.used) {
+      throw new Error('Invalid, expired, or already used token');
     }
 
     // Mark email as verified
@@ -25,19 +26,20 @@ export async function GET(req: Request) {
       data: { emailVerified: true },
     });
 
-    // ✅ REMOVE this line:
-    // await prisma.emailVerificationToken.update({
-    //   where: { id: record.id },
-    //   data: { used: true },
-    // });
+    // Mark token as used
+    await prisma.emailVerificationToken.update({
+      where: { id: record.id },
+      data: { used: true }, // <-- this prevents reuse
+    });
 
-    // Redirect to frontend with token + email
+    // Redirect to frontend verification page
     const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     return NextResponse.redirect(
       `${frontendUrl}/auth/verify-client?token=${token}&email=${encodeURIComponent(record.user.email)}`,
     );
   } catch (err) {
     console.error('Verification error:', err);
+
     const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     return NextResponse.redirect(`${frontendUrl}/auth/error`);
   }
