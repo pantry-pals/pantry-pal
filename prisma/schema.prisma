@@ -48,4 +48,5 @@ model EmailVerificationToken {
   user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
   createdAt DateTime @default(now())
+  used      Boolean  @default(false)
 }

@@ -17,12 +17,22 @@ export default function VerifyClient() {
       return;
     }
 
-    signIn('credentials', {
-      token,
-      email,
-      redirect: true,
-      callbackUrl: '/list',
-    });
+    async function login() {
+      // redirect: false prevents race conditions
+      const result = await signIn('credentials', {
+        token,
+        email,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        router.replace('/list'); // redirect after successful login
+      } else {
+        router.replace('/auth/error'); // login failed
+      }
+    }
+
+    login();
   }, [searchParams, router]);
 
   return <div>Verifying your account...</div>;

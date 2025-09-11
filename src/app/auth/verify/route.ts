@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
-    if (!token) throw new Error('No token');
+    if (!token) throw new Error('No token provided');
 
     // Find token record and include user
     const record = await prisma.emailVerificationToken.findUnique({
@@ -15,7 +15,9 @@ export async function GET(req: Request) {
       include: { user: true },
     });
 
-    if (!record || record.expiresAt < new Date()) throw new Error('Invalid or expired token');
+    if (!record || record.expiresAt < new Date()) {
+      throw new Error('Invalid or expired token');
+    }
 
     // Mark email as verified
     await prisma.user.update({
@@ -23,8 +25,11 @@ export async function GET(req: Request) {
       data: { emailVerified: true },
     });
 
-    // Delete the token
-    await prisma.emailVerificationToken.delete({ where: { id: record.id } });
+    // ✅ REMOVE this line:
+    // await prisma.emailVerificationToken.update({
+    //   where: { id: record.id },
+    //   data: { used: true },
+    // });
 
     // Redirect to frontend with token + email
     const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
