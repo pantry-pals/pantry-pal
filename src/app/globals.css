@@ -24,10 +24,15 @@ body {
 
 .navandfooter {
   background-color: var(--hunter-green);
-  color: var(--timberwolf);
+  color: white;
   padding: 1rem;
 }
 
 #add-stuff-nav, #list-stuff-nav, #view-pantry-nav, #login-dropdown, .navandfooter .navbar-brand {
-  color: var(--timberwolf) !important;
+  color: white !important;
+}
+
+footer a {
+  color: #fff;
+  text-decoration: underline;
 }
