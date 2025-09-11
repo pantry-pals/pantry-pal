@@ -21,6 +21,7 @@ export const AddProduceSchema = Yup.object({
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
   expiration: Yup.date().required(),
+  owner: Yup.string().required(),
 });
 
 export const EditProduceSchema = Yup.object({
@@ -30,4 +31,5 @@ export const EditProduceSchema = Yup.object({
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
   expiration: Yup.date().required(),
+  owner: Yup.string().required(),
 });

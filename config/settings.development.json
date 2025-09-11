@@ -1,7 +1,7 @@
 {
   "defaultAccounts": [
-    { "email": "admin@foo.com", "password": "changeme", "role": "ADMIN" },
-    { "email": "john@foo.com", "password": "changeme" }
+    { "email": "admin@foo.com", "password": "password", "role": "ADMIN", "verified": true, "verificationToken": "test-token-123" },
+    { "email": "john@foo.com", "password": "password", "role": "USER", "verified": true, "verificationToken": "test-token-123" }
   ],
 
   "defaultData": [
@@ -12,11 +12,11 @@
   ],
 
   "defaultProduce": [
-    {"name": "Banana", "type": "fruit", "location": "pantry", "quantity": 20, "expiration": "2025-12-31T00:00:00.000Z"},
-    {"name": "Apple", "type": "fruit", "location": "pantry", "quantity": 15, "expiration": "2025-11-30T00:00:00.000Z"},
-    {"name": "Carrot", "type": "vegetable", "location": "fridge", "quantity": 10, "expiration": "2025-10-15T00:00:00.000Z"},
-    {"name": "Broccoli", "type": "vegetable", "location": "fridge", "quantity": 8, "expiration": "2025-10-10T00:00:00.000Z"},
-    {"name": "Chicken Breast", "type": "meat", "location": "freezer", "quantity": 5, "expiration": "2026-01-20T00:00:00.000Z"},
-    {"name": "Salmon Fillet", "type": "meat", "location": "freezer", "quantity": 4, "expiration": "2026-02-15T00:00:00.000Z"}
+    {"name": "Banana", "type": "fruit", "location": "pantry", "quantity": 20, "expiration": "2025-12-31T00:00:00.000Z", "owner": "john@foo.com"},
+    {"name": "Apple", "type": "fruit", "location": "pantry", "quantity": 15, "expiration": "2025-11-30T00:00:00.000Z", "owner": "john@foo.com"},
+    {"name": "Carrot", "type": "vegetable", "location": "fridge", "quantity": 10, "expiration": "2025-10-15T00:00:00.000Z", "owner": "john@foo.com"},
+    {"name": "Broccoli", "type": "vegetable", "location": "fridge", "quantity": 8, "expiration": "2025-10-10T00:00:00.000Z", "owner": "john@foo.com"},
+    {"name": "Chicken Breast", "type": "meat", "location": "freezer", "quantity": 5, "expiration": "2026-01-20T00:00:00.000Z", "owner": "john@foo.com"},
+    {"name": "Salmon Fillet", "type": "meat", "location": "freezer", "quantity": 4, "expiration": "2026-02-15T00:00:00.000Z", "owner": "john@foo.com"}
   ]
 }

@@ -57,6 +57,7 @@ async function main() {
         location: produce.location,
         quantity: produce.quantity,
         expiration: new Date(produce.expiration),
+        owner: produce.owner,
       },
     });
   }

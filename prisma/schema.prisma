@@ -58,4 +58,5 @@ model Produce {
   location    String
   quantity    Int
   expiration  DateTime      @default(now())
+  owner     String
 }
