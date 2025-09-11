@@ -1,21 +1,11 @@
-'use client';
-
-import React from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import authOptions from '@/lib/authOptions';
 
-export default function Hero() {
-  const router = useRouter();
-  const { status } = useSession();
-
-  const redirectToLogin = () => {
-    router.push('/auth/signin');
-  };
-
-  const redirectToSignup = () => {
-    router.push('/auth/signup');
-  };
+export default async function Hero() {
+  // server-side session check
+  const session = await getServerSession(authOptions);
 
   return (
     <section className="container py-5">
@@ -40,22 +30,14 @@ export default function Hero() {
             eum an brute copiosae hendrerit.
           </p>
 
-          {status !== 'authenticated' && (
+          {!session && (
             <div className="d-flex gap-2">
-              <button
-                type="button"
-                className="btn btn-dark"
-                onClick={redirectToLogin}
-              >
+              <Link href="/auth/signin" className="btn btn-dark">
                 Log In
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline-dark"
-                onClick={redirectToSignup}
-              >
+              </Link>
+              <Link href="/auth/signup" className="btn btn-outline-dark">
                 Sign Up
-              </button>
+              </Link>
             </div>
           )}
         </div>
