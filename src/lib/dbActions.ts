@@ -89,11 +89,13 @@ export async function addProduce(produce: {
   location: string;
   quantity: number;
   expiration: string | Date | null;
+  owner: string;
 }) {
   await prisma.produce.create({
     data: {
       name: produce.name,
       type: produce.type,
+      owner: produce.owner,
       location: produce.location,
       quantity: produce.quantity,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
@@ -129,6 +131,7 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       location: produce.location,
       quantity: produce.quantity,
       expiration,
+      owner: produce.owner,
     },
   });
 }

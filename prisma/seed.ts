@@ -20,7 +20,7 @@ async function main() {
         email: account.email,
         password,
         role,
-        emailVerified: false,
+        emailVerified: true,
       },
     });
   }
@@ -57,6 +57,7 @@ async function main() {
         location: produce.location,
         quantity: produce.quantity,
         expiration: new Date(produce.expiration),
+        owner: produce.owner,
       },
     });
   }
