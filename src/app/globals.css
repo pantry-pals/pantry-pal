@@ -28,6 +28,6 @@ body {
   padding: 1rem;
 }
 
-.navandfooter .navbar-brand {
+#add-stuff-nav, #list-stuff-nav, #view-pantry-nav, #login-dropdown, .navandfooter .navbar-brand {
   color: var(--timberwolf) !important;
 }
