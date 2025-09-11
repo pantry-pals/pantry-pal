@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
@@ -13,8 +15,17 @@ type SignUpForm = {
 };
 
 const SignUp = () => {
+  const { status } = useSession();
+  const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // redirect if already logged in
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/list');
+    }
+  }, [status, router]);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email is invalid'),
@@ -59,6 +70,8 @@ const SignUp = () => {
       setErrorMessage(err.message || 'Something went wrong. Please try again.');
     }
   };
+
+  if (status === 'loading' || status === 'authenticated') return null;
 
   if (submitted) {
     return (

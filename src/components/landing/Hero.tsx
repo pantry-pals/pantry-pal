@@ -3,9 +3,11 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
 export default function Hero() {
   const router = useRouter();
+  const { status } = useSession();
 
   const redirectToLogin = () => {
     router.push('/auth/signin');
@@ -18,7 +20,6 @@ export default function Hero() {
   return (
     <section className="container py-5">
       <div style={{ marginTop: '75px' }} className="row align-items-center">
-
         <div className="col-md-6 mb-4 mb-md-0 mt-5">
           <div className="d-flex justify-content-center align-items-center" style={{ height: '300px' }}>
             <Image
@@ -38,22 +39,25 @@ export default function Hero() {
             legendos at vix ad putent delectus delicata usu. Vidit dissentiet eos cu
             eum an brute copiosae hendrerit.
           </p>
-          <div className="d-flex gap-2">
-            <button
-              type="button"
-              className="btn btn-dark"
-              onClick={redirectToLogin}
-            >
-              Log In
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-dark"
-              onClick={redirectToSignup}
-            >
-              Sign Up
-            </button>
-          </div>
+
+          {status !== 'authenticated' && (
+            <div className="d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-dark"
+                onClick={redirectToLogin}
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-dark"
+                onClick={redirectToSignup}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>
