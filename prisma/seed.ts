@@ -20,7 +20,7 @@ async function main() {
         email: account.email,
         password,
         role,
-        emailVerified: false,
+        emailVerified: true,
       },
     });
   }

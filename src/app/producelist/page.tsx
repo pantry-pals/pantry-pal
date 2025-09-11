@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { Col, Container, Row, Table } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
-import StuffItem from '@/components/StuffItem';
+import ProduceItem from '@/components/ProduceItem';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 
@@ -11,7 +11,7 @@ type SessionUser = {
   randomKey: string;
 };
 
-const ListPage = async () => {
+const ProduceListPage = async () => {
   const session = (await getServerSession(authOptions)) as
     | { user: SessionUser }
     | null;
@@ -20,7 +20,7 @@ const ListPage = async () => {
 
   const owner = session?.user?.email || '';
 
-  const stuff = await prisma.stuff.findMany({
+  const produce = await prisma.produce.findMany({
     where: { owner },
   });
 
@@ -29,7 +29,7 @@ const ListPage = async () => {
       <Container id="list" className="py-3">
         <Row>
           <Col>
-            <h1>Stuff</h1>
+            <h1>Your Pantry at a Glance</h1>
             <Table striped bordered hover>
               <thead>
                 <tr>
@@ -37,18 +37,20 @@ const ListPage = async () => {
                   <th>Type</th>
                   <th>Location</th>
                   <th>Quantity</th>
-                  <th>Condition</th>
+                  <th>Expiration</th>
                   <th>Edit</th>
                 </tr>
               </thead>
               <tbody>
-                {stuff.map((item) => (
-                  <StuffItem
+                {produce.map((item) => (
+                  <ProduceItem
                     key={item.id}
                     id={item.id}
                     name={item.name}
                     quantity={item.quantity}
-                    condition={item.condition}
+                    type={item.type}
+                    location={item.location}
+                    expiration={item.expiration}
                     owner={item.owner}
                   />
                 ))}
@@ -61,4 +63,4 @@ const ListPage = async () => {
   );
 };
 
-export default ListPage;
+export default ProduceListPage;
