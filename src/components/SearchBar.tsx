@@ -10,6 +10,13 @@ type Props = { initialProduce: Produce[] };
 // order the “known” sections first; everything else appears after, alphabetically
 const LOCATION_ORDER = ['Freezer', 'Fridge', 'Pantry'] as const;
 
+// safely get a timestamp; put null/invalid dates at the end (Infinity)
+const toTime = (d: unknown): number => {
+  if (!d) return Number.POSITIVE_INFINITY;
+  const t = new Date(d as string | number | Date).getTime();
+  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+};
+
 // --- helper components (kept in this file to avoid eslint on nested ternaries) ---
 function FlatTable({ rows }: { rows: Produce[] }) {
   return (
@@ -95,7 +102,10 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
       case 'name-desc': arr.sort((a, b) => b.name.localeCompare(a.name)); break;
       case 'location-asc': arr.sort((a, b) => (a.location ?? '').localeCompare(b.location ?? '')); break;
       case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
-      case 'expiration-soon': arr.sort((a, b) => +new Date(a.expiration) - +new Date(b.expiration)); break;
+      case 'expiration-soon':
+        arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
+        break;
+
       case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
       default: break;
     }
@@ -120,7 +130,9 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
         case 'name-asc': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
         case 'name-desc': arr.sort((a, b) => b.name.localeCompare(a.name)); break;
         case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
-        case 'expiration-soon': arr.sort((a, b) => +new Date(a.expiration) - +new Date(b.expiration)); break;
+        case 'expiration-soon':
+          arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
+          break;
         case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
         default: break;
       }
