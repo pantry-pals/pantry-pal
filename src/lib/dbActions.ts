@@ -1,7 +1,7 @@
 'use server';
 
 import { Condition, Prisma } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
 
@@ -61,14 +61,42 @@ export async function createUser({ email, password }: { email: string; password:
 }
 
 /**
- * Changes a user's password.
+ * Changes a user's password, checking the old password.
  */
-export async function changePassword({ email, password }: { email: string; password: string }) {
-  const hashedPassword = await hash(password, 10);
+export async function changePassword({
+  email,
+  oldPassword,
+  newPassword,
+}: {
+  email: string;
+  oldPassword: string;
+  newPassword: string;
+}) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { success: false, message: 'User not found.' };
+  }
+
+  const match = await compare(oldPassword, user.password);
+  if (!match) {
+    return { success: false, message: 'Old password is incorrect.' };
+  }
+
+  if (oldPassword === newPassword) {
+    return { success: false, message: 'New password must be different from old password.' };
+  }
+
+  if (newPassword.length < 6 || newPassword.length > 40) {
+    return { success: false, message: 'Password must be between 6 and 40 characters.' };
+  }
+
+  const hashedPassword = await hash(newPassword, 10);
   await prisma.user.update({
     where: { email },
     data: { password: hashedPassword },
   });
+
+  return { success: true };
 }
 
 /**
