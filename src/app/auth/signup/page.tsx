@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Card, Col, Container, Button, Form, Row, Alert } from 'react-bootstrap';
+import { Card, Col, Container, Button, Form, Row, Alert, Modal } from 'react-bootstrap';
 
 type SignUpForm = {
   email: string;
@@ -17,16 +17,25 @@ type SignUpForm = {
 const SignUp = () => {
   const { status } = useSession();
   const router = useRouter();
-  const [submitted, setSubmitted] = useState(false);
+
+  // Registration state
   const [errorMessage, setErrorMessage] = useState('');
 
-  // redirect if already logged in
+  // Verification modal state
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [code, setCode] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
+  const [verificationSuccess, setVerificationSuccess] = useState('');
+
+  // Redirect if already logged in
   useEffect(() => {
     if (status === 'authenticated') {
       router.replace('/list');
     }
   }, [status, router]);
 
+  // Validation schema
   const validationSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email is invalid'),
     password: Yup.string()
@@ -35,21 +44,16 @@ const SignUp = () => {
       .max(40, 'Password must not exceed 40 characters'),
     confirmPassword: Yup.string()
       .required('Confirm Password is required')
-      .oneOf([Yup.ref('password'), ''], 'Confirm Password does not match'),
+      .oneOf([Yup.ref('password')], 'Confirm Password does not match'),
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<SignUpForm>({
+  const { register, handleSubmit, reset, formState: { errors }, getValues } = useForm<SignUpForm>({
     resolver: yupResolver(validationSchema),
   });
 
+  // Handle registration
   const onSubmit = async (data: SignUpForm) => {
     const { email, password } = data;
-
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -58,42 +62,68 @@ const SignUp = () => {
       });
 
       const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Registration failed');
 
-      if (!res.ok) {
-        throw new Error(result.message || 'Registration failed');
-      }
-
-      setSubmitted(true);
       setErrorMessage('');
+      setShowVerificationModal(true);
     } catch (err: any) {
       console.error(err);
       setErrorMessage(err.message || 'Something went wrong. Please try again.');
     }
   };
 
-  if (status === 'loading' || status === 'authenticated') return null;
+  // Handle code verification and auto-login
+  const handleVerifyCode = async () => {
+    setVerificationLoading(true);
+    setVerificationError('');
+    const email = getValues('email');
 
-  if (submitted) {
-    return (
-      <main>
-        <Container>
-          <Row className="justify-content-center">
-            <Col xs={5}>
-              <Card>
-                <Card.Body>
-                  <h3 className="text-center">Verify Your Email</h3>
-                  <p>
-                    Thanks for signing up! We sent a verification link to your email. Click the link to activate your
-                    account before signing in.
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    );
-  }
+    try {
+      const res = await fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Verification failed');
+
+      // Auto sign-in after verification
+      const signInResult = await signIn('credentials', {
+        redirect: false,
+        email,
+        password: '', // empty because user verified via code
+      });
+
+      if (signInResult?.error) throw new Error(signInResult.error);
+
+      setVerificationSuccess('Email verified! Redirecting...');
+      router.push('/list');
+    } catch (err: any) {
+      setVerificationError(err.message || 'Something went wrong.');
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  // Handle resend code
+  const handleResendCode = async () => {
+    setVerificationError('');
+    try {
+      const email = getValues('email');
+      const res = await fetch('/api/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) throw new Error('Failed to resend code');
+      setVerificationSuccess('New code sent to your email.');
+    } catch (err: any) {
+      setVerificationError(err.message || 'Failed to resend code');
+    }
+  };
+
+  if (status === 'loading' || status === 'authenticated') return null;
 
   return (
     <main>
@@ -160,6 +190,40 @@ const SignUp = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* Verification Modal */}
+      <Modal show={showVerificationModal} onHide={() => {}} backdrop="static" keyboard={false}>
+        <Modal.Header>
+          <Modal.Title>Email Verification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {verificationError && <Alert variant="danger">{verificationError}</Alert>}
+          {verificationSuccess && <Alert variant="success">{verificationSuccess}</Alert>}
+
+          <Form.Group className="mb-3">
+            <Form.Label>Enter 6-digit code</Form.Label>
+            <Form.Control
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Enter verification code"
+            />
+          </Form.Group>
+
+          <div className="d-flex justify-content-between">
+            <Button
+              disabled={verificationLoading}
+              onClick={handleVerifyCode}
+              className="btn btn-primary"
+            >
+              Verify Code
+            </Button>
+            <Button variant="link" onClick={handleResendCode}>
+              Resend Code
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
     </main>
   );
 };

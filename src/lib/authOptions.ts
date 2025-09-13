@@ -18,68 +18,37 @@ const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        token: { label: 'Token', type: 'text' },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials || !credentials.email) return null;
 
-        let user = null;
+        const foundUser = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+        if (!foundUser) return null;
 
-        // 🔑 Token-based login (email verification flow)
-        if (credentials.token) {
-          if (!credentials.email) return null;
-
-          const foundUser = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
-          if (!foundUser) return null;
-
-          // Look up the token
-          const tokenRecord = await prisma.emailVerificationToken.findUnique({
-            where: { token: credentials.token },
-          });
-
-          if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
-            return null; // invalid or expired
-          }
-
-          if (tokenRecord.used) {
-            // Already used → allow login if user is verified
-            if (!foundUser.emailVerified) return null;
-          } else {
-            // Mark token as used
-            await prisma.emailVerificationToken.update({
-              where: { id: tokenRecord.id },
-              data: { used: true },
-            });
-          }
-
-          // User must be verified by now
+        // Case 1: Login after email verification (no password provided)
+        if (!credentials.password) {
           if (!foundUser.emailVerified) return null;
+          return {
+            id: foundUser.id.toString(),
+            email: foundUser.email,
+            role: foundUser.role ?? null,
+          };
+        }
 
-          user = foundUser;
-        } else {
-          if (!credentials.email || !credentials.password) return null;
+        // Case 2: Normal login with password
+        const isValid = await compare(credentials.password, foundUser.password);
+        if (!isValid) return null;
 
-          const foundUser = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
-          if (!foundUser) return null;
-
-          const isValid = await compare(credentials.password, foundUser.password);
-          if (!isValid) return null;
-
-          if (!foundUser.emailVerified) {
-            throw new Error('Email not verified');
-          }
-
-          user = foundUser;
+        if (!foundUser.emailVerified) {
+          throw new Error('Email not verified');
         }
 
         return {
-          id: user.id.toString(),
-          email: user.email,
-          role: user.role ?? null,
+          id: foundUser.id.toString(),
+          email: foundUser.email,
+          role: foundUser.role ?? null,
         };
       },
     }),
