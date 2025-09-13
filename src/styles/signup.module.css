@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: var(--timberwolf); /* Light background to contrast Hero */
+  background-color: var(--timberwolf);
   padding: 20px;
 }
 
@@ -14,7 +14,7 @@
   width: 100%;
   max-width: 400px;
   padding: 25px;
-  background-color: #fff; /* Keep card white for contrast */
+  background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   text-align: center;
@@ -23,7 +23,7 @@
 /* Title styling */
 .title {
   font-size: 1.8rem;
-  color: var(--hunter-green); /* Darker green for headings */
+  color: var(--hunter-green);
   margin-bottom: 15px;
   font-weight: bold;
 }
@@ -31,7 +31,7 @@
 /* Description styling */
 .descriptionCentered {
   font-size: 1rem;
-  color: var(--fern-green); /* Softer green for subtext */
+  color: var(--fern-green);
   margin: 10px 0 20px;
 }
 
@@ -90,7 +90,7 @@
 .button {
   width: 100%;
   padding: 12px;
-  background-color: var(--hunter-green); /* Dark green for main action */
+  background-color: var(--hunter-green);
   color: white;
   font-size: 1rem;
   font-weight: bold;
@@ -102,7 +102,7 @@
 }
 
 .button:hover {
-  background-color: var(--fern-green); /* Softer green on hover */
+  background-color: var(--fern-green);
   transform: translateY(-2px);
 }
 
@@ -118,7 +118,6 @@
   text-align: center;
 }
 
-/* Log in link styling */
 .logIn {
   font-size: 0.85rem;
   color: var(--fern-green);
@@ -131,7 +130,6 @@
   text-decoration: underline;
 }
 
-/* Verification popup */
 .verificationPopup {
   background-color: var(--timberwolf);
   border: 2px solid var(--hunter-green);

@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
     });
 
     // Call send-code internally
-    // We can pass a fake Request object with the body containing the email
     await sendCode(
       new Request('http://localhost/api/auth/send-code', {
         method: 'POST',

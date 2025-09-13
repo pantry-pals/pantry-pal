@@ -1,4 +1,3 @@
-// app/api/auth/verify-code/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -26,7 +25,7 @@ export async function POST(req: Request) {
         userId: user.id,
         code,
         used: false,
-        expiresAt: { gt: new Date() }, // not expired
+        expiresAt: { gt: new Date() },
       },
     });
 
