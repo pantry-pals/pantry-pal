@@ -29,7 +29,9 @@ const authOptions: NextAuthOptions = {
 
         // Case 1: Login after email verification (no password provided)
         if (!credentials.password) {
-          if (!foundUser.emailVerified) return null;
+          if (!foundUser.emailVerified) {
+            throw new Error('User not verified'); // <- frontend expects this string
+          }
           return {
             id: foundUser.id.toString(),
             email: foundUser.email,
@@ -42,7 +44,7 @@ const authOptions: NextAuthOptions = {
         if (!isValid) return null;
 
         if (!foundUser.emailVerified) {
-          throw new Error('Email not verified');
+          throw new Error('User not verified'); // <- frontend expects this string
         }
 
         return {

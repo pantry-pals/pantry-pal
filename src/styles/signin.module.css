@@ -6,8 +6,10 @@
   height: 100vh;
   background-color: var(--timberwolf);
   padding: 20px;
+  position: relative;
 }
 
+/* Sign-in form */
 .formWrapper {
   width: 100%;
   max-width: 400px;
@@ -16,6 +18,8 @@
   border-radius: 10px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   text-align: center;
+  z-index: 1;
+  position: relative;
 }
 
 .title {
@@ -116,4 +120,88 @@
 
 .logIn:hover {
   text-decoration: underline;
+}
+
+/* Verification popup */
+.verificationPopup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.3s ease;
+  z-index: 2;
+}
+
+.verificationPopup h2 {
+  font-size: 1.6rem;
+  color: var(--hunter-green);
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.verificationPopup p {
+  font-size: 1rem;
+  color: var(--fern-green);
+  margin-bottom: 15px;
+}
+
+.verificationPopup strong {
+  color: var(--hunter-green);
+}
+
+.verificationPopup .input {
+  margin-bottom: 12px;
+}
+
+.verificationPopup .button {
+  margin-top: 10px;
+}
+
+.resendButton {
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  color: var(--hunter-green);
+  border: 2px solid var(--hunter-green);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resendButton:hover {
+  background-color: var(--hunter-green);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.resendButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success & Error messages inside popup */
+.success {
+  color: green;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.invalid {
+  border-color: red !important;
+}
+
+/* Animation for popup */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

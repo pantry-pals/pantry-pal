@@ -26,12 +26,23 @@ const SignUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<SignUpForm | null>(null);
 
-  // Redirect if logged in
+  // Countdown state
+  const [resendCountdown, setResendCountdown] = useState(0);
+
   useEffect(() => {
     if (status === 'authenticated') {
       router.replace('/list');
     }
   }, [status, router]);
+
+  // Countdown effect
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCountdown]);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email is invalid'),
@@ -62,7 +73,9 @@ const SignUp = () => {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Failed to send code');
+
       setVerificationCodeSent(true);
+      setResendCountdown(5);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to send verification code');
     }
@@ -109,7 +122,7 @@ const SignUp = () => {
       const signInResult = await signIn('credentials', {
         redirect: false,
         email: formData.email,
-        password: '', // verified via code
+        password: '',
       });
 
       if (signInResult?.error) throw new Error(signInResult.error);
@@ -158,17 +171,10 @@ const SignUp = () => {
             <label>Confirm Password</label>
             <input
               type="password"
-              id="confirmPassword"
               {...register('confirmPassword')}
               className={`${styles.input} ${errors.confirmPassword ? styles.invalid : ''}`}
-              aria-invalid={!!errors.confirmPassword}
-              aria-describedby="confirmPasswordError"
             />
-            {errors.confirmPassword && (
-            <p id="confirmPasswordError" className={styles.error}>
-              {errors.confirmPassword.message}
-            </p>
-            )}
+            {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword.message}</p>}
           </div>
 
           <button type="submit" className={styles.button} disabled={isSubmitting}>
@@ -177,45 +183,42 @@ const SignUp = () => {
         </form>
 
         {verificationCodeSent && (
-        <div className={styles.verificationPopup}>
-          <h2>Verify Your Email</h2>
-          <p>
-            We sent a code to
-            {' '}
-            <strong>{formData?.email}</strong>
-            . Enter it below:
-          </p>
+          <div className={styles.verificationPopup}>
+            <h2>Verify Your Email</h2>
+            <p>
+              We sent a code to <strong>{formData?.email}</strong>. Enter it below:
+            </p>
 
-          <input
-            type="text"
-            value={enteredCode}
-            onChange={(e) => setEnteredCode(e.target.value)}
-            className={`${styles.input} ${verificationError ? styles.invalid : ''}`}
-            placeholder="Enter code"
-          />
+            <input
+              type="text"
+              value={enteredCode}
+              onChange={(e) => setEnteredCode(e.target.value)}
+              className={`${styles.input} ${verificationError ? styles.invalid : ''}`}
+              placeholder="Enter code"
+            />
 
-          {verificationError && <p className={styles.error}>{verificationError}</p>}
-          {verificationSuccess && <p className={styles.success}>{verificationSuccess}</p>}
+            {verificationError && <p className={styles.error}>{verificationError}</p>}
+            {verificationSuccess && <p className={styles.success}>{verificationSuccess}</p>}
 
-          <button
-            type="button"
-            className={styles.button}
-            onClick={handleVerifyCode}
-            disabled={isSubmitting}
-            style={{ marginTop: '12px' }}
-          >
-            Verify Code
-          </button>
+            <button
+              type="button"
+              className={styles.button}
+              onClick={handleVerifyCode}
+              disabled={isSubmitting}
+              style={{ marginTop: '12px' }}
+            >
+              Verify Code
+            </button>
 
-          <button
-            type="button"
-            className={styles.resendButton}
-            onClick={() => formData && sendVerificationCode(formData.email)}
-            disabled={isSubmitting}
-          >
-            Resend Code
-          </button>
-        </div>
+            <button
+              type="button"
+              className={styles.resendButton}
+              onClick={() => formData && sendVerificationCode(formData.email)}
+              disabled={isSubmitting || resendCountdown > 0}
+            >
+              {resendCountdown > 0 ? `Resend Code (${resendCountdown})` : 'Resend Code'}
+            </button>
+          </div>
         )}
 
         <p className={styles.accountPromptWrapper}>
