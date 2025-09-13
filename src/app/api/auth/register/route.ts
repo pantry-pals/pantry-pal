@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcrypt';
-import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-import { sendVerificationEmail } from '@/lib/mailer'; // make sure this exists and works
+import { POST as sendCode } from '@/app/api/auth/send-code/route';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 10);
 
-    // Create user with default role and emailVerified = false
+    // Create user
     const user = await prisma.user.create({
       data: {
         email,
@@ -31,22 +30,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Generate email verification token
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour expiry
+    // Call send-code internally
+    await sendCode(
+      new Request('http://localhost/api/auth/send-code', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
 
-    await prisma.emailVerificationToken.create({
-      data: {
-        token,
-        userId: user.id,
-        expiresAt,
-      },
-    });
-
-    // Send verification email
-    await sendVerificationEmail(email, token);
-
-    return NextResponse.json({ message: 'User created, verification email sent', userId: user.id }, { status: 201 });
+    return NextResponse.json(
+      { message: 'User created, verification code sent', userId: user.id },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('Error creating user:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
