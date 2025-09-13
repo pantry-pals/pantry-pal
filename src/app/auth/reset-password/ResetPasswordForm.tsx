@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import styles from '@/styles/reset-password.module.css';
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -50,39 +51,45 @@ export default function ResetPasswordForm() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '50px auto' }}>
-      <h1>Reset Password</h1>
-      <p>Enter your new password below to reset your Pantry Pal account password.</p>
-      <form onSubmit={handleSubmit}>
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          New Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
-          />
-        </label>
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Confirm Password
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: 10, width: '100%' }}
-        >
-          {loading ? 'Resetting...' : 'Reset Password'}
-        </button>
-      </form>
-      {message && <p style={{ marginTop: 20 }}>{message}</p>}
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h1 className={styles.title}>Reset Password</h1>
+        <p className={styles.descriptionCentered}>
+          Enter your new password below to reset your Pantry Pal account password.
+        </p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>New Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={styles.input}
+              placeholder="New password"
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className={styles.input}
+              placeholder="Confirm password"
+            />
+          </div>
+          <button type="submit" disabled={loading} className={styles.button}>
+            {loading ? 'Resetting...' : 'Reset Password'}
+          </button>
+        </form>
+        {message && (
+          <p className={message.toLowerCase().includes('success') ? styles.success : styles.error}>
+            {message}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
