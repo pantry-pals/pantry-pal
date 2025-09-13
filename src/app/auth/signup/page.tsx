@@ -6,226 +6,215 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Card, Col, Container, Button, Form, Row, Alert, Modal } from 'react-bootstrap';
+import styles from '@/styles/signup.module.css';
 
 type SignUpForm = {
-  email: string;
-  password: string;
-  confirmPassword: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
 };
 
 const SignUp = () => {
-  const { status } = useSession();
-  const router = useRouter();
+    const { status } = useSession();
+    const router = useRouter();
 
-  // Registration state
-  const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [verificationCodeSent, setVerificationCodeSent] = useState(false);
+    const [enteredCode, setEnteredCode] = useState('');
+    const [verificationSuccess, setVerificationSuccess] = useState('');
+    const [verificationError, setVerificationError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState<SignUpForm | null>(null);
 
-  // Verification modal state
-  const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [code, setCode] = useState('');
-  const [verificationLoading, setVerificationLoading] = useState(false);
-  const [verificationError, setVerificationError] = useState('');
-  const [verificationSuccess, setVerificationSuccess] = useState('');
+    // Redirect if logged in
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.replace('/list');
+        }
+    }, [status, router]);
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.replace('/list');
-    }
-  }, [status, router]);
+    const validationSchema = Yup.object().shape({
+        email: Yup.string().required('Email is required').email('Email is invalid'),
+        password: Yup.string()
+            .required('Password is required')
+            .min(6, 'Password must be at least 6 characters')
+            .max(40, 'Password must not exceed 40 characters'),
+        confirmPassword: Yup.string()
+            .required('Confirm Password is required')
+            .oneOf([Yup.ref('password')], 'Confirm Password does not match'),
+    });
 
-  // Validation schema
-  const validationSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email is invalid'),
-    password: Yup.string()
-      .required('Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .max(40, 'Password must not exceed 40 characters'),
-    confirmPassword: Yup.string()
-      .required('Confirm Password is required')
-      .oneOf([Yup.ref('password')], 'Confirm Password does not match'),
-  });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<SignUpForm>({
+        resolver: yupResolver(validationSchema),
+    });
 
-  const { register, handleSubmit, reset, formState: { errors }, getValues } = useForm<SignUpForm>({
-    resolver: yupResolver(validationSchema),
-  });
+    // Send verification code
+    const sendVerificationCode = async (email: string) => {
+        try {
+            const res = await fetch('/api/auth/send-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Failed to send code');
+            setVerificationCodeSent(true);
+        } catch (err: any) {
+            setErrorMessage(err.message || 'Failed to send verification code');
+        }
+    };
 
-  // Handle registration
-  const onSubmit = async (data: SignUpForm) => {
-    const { email, password } = data;
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    // Handle registration
+    const onSubmit = async (data: SignUpForm) => {
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: data.email, password: data.password }),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Registration failed');
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Registration failed');
+            setErrorMessage('');
+            setFormData(data);
+            await sendVerificationCode(data.email);
+        } catch (err: any) {
+            setErrorMessage(err.message || 'Something went wrong.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-      setErrorMessage('');
-      setShowVerificationModal(true);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.message || 'Something went wrong. Please try again.');
-    }
-  };
+    // Handle code verification + auto-login
+    const handleVerifyCode = async () => {
+        if (!formData) return;
 
-  // Handle code verification and auto-login
-  const handleVerifyCode = async () => {
-    setVerificationLoading(true);
-    setVerificationError('');
-    const email = getValues('email');
+        setIsSubmitting(true);
+        setVerificationError('');
+        try {
+            const res = await fetch('/api/auth/verify-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email, code: enteredCode }),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Verification failed');
 
-    try {
-      const res = await fetch('/api/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Verification failed');
+            // Sign in after verification
+            const signInResult = await signIn('credentials', {
+                redirect: false,
+                email: formData.email,
+                password: '', // verified via code
+            });
 
-      // Auto sign-in after verification
-      const signInResult = await signIn('credentials', {
-        redirect: false,
-        email,
-        password: '', // empty because user verified via code
-      });
+            if (signInResult?.error) throw new Error(signInResult.error);
 
-      if (signInResult?.error) throw new Error(signInResult.error);
+            setVerificationSuccess('Email verified! Redirecting...');
+            router.push('/list');
+        } catch (err: any) {
+            setVerificationError(err.message || 'Verification failed.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-      setVerificationSuccess('Email verified! Redirecting...');
-      router.push('/list');
-    } catch (err: any) {
-      setVerificationError(err.message || 'Something went wrong.');
-    } finally {
-      setVerificationLoading(false);
-    }
-  };
+    if (status === 'loading' || status === 'authenticated') return null;
 
-  // Handle resend code
-  const handleResendCode = async () => {
-    setVerificationError('');
-    try {
-      const email = getValues('email');
-      const res = await fetch('/api/auth/send-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+    return (
+        <div className={styles.container}>
+            <div className={styles.formWrapper}>
+                <h1 className={styles.title}>Sign Up</h1>
+                <p className={styles.descriptionCentered}>Sign up with your email</p>
 
-      if (!res.ok) throw new Error('Failed to resend code');
-      setVerificationSuccess('New code sent to your email.');
-    } catch (err: any) {
-      setVerificationError(err.message || 'Failed to resend code');
-    }
-  };
+                {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
-  if (status === 'loading' || status === 'authenticated') return null;
+                <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                    <div className={styles.inputGroup}>
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            {...register('email')}
+                            className={`${styles.input} ${errors.email ? styles.invalid : ''}`}
+                        />
+                        {errors.email && <p className={styles.error}>{errors.email.message}</p>}
+                    </div>
 
-  return (
-    <main>
-      <Container>
-        <Row className="justify-content-center">
-          <Col xs={5}>
-            <h1 className="text-center">Sign Up</h1>
-            {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-            <Card>
-              <Card.Body>
-                <Form onSubmit={handleSubmit(onSubmit)}>
-                  <Form.Group className="form-group">
-                    <Form.Label>Email</Form.Label>
-                    <input
-                      type="text"
-                      {...register('email')}
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.email?.message}</div>
-                  </Form.Group>
+                    <div className={styles.inputGroup}>
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            {...register('password')}
+                            className={`${styles.input} ${errors.password ? styles.invalid : ''}`}
+                        />
+                        {errors.password && <p className={styles.error}>{errors.password.message}</p>}
+                    </div>
 
-                  <Form.Group className="form-group">
-                    <Form.Label>Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('password')}
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.password?.message}</div>
-                  </Form.Group>
+                    <div className={styles.inputGroup}>
+                        <label>Confirm Password</label>
+                        <input
+                            type="password"
+                            {...register('confirmPassword')}
+                            className={`${styles.input} ${errors.confirmPassword ? styles.invalid : ''}`}
+                        />
+                        {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword.message}</p>}
+                    </div>
 
-                  <Form.Group className="form-group">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('confirmPassword')}
-                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.confirmPassword?.message}</div>
-                  </Form.Group>
+                    <button type="submit" className={styles.button} disabled={isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : 'Register'}
+                    </button>
+                </form>
 
-                  <Form.Group className="form-group py-3">
-                    <Row>
-                      <Col>
-                        <Button type="submit" className="btn btn-primary">
-                          Register
-                        </Button>
-                      </Col>
-                      <Col>
-                        <Button type="button" onClick={() => reset()} className="btn btn-warning float-right">
-                          Reset
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Form.Group>
-                </Form>
-              </Card.Body>
-              <Card.Footer>
-                Already have an account?
-                {' '}
-                <a href="/auth/signin">Sign in</a>
-              </Card.Footer>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+                {verificationCodeSent && (
+                    <div className={styles.verificationPopup}>
+                        <h2>Verify Your Email</h2>
+                        <p>We sent a code to <strong>{formData?.email}</strong>. Enter it below:</p>
 
-      {/* Verification Modal */}
-      <Modal show={showVerificationModal} onHide={() => {}} backdrop="static" keyboard={false}>
-        <Modal.Header>
-          <Modal.Title>Email Verification</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {verificationError && <Alert variant="danger">{verificationError}</Alert>}
-          {verificationSuccess && <Alert variant="success">{verificationSuccess}</Alert>}
+                        <input
+                            type="text"
+                            value={enteredCode}
+                            onChange={(e) => setEnteredCode(e.target.value)}
+                            className={`${styles.input} ${verificationError ? styles.invalid : ''}`}
+                            placeholder="Enter code"
+                        />
 
-          <Form.Group className="mb-3">
-            <Form.Label>Enter 6-digit code</Form.Label>
-            <Form.Control
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Enter verification code"
-            />
-          </Form.Group>
+                        {verificationError && <p className={styles.error}>{verificationError}</p>}
+                        {verificationSuccess && <p className={styles.success}>{verificationSuccess}</p>}
 
-          <div className="d-flex justify-content-between">
-            <Button
-              disabled={verificationLoading}
-              onClick={handleVerifyCode}
-              className="btn btn-primary"
-            >
-              Verify Code
-            </Button>
-            <Button variant="link" onClick={handleResendCode}>
-              Resend Code
-            </Button>
-          </div>
-        </Modal.Body>
-      </Modal>
-    </main>
-  );
+                        <button
+                            type="button"
+                            className={styles.button}
+                            onClick={handleVerifyCode}
+                            disabled={isSubmitting}
+                            style={{ marginTop: '12px' }}
+                        >
+                            Verify Code
+                        </button>
+
+                        <button
+                            type="button"
+                            className={styles.resendButton}
+                            onClick={() => formData && sendVerificationCode(formData.email)}
+                            disabled={isSubmitting}
+                        >
+                            Resend Code
+                        </button>
+                    </div>
+                )}
+
+                <p className={styles.accountPromptWrapper}>
+                    Already have an account?&nbsp;
+                    <a href="/auth/signin" className={styles.logIn}>
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+    );
 };
 
 export default SignUp;
