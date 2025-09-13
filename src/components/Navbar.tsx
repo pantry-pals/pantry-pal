@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-indent, @typescript-eslint/indent */
-
 'use client';
 
 import { useSession } from 'next-auth/react';
@@ -22,16 +20,16 @@ const NavBar: React.FC = () => {
           <Nav className="me-auto justify-content-start">
             {currentUser
               ? [
-                  <Nav.Link id="add-stuff-nav" href="/add" key="add" active={pathName === '/add'}>
-                    Add Stuff
-                  </Nav.Link>,
-                  <Nav.Link id="list-stuff-nav" href="/list" key="list" active={pathName === '/list'}>
-                    List Stuff
-                  </Nav.Link>,
-                  <Nav.Link id="view-pantry-nav" href="/view" key="view" active={pathName === '/view-pantry'}>
-                    View Pantry
-                  </Nav.Link>,
-                ]
+                <Nav.Link id="add-stuff-nav" href="/add" key="add" active={pathName === '/add'}>
+                  Add Stuff
+                </Nav.Link>,
+                <Nav.Link id="list-stuff-nav" href="/list" key="list" active={pathName === '/list'}>
+                  List Stuff
+                </Nav.Link>,
+                <Nav.Link id="view-pantry-nav" href="/view" key="view" active={pathName === '/view-pantry'}>
+                  View Pantry
+                </Nav.Link>,
+              ]
               : ''}
             {currentUser && role === 'ADMIN' ? (
               <Nav.Link id="admin-stuff-nav" href="/admin" key="admin" active={pathName === '/admin'}>
@@ -44,7 +42,7 @@ const NavBar: React.FC = () => {
           <Nav>
             {session ? (
               <NavDropdown id="login-dropdown" title={currentUser}>
-                <NavDropdown.Item id="login-dropdown-sign-out" href="/api/auth/signout">
+                <NavDropdown.Item id="login-dropdown-sign-out" href="/auth/signout">
                   <BoxArrowRight />
                   Sign Out
                 </NavDropdown.Item>
