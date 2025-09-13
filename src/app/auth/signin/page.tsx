@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, Col, Container, Form, Row, Alert } from 'react-bootstrap';
+import styles from '@/styles/signin.module.css'; // We'll create a CSS module similar to signup/reset pages
 
-const SignIn = () => {
+export default function SignInPage() {
   const { status } = useSession();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
-  // redirect if already logged in
   useEffect(() => {
     if (status === 'authenticated') {
       router.replace('/list');
@@ -19,7 +18,7 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setError('');
 
     const target = e.target as typeof e.target & {
       email: { value: string };
@@ -43,43 +42,52 @@ const SignIn = () => {
     }
   };
 
-  // show nothing while redirecting
   if (status === 'loading' || status === 'authenticated') return null;
 
   return (
-    <main>
-      <Container>
-        <Row className="justify-content-center">
-          <Col xs={12} md={6} lg={5}>
-            <h1 className="text-center mb-4">Sign In</h1>
-            <Card>
-              <Card.Body>
-                {error && <Alert variant="danger">{error}</Alert>}
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="formBasicEmail" className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control name="email" type="email" required />
-                  </Form.Group>
-                  <Form.Group controlId="formBasicPassword" className="mb-3">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control name="password" type="password" required />
-                  </Form.Group>
-                  <Button type="submit" className="w-100">
-                    Sign In
-                  </Button>
-                </Form>
-              </Card.Body>
-              <Card.Footer className="text-center">
-                Don&apos;t have an account?
-                {' '}
-                <a href="/auth/signup">Sign up</a>
-              </Card.Footer>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </main>
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h1 className={styles.title}>Sign In</h1>
+        <p className={styles.descriptionCentered}>
+          Enter your email and password to access your Pantry Pal account.
+        </p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Email</label>
+            <input
+              type="email"
+              name="email"
+              required
+              className={styles.input}
+              placeholder="you@example.com"
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              Password
+              <span className={styles.forgotPassword}>
+                <a href="/auth/forgot-password">Forgot password?</a>
+              </span>
+            </label>
+            <input
+              type="password"
+              name="password"
+              required
+              className={styles.input}
+              placeholder="Password"
+            />
+          </div>
+          <button type="submit" className={styles.button}>
+            Sign In
+          </button>
+        </form>
+        {error && <p className={styles.error}>{error}</p>}
+        <p className={styles.accountPromptWrapper}>
+          Don&apos;t have an account?
+          {' '}
+          <a href="/auth/signup" className={styles.logIn}>Sign up</a>
+        </p>
+      </div>
+    </div>
   );
-};
-
-export default SignIn;
+}
