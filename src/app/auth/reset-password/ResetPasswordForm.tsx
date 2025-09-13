@@ -28,6 +28,11 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    if (password.length < 6 || password.length > 40) {
+      setMessage('Password must be between 6 and 40 characters.');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/auth/reset-password', {
@@ -66,7 +71,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className={styles.input}
-              placeholder="New password"
+              placeholder="New password (6-40 characters)"
             />
           </div>
           <div className={styles.inputGroup}>

@@ -1,4 +1,3 @@
-// src/app/api/auth/forgot-password/route.ts
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/lib/mailer';

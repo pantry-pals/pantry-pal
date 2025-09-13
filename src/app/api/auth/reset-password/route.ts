@@ -1,6 +1,5 @@
-// src/app/api/auth/reset-password/route.ts
 import { prisma } from '@/lib/prisma';
-import { hash } from 'bcrypt';
+import bcrypt, { hash } from 'bcrypt';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -22,6 +21,23 @@ export async function POST(req: Request) {
   if (!resetToken || resetToken.used || resetToken.expiresAt < new Date()) {
     return NextResponse.json(
       { message: 'Invalid or expired token.' },
+      { status: 400 },
+    );
+  }
+
+  // Check if new password is same as old
+  const isSamePassword = await bcrypt.compare(newPassword, resetToken.user.password);
+  if (isSamePassword) {
+    return NextResponse.json(
+      { message: 'New password must be different from the old password.' },
+      { status: 400 },
+    );
+  }
+
+  // Check length
+  if (newPassword.length < 6 || newPassword.length > 40) {
+    return NextResponse.json(
+      { message: 'Password must be between 6 and 40 characters.' },
       { status: 400 },
     );
   }
