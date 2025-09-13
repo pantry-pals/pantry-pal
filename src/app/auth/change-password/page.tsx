@@ -1,115 +1,106 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import swal from 'sweetalert';
-import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
 import { changePassword } from '@/lib/dbActions';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import styles from '@/styles/change-password.module.css';
+import swal from 'sweetalert';
 
-type ChangePasswordForm = {
-  oldpassword: string;
-  password: string;
-  confirmPassword: string;
-  // acceptTerms: boolean;
-};
-
-/** The change password page. */
-const ChangePassword = () => {
+export default function ChangePasswordPage() {
   const { data: session, status } = useSession();
   const email = session?.user?.email || '';
-  const validationSchema = Yup.object().shape({
-    oldpassword: Yup.string().required('Password is required'),
-    password: Yup.string()
-      .required('Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .max(40, 'Password must not exceed 40 characters'),
-    confirmPassword: Yup.string()
-      .required('Confirm Password is required')
-      .oneOf([Yup.ref('password'), ''], 'Confirm Password does not match'),
-  });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ChangePasswordForm>({
-    resolver: yupResolver(validationSchema),
-  });
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data: ChangePasswordForm) => {
-    // console.log(JSON.stringify(data, null, 2));
-    await changePassword({ email, ...data });
-    await swal('Password Changed', 'Your password has been changed', 'success', { timer: 2000 });
-    reset();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (newPassword !== confirmPassword) {
+      setError('Confirm Password does not match.');
+      return;
+    }
+
+    if (newPassword.length < 6 || newPassword.length > 40) {
+      setError('Password must be between 6 and 40 characters.');
+      return;
+    }
+
+    if (oldPassword === newPassword) {
+      setError('New password must be different from old password.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await changePassword({ email, oldPassword, newPassword });
+      if (res.success) {
+        await swal('Password Changed', 'Your password has been changed', 'success', { timer: 2000 });
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setError(res.message || 'Failed to change password.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (status === 'loading') {
-    return <LoadingSpinner />;
-  }
+  if (status === 'loading') return <LoadingSpinner />;
 
   return (
-    <main>
-      <Container>
-        <Row className="justify-content-center">
-          <Col xs={5}>
-            <h1 className="text-center">Change Password</h1>
-            <Card>
-              <Card.Body>
-                <Form onSubmit={handleSubmit(onSubmit)}>
-                  <Form.Group className="form-group">
-                    <Form.Label>Old Passord</Form.Label>
-                    <input
-                      type="password"
-                      {...register('oldpassword')}
-                      className={`form-control ${errors.oldpassword ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.oldpassword?.message}</div>
-                  </Form.Group>
-
-                  <Form.Group className="form-group">
-                    <Form.Label>New Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('password')}
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.password?.message}</div>
-                  </Form.Group>
-                  <Form.Group className="form-group">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('confirmPassword')}
-                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.confirmPassword?.message}</div>
-                  </Form.Group>
-                  <Form.Group className="form-group py-3">
-                    <Row>
-                      <Col>
-                        <Button type="submit" className="btn btn-primary">
-                          Change
-                        </Button>
-                      </Col>
-                      <Col>
-                        <Button type="button" onClick={() => reset()} className="btn btn-warning float-right">
-                          Reset
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Form.Group>
-                </Form>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </main>
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h1 className={styles.title}>Change Password</h1>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Old Password</label>
+            <input
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className={styles.input}
+              placeholder="Enter old password"
+              required
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className={styles.input}
+              placeholder="Enter new password"
+              required
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={styles.input}
+              placeholder="Confirm new password"
+              required
+            />
+          </div>
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? 'Changing...' : 'Change Password'}
+          </button>
+          {error && <p className={styles.error}>{error}</p>}
+        </form>
+      </div>
+    </div>
   );
-};
-
-export default ChangePassword;
+}

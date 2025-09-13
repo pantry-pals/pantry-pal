@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';

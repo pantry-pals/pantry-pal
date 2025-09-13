@@ -30,20 +30,21 @@ enum Condition {
 }
 
 model User {
-  id            Int                      @id @default(autoincrement())
-  email         String                   @unique
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   password      String
-  role          Role                     @default(USER)
-  emailVerified Boolean                  @default(false)
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
+  role          Role     @default(USER)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   emailVerificationCodes EmailVerificationCode[]
+  passwordResetTokens    PasswordResetToken[]
 }
 
 model EmailVerificationCode {
   id        Int      @id @default(autoincrement())
-  code      String   // store as string so you can handle leading zeros
+  code      String // store as string so you can handle leading zeros
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
@@ -53,12 +54,24 @@ model EmailVerificationCode {
   @@index([userId])
 }
 
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
 model Produce {
-  id          Int           @id  @default(autoincrement())
-  name        String
-  type        String
-  location    String
-  quantity    Int
-  expiration  DateTime?
-  owner       String
+  id         Int       @id @default(autoincrement())
+  name       String
+  type       String
+  location   String
+  quantity   Int
+  expiration DateTime?
+  owner      String
 }
