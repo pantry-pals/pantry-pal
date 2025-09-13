@@ -27,7 +27,9 @@ export default function SignInPage() {
 
   // Countdown effect
   useEffect(() => {
-    if (resendCountdown <= 0) return;
+    if (resendCountdown <= 0) {
+      return undefined;
+    }
     const timer = setInterval(() => {
       setResendCountdown((prev) => prev - 1);
     }, 1000);
@@ -156,7 +158,8 @@ export default function SignInPage() {
             {error && <p className={styles.error}>{error}</p>}
           </form>
           <p className={styles.accountPromptWrapper}>
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?
+            {' '}
             <a href="/auth/signup" className={styles.logIn}>Sign up</a>
           </p>
         </div>
@@ -166,7 +169,10 @@ export default function SignInPage() {
         <div className={styles.verificationPopup}>
           <h2>Verify Your Email</h2>
           <p>
-            We sent a code to <strong>{formData.email}</strong>. Enter it below:
+            We sent a code to
+            {' '}
+            <strong>{formData.email}</strong>
+            . Enter it below:
           </p>
           <input
             type="text"
