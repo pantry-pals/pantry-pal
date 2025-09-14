@@ -1,45 +1,89 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { getServerSession } from 'next-auth';
-import authOptions from '@/lib/authOptions';
+import { motion } from 'framer-motion';
+import { useSession } from 'next-auth/react';
+import styles from '@/styles/hero.module.css';
 
-export default async function Hero() {
-  // server-side session check
-  const session = await getServerSession(authOptions);
+export default function Hero() {
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
+  const parent = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
+  const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
 
   return (
-    <section className="container py-5">
-      <div style={{ marginTop: '75px' }} className="row align-items-center">
-        <div className="col-md-6 mb-4 mb-md-0 mt-5">
-          <div className="d-flex justify-content-center align-items-center" style={{ height: '300px' }}>
-            <Image
-              src="/PantryPalsLogo.png"
-              alt="Pantry Pal Logo"
-              width={500}
-              height={500}
-              priority
-            />
+    <section className="py-5" style={{ backgroundColor: 'var(--timberwolf)' }}>
+      <div className="container" style={{ marginTop: 75 }}>
+        <div className="row align-items-center">
+          {/* Left: Logo */}
+          <div className="col-md-6 mb-4 mb-md-0 mt-5">
+            <motion.div
+              className="d-flex justify-content-center align-items-center"
+              style={{ height: 320 }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              whileHover={{ scale: 1.04, rotate: 0.8 }}
+            >
+              <Image
+                src="/pantrypals-logo.png"
+                alt="Pantry Pals Logo"
+                width={420}
+                height={420}
+                priority
+                className="img-fluid rounded shadow-lg"
+              />
+            </motion.div>
           </div>
-        </div>
 
-        <div className="col-md-6">
-          <h1 className="fw-bold">Welcome To Pantry Pals!</h1>
-          <p className="text-muted">
-            Lorem ipsum dolor sit amet et delectus accommodare his consul copiosae
-            legendos at vix ad putent delectus delicata usu. Vidit dissentiet eos cu
-            eum an brute copiosae hendrerit.
-          </p>
+          {/* Right: Text */}
+          <div className="col-md-6 text-center text-md-start">
+            <motion.div variants={parent} initial="hidden" animate="show">
+              <motion.h1
+                className="fw-bold mb-3"
+                style={{ color: 'var(--brunswick-green)' }}
+                variants={item}
+              >
+                Welcome to
+                {' '}
+                <span style={{ color: 'var(--fern-green)' }}>Pantry Pals</span>
+              </motion.h1>
 
-          {!session && (
-            <div className="d-flex gap-2">
-              <Link href="/auth/signin" className="btn btn-dark">
-                Log In
-              </Link>
-              <Link href="/auth/signup" className="btn btn-outline-dark">
-                Sign Up
-              </Link>
-            </div>
-          )}
+              <motion.p
+                className="mb-4"
+                style={{ color: 'var(--hunter-green)', fontSize: '1.1rem' }}
+                variants={item}
+              >
+                Keep track of your pantry, cut down on food waste, and discover
+                recipes with what you already have. Smarter cooking, simplified.
+              </motion.p>
+
+              <motion.div className="d-flex gap-3 justify-content-center justify-content-md-start" variants={item}>
+                {!session && !isLoading ? (
+                  <>
+                    <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ duration: 0.12 }}>
+                      <Link href="/auth/signup" className={styles.primaryButton}>
+                        Sign Up
+                      </Link>
+                    </motion.div>
+
+                    <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
+                      <Link href="/auth/signin" className={styles.secondaryButton}>
+                        Log In
+                      </Link>
+                    </motion.div>
+                  </>
+                ) : (
+                  <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
+                    <Link href="/dashboard" className={styles.primaryButton}>
+                      Go to Dashboard
+                    </Link>
+                  </motion.div>
+                )}
+              </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
