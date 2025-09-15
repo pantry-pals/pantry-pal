@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcrypt';
 import { prisma } from '@/lib/prisma';
-import { POST as sendCode } from '@/app/api/auth/send-code/route';
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,17 +29,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Call send-code internally
-    await sendCode(
-      new Request('http://localhost/api/auth/send-code', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-
     return NextResponse.json(
-      { message: 'User created, verification code sent', userId: user.id },
+      { message: 'User created successfully', userId: user.id },
       { status: 201 },
     );
   } catch (error) {

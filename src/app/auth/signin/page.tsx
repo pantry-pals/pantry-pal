@@ -15,8 +15,9 @@ export default function SignInPage() {
   const [verificationError, setVerificationError] = useState('');
   const [formData, setFormData] = useState<{ email: string; password: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // New state for countdown
+  // Countdown
   const [resendCountdown, setResendCountdown] = useState(0);
 
   useEffect(() => {
@@ -25,10 +26,9 @@ export default function SignInPage() {
     }
   }, [status, router]);
 
-  // Countdown effect
   useEffect(() => {
     if (resendCountdown <= 0) {
-      return undefined;
+      return () => {}; // consistent return: cleanup does nothing
     }
     const timer = setInterval(() => {
       setResendCountdown((prev) => prev - 1);
@@ -37,6 +37,7 @@ export default function SignInPage() {
   }, [resendCountdown]);
 
   const sendVerificationCode = async (email: string) => {
+    setResendCountdown(60);
     try {
       const res = await fetch('/api/auth/send-code', {
         method: 'POST',
@@ -45,9 +46,6 @@ export default function SignInPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Failed to send code');
-
-      // Start 5-second countdown
-      setResendCountdown(5);
     } catch (err: any) {
       setError(err.message || 'Failed to send verification code');
     }
@@ -56,6 +54,7 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setIsSigningIn(true);
 
     const target = e.target as typeof e.target & {
       email: { value: string };
@@ -83,6 +82,8 @@ export default function SignInPage() {
     } else if (result?.url) {
       window.location.href = result.url;
     }
+
+    setIsSigningIn(false);
   };
 
   const handleVerifyCode = async () => {
@@ -152,8 +153,8 @@ export default function SignInPage() {
                 placeholder="Password"
               />
             </div>
-            <button type="submit" className={styles.button}>
-              Sign In
+            <button type="submit" className={styles.button} disabled={isSigningIn}>
+              {isSigningIn ? <span className={styles.spinner} /> : 'Sign In'}
             </button>
             {error && <p className={styles.error}>{error}</p>}
           </form>
@@ -190,7 +191,7 @@ export default function SignInPage() {
             onClick={handleVerifyCode}
             disabled={isSubmitting}
           >
-            Verify Code
+            {isSubmitting ? <span className={styles.spinner} /> : 'Verify Code'}
           </button>
 
           <button

@@ -38,7 +38,7 @@ const SignUp = () => {
   // Countdown effect
   useEffect(() => {
     if (resendCountdown <= 0) {
-      return undefined;
+      return () => {};
     }
     const timer = setInterval(() => {
       setResendCountdown((prev) => prev - 1);
@@ -67,6 +67,9 @@ const SignUp = () => {
 
   // Send verification code
   const sendVerificationCode = async (email: string) => {
+    // Start countdown right away (60s)
+    setResendCountdown(60);
+
     try {
       const res = await fetch('/api/auth/send-code', {
         method: 'POST',
@@ -77,9 +80,10 @@ const SignUp = () => {
       if (!res.ok) throw new Error(result.error || 'Failed to send code');
 
       setVerificationCodeSent(true);
-      setResendCountdown(5);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to send verification code');
+      // Reset countdown if request fails
+      setResendCountdown(0);
     }
   };
 
@@ -108,9 +112,9 @@ const SignUp = () => {
   // Handle code verification + auto-login
   const handleVerifyCode = async () => {
     if (!formData) return;
-
     setIsSubmitting(true);
     setVerificationError('');
+
     try {
       const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
@@ -120,11 +124,10 @@ const SignUp = () => {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Verification failed');
 
-      // Sign in after verification
       const signInResult = await signIn('credentials', {
         redirect: false,
         email: formData.email,
-        password: '',
+        password: formData.password,
       });
 
       if (signInResult?.error) throw new Error(signInResult.error);
@@ -180,7 +183,7 @@ const SignUp = () => {
           </div>
 
           <button type="submit" className={styles.button} disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Register'}
+            {isSubmitting ? <span className={styles.spinner} /> : 'Register'}
           </button>
         </form>
 
@@ -212,7 +215,7 @@ const SignUp = () => {
               disabled={isSubmitting}
               style={{ marginTop: '12px' }}
             >
-              Verify Code
+              {isSubmitting ? <span className={styles.spinner} /> : 'Verify Code'}
             </button>
 
             <button
