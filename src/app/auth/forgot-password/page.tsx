@@ -1,17 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '@/styles/forgot-password.module.css';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+
+    if (resendCountdown > 0) {
+      timer = setInterval(() => {
+        setResendCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [resendCountdown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
     setLoading(true);
+    setResendCountdown(60); // start countdown immediately
 
     try {
       const res = await fetch('/api/auth/forgot-password', {
@@ -25,10 +41,20 @@ export default function ForgotPasswordPage() {
     } catch (err) {
       console.error(err);
       setMessage('Something went wrong. Please try again.');
+      setResendCountdown(0); // reset countdown if failed
     } finally {
       setLoading(false);
     }
   };
+
+  let buttonLabel;
+  if (loading) {
+    buttonLabel = <span className={styles.spinner} />;
+  } else if (resendCountdown > 0) {
+    buttonLabel = `Resend Link (${resendCountdown})`;
+  } else {
+    buttonLabel = 'Send Reset Link';
+  }
 
   return (
     <div className={styles.container}>
@@ -49,14 +75,18 @@ export default function ForgotPasswordPage() {
               placeholder="you@example.com"
             />
           </div>
-          <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Sending...' : 'Send Reset Link'}
+          <button
+            type="submit"
+            disabled={loading || resendCountdown > 0}
+            className={styles.button}
+          >
+            {buttonLabel}
           </button>
         </form>
         {message && (
-          <p className={message.toLowerCase().includes('sent') ? styles.success : styles.error}>
-            {message}
-          </p>
+        <p className={message.toLowerCase().includes('sent') ? styles.success : styles.error}>
+          {message}
+        </p>
         )}
       </div>
     </div>
