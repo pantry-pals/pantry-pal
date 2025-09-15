@@ -1,34 +1,61 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
-import styles from '@/styles/signup.module.css';
+import { signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import styles from '@/styles/signin.module.css';
 
-const SignOut = () => (
-  <div className={styles.container}>
-    <div className={styles.formWrapper} style={{ maxWidth: '500px', textAlign: 'center' }}>
-      <h2 className={styles.title}>Do you want to sign out?</h2>
+export default function SignOutPage() {
+  const { status } = useSession();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '25px' }}>
-        <button
-          type="button"
-          className={styles.button}
-          style={{ backgroundColor: 'var(--fern-green)' }}
-          onClick={() => signOut({ callbackUrl: '/', redirect: true })}
-        >
-          Sign Out
-        </button>
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status !== 'authenticated') router.replace('/auth/signin');
+  }, [status, router]);
 
-        <button
-          type="button"
-          className={styles.button}
-          style={{ backgroundColor: 'var(--sage)', color: 'var(--brunswick-green)' }}
-          onClick={() => (window.location.href = '/')}
-        >
-          Cancel
-        </button>
+  if (status === 'loading' || status !== 'authenticated') return null;
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await signOut({ callbackUrl: '/', redirect: true });
+    setIsSigningOut(false);
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h1 className={styles.title}>Sign Out</h1>
+        <p className={styles.descriptionCentered}>
+          Are you sure you want to sign out of your Pantry Pal account?
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '25px' }}>
+          <button
+            type="button"
+            className={styles.button}
+            style={{ backgroundColor: 'var(--fern-green)' }}
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? <span className={styles.spinner} /> : 'Sign Out'}
+          </button>
+
+          <button
+            type="button"
+            className={styles.button}
+            style={{
+              backgroundColor: 'var(--sage)',
+              color: 'var(--brunswick-green)',
+            }}
+            onClick={() => router.push('/list')}
+            disabled={isSigningOut}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
-
-export default SignOut;
+  );
+}

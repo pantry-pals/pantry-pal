@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
             />
           </div>
           <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Resetting...' : 'Reset Password'}
+            {loading ? <span className={styles.spinner} /> : 'Reset Password'}
           </button>
         </form>
         {message && (

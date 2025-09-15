@@ -9,6 +9,7 @@ import styles from '@/styles/hero.module.css';
 export default function Hero() {
   const { data: session, status } = useSession();
   const isLoading = status === 'loading';
+
   const parent = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
   const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
 
@@ -60,26 +61,28 @@ export default function Hero() {
               </motion.p>
 
               <motion.div className="d-flex gap-3 justify-content-center justify-content-md-start" variants={item}>
-                {!session && !isLoading ? (
-                  <>
-                    <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ duration: 0.12 }}>
-                      <Link href="/auth/signup" className={styles.primaryButton}>
-                        Sign Up
-                      </Link>
-                    </motion.div>
+                {!isLoading && (
+                  !session ? (
+                    <>
+                      <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ duration: 0.12 }}>
+                        <Link href="/auth/signup" className={styles.primaryButton}>
+                          Sign Up
+                        </Link>
+                      </motion.div>
 
+                      <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
+                        <Link href="/auth/signin" className={styles.secondaryButton}>
+                          Log In
+                        </Link>
+                      </motion.div>
+                    </>
+                  ) : (
                     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
-                      <Link href="/auth/signin" className={styles.secondaryButton}>
-                        Log In
+                      <Link href="/list" className={styles.primaryButton}>
+                        Go to Dashboard
                       </Link>
                     </motion.div>
-                  </>
-                ) : (
-                  <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
-                    <Link href="/dashboard" className={styles.primaryButton}>
-                      Go to Dashboard
-                    </Link>
-                  </motion.div>
+                  )
                 )}
               </motion.div>
             </motion.div>
