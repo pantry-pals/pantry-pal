@@ -1,27 +1,22 @@
+// src/app/producelist/page.tsx
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, Table } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
-import ProduceItem from '@/components/ProduceItem';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
+import ProduceListWithGrouping from '@/components/SearchBar'; // client component
 
-type SessionUser = {
-  id: string;
-  email: string;
-  randomKey: string;
-};
+type SessionUser = { id: string; email: string; randomKey: string };
 
 const ProduceListPage = async () => {
-  const session = (await getServerSession(authOptions)) as
-    | { user: SessionUser }
-    | null;
-
+  const session = (await getServerSession(authOptions)) as { user: SessionUser } | null;
   loggedInProtectedPage(session);
 
   const owner = session?.user?.email || '';
 
   const produce = await prisma.produce.findMany({
     where: { owner },
+    orderBy: [{ name: 'asc' }],
   });
 
   return (
@@ -30,32 +25,7 @@ const ProduceListPage = async () => {
         <Row>
           <Col>
             <h1>Your Pantry at a Glance</h1>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Location</th>
-                  <th>Quantity</th>
-                  <th>Expiration</th>
-                  <th>Edit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {produce.map((item) => (
-                  <ProduceItem
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                    quantity={item.quantity}
-                    type={item.type}
-                    location={item.location}
-                    expiration={item.expiration}
-                    owner={item.owner}
-                  />
-                ))}
-              </tbody>
-            </Table>
+            <ProduceListWithGrouping initialProduce={produce} />
           </Col>
         </Row>
       </Container>
