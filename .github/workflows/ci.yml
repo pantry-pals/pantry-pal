@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
@@ -21,11 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run TestCafe Acceptance Tests
-        run: npm run test-acceptance-development
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run TestCafe Acceptance Tests on Vercel
+        run: npm run test-acceptance-vercel

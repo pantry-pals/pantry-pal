@@ -2,7 +2,7 @@ import { Selector, t } from 'testcafe';
 import SignUpPage from './pages/SignUpPage';
 
 fixture('SignUp Page')
-  .page('http://localhost:3000/auth/signup');
+  .page('https://pantry-pal-gamma.vercel.app/auth/signup');
 
 test('Page loads', async t => {
   await SignUpPage.isDisplayed();

@@ -1,7 +1,7 @@
 import { Selector, t } from 'testcafe';
 
 fixture('About Us Page')
-    .page('http://localhost:3000/aboutus');
+    .page('https://pantry-pal-gamma.vercel.app/aboutus');
 
 test('About Us page loads', async t => {
     // Check for main heading

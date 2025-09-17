@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
 fixture('Add Page')
-    .page('http://localhost:3000/auth/signin');
+    .page('https://pantry-pal-gamma.vercel.app/auth/signin');
 
 const testEmail = 'admin@foo.com';
 const testPassword = 'changeme';
@@ -17,7 +17,7 @@ test('Add page loads', async t => {
     await t.expect(t.eval(() => window.location.pathname)).notEql('/auth/signin', { timeout: 10000 });
 
     // Go to /add page
-    await t.navigateTo('http://localhost:3000/add');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/add');
 
     // Check that the AddStuffForm rendered
     const addForm = Selector('form'); // assuming AddStuffForm renders a <form>

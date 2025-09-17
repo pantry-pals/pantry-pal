@@ -2,7 +2,7 @@ import { Selector, t } from 'testcafe';
 
 // --- Helpers ---
 const signIn = async () => {
-    await t.navigateTo('http://localhost:3000/auth/signin');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signin');
 
     await t
         .typeText('input[name="email"]', 'admin@foo.com', { replace: true })
@@ -15,11 +15,11 @@ const signIn = async () => {
 
 // --- Tests ---
 fixture('List & Edit Flow')
-    .page('http://localhost:3000');
+    .page('https://pantry-pal-gamma.vercel.app');
 
 test('List page loads', async t => {
     await signIn();
-    await t.navigateTo('http://localhost:3000/list');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
     const listContainer = Selector('#list');
     await t.expect(listContainer.exists).ok('Expected list container to exist');
@@ -27,7 +27,7 @@ test('List page loads', async t => {
 
 test('Click edit link works', async t => {
     await signIn();
-    await t.navigateTo('http://localhost:3000/list');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
     await t.expect(firstEditLink.exists).ok('Expected first edit link to exist');
@@ -38,20 +38,9 @@ test('Click edit link works', async t => {
     await t.expect(editForm.exists).ok('Expected edit form to exist');
 });
 
-test('Edit page loads', async t => {
-    await signIn();
-    await t.navigateTo('http://localhost:3000/list');
-
-    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
-    await t.click(firstEditLink);
-
-    const editForm = Selector('form');
-    await t.expect(editForm.exists).ok('Expected edit form to exist');
-});
-
 test('Edit form can modify item', async t => {
     await signIn();
-    await t.navigateTo('http://localhost:3000/list');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
     await t.click(firstEditLink);
