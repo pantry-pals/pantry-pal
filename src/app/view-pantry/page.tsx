@@ -8,7 +8,7 @@ import ProduceListWithGrouping from '@/components/SearchBar'; // client componen
 
 type SessionUser = { id: string; email: string; randomKey: string };
 
-const ProduceListPage = async () => {
+const ViewPantryPage = async () => {
   const session = (await getServerSession(authOptions)) as { user: SessionUser } | null;
   loggedInProtectedPage(session);
 
@@ -33,4 +33,4 @@ const ProduceListPage = async () => {
   );
 };
 
-export default ProduceListPage;
+export default ViewPantryPage;
