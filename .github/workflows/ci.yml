@@ -28,4 +28,4 @@ jobs:
         run: npm run lint
 
       - name: Run TestCafe Acceptance Tests
-        run: npx testcafe "chrome" tests/
+        run: npx testcafe "chrome:headless" tests/ 
