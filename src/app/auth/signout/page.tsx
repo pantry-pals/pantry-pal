@@ -19,7 +19,9 @@ export default function SignOutPage() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    await signOut({ callbackUrl: '/', redirect: true });
+    // Do not redirect automatically, let router handle it
+    await signOut({ redirect: false });
+    router.push('/');
     setIsSigningOut(false);
   };
 
@@ -34,6 +36,7 @@ export default function SignOutPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '25px' }}>
           <button
             type="button"
+            data-testid="signout-button"
             className={styles.button}
             style={{ backgroundColor: 'var(--fern-green)' }}
             onClick={handleSignOut}

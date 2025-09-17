@@ -8,7 +8,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "playwright-development": "npx playwright test"
+    "playwright-development": "npx playwright test",
+    "test-acceptance-development": "testcafe chrome tests/acceptance/*.testcafe.js --selector-timeout 3000",
+    "test-acceptance-single": "testcafe chrome:headless tests/acceptance/*.testcafe.js",
+    "test-acceptance-ci": "testcafe 'chromium:headless --no-sandbox' tests/acceptance/*.testcafe.js"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -53,6 +56,7 @@
     "prettier": "^3.3.1",
     "prettier-eslint": "^16.3.0",
     "prisma": "^6.15.0",
+    "testcafe": "^3.7.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }

@@ -1,0 +1,73 @@
+import { Selector, t } from 'testcafe';
+
+// --- Helpers ---
+const signIn = async () => {
+    await t.navigateTo('http://localhost:3000/auth/signin');
+
+    await t
+        .typeText('input[name="email"]', 'admin@foo.com', { replace: true })
+        .typeText('input[name="password"]', 'changeme', { replace: true })
+        .click('button[type="submit"]');
+
+    // Wait for the list page or a logged-in state
+    await t.expect(Selector('main').exists).ok('Expected main content to appear after sign-in');
+};
+
+// --- Tests ---
+fixture('List & Edit Flow')
+    .page('http://localhost:3000');
+
+test('List page loads', async t => {
+    await signIn();
+    await t.navigateTo('http://localhost:3000/list');
+
+    const listContainer = Selector('#list');
+    await t.expect(listContainer.exists).ok('Expected list container to exist');
+});
+
+test('Click edit link works', async t => {
+    await signIn();
+    await t.navigateTo('http://localhost:3000/list');
+
+    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
+    await t.expect(firstEditLink.exists).ok('Expected first edit link to exist');
+    await t.click(firstEditLink);
+
+    // Confirm we are on edit page
+    const editForm = Selector('form');
+    await t.expect(editForm.exists).ok('Expected edit form to exist');
+});
+
+test('Edit page loads', async t => {
+    await signIn();
+    await t.navigateTo('http://localhost:3000/list');
+
+    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
+    await t.click(firstEditLink);
+
+    const editForm = Selector('form');
+    await t.expect(editForm.exists).ok('Expected edit form to exist');
+});
+
+test('Edit form can modify item', async t => {
+    await signIn();
+    await t.navigateTo('http://localhost:3000/list');
+
+    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
+    await t.click(firstEditLink);
+
+    const editForm = Selector('form');
+    const nameInput = editForm.find('input[name="name"]');
+
+    const originalName = await nameInput.value;
+    const newName = originalName + ' Updated';
+
+    await t
+        .selectText(nameInput)
+        .pressKey('delete')
+        .typeText(nameInput, newName)
+        .click(editForm.find('button[type="submit"]'));
+
+    // Verify input reflects updated value after submission (no redirect)
+    await t.expect(nameInput.value).eql(newName, 'Expected name input to reflect updated value after submission');
+});
