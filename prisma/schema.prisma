@@ -40,6 +40,9 @@ model User {
 
   emailVerificationCodes EmailVerificationCode[]
   passwordResetTokens    PasswordResetToken[]
+
+  produces      Produce[]
+  shoppingLists ShoppingList[]
 }
 
 model EmailVerificationCode {
@@ -67,11 +70,56 @@ model PasswordResetToken {
 }
 
 model Produce {
-  id         Int       @id @default(autoincrement())
-  name       String
-  type       String
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product? @relation(fields: [productId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
   location   String
   quantity   Int
   expiration DateTime?
-  owner      String
+
+  @@map("produce")
+}
+
+model Product {
+  id    Int     @id @default(autoincrement())
+  name  String
+  type  String?
+  price Float?
+
+  pantryItems       Produce[]
+  shoppingListItems ShoppingListItem[]
+
+  @@map("product")
+}
+
+model ShoppingList {
+  id        Int                @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  items     ShoppingListItem[]
+  createdAt DateTime           @default(now())
+
+  @@map("shoppinglist")
+}
+
+model ShoppingListItem {
+  id             Int          @id @default(autoincrement())
+  shoppingListId Int
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id])
+
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  name      String?
+  price     Float?
+  quantity  Int      @default(1)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@map("shoppinglistitem")
 }

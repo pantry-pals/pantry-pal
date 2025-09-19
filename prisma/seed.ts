@@ -43,21 +43,56 @@ async function main() {
     });
   }
 
-  // Seed produce
+  // Seed products
+  for (let index = 0; index < config.defaultProduce.length; index++) {
+    const item = config.defaultProduce[index];
+    console.log(`  Adding product: ${item.name}`);
+
+    await prisma.product.upsert({
+      where: { id: index + 1 },
+      update: {},
+      create: {
+        name: item.name,
+        type: item.type ?? null,
+        price: item.price ?? null,
+      },
+    });
+  }
+
+// Seed produce
   for (let index = 0; index < config.defaultProduce.length; index++) {
     const produce = config.defaultProduce[index];
     console.log(`  Adding produce: ${JSON.stringify(produce)}`);
+
+    // Find the owner user by email
+    const user = await prisma.user.findUnique({
+      where: { email: produce.owner },
+    });
+
+    if (!user) {
+      console.warn(`  Skipping produce: user not found for ${produce.owner}`);
+      continue;
+    }
+
+    // Find product by name
+    const product = await prisma.product.findFirst({
+      where: { name: produce.name },
+    });
+
+    if (!product) {
+      console.warn(`  Skipping produce: product not found for ${produce.name}`);
+      continue;
+    }
 
     await prisma.produce.upsert({
       where: { id: index + 1 },
       update: {},
       create: {
-        name: produce.name,
-        type: produce.type,
+        productId: product.id,
+        userId: user.id,
         location: produce.location,
         quantity: produce.quantity,
-        expiration: new Date(produce.expiration),
-        owner: produce.owner,
+        expiration: produce.expiration ? new Date(produce.expiration) : null,
       },
     });
   }
