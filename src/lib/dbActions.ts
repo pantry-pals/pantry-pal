@@ -109,6 +109,7 @@ export async function addProduce(produce: {
   quantity: number;
   expiration: string | Date | null;
   owner: string;
+  image: string | null;
 }) {
   await prisma.produce.create({
     data: {
@@ -118,6 +119,7 @@ export async function addProduce(produce: {
       location: produce.location,
       quantity: produce.quantity,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
+      image: produce.image ? produce.image : null,
     },
   });
 
@@ -149,6 +151,7 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       quantity: produce.quantity,
       expiration,
       owner: produce.owner,
+      image: produce.image,
     },
   });
 }

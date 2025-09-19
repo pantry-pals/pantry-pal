@@ -74,4 +74,5 @@ model Produce {
   quantity   Int
   expiration DateTime?
   owner      String
+  image      String?
 }
