@@ -148,6 +148,45 @@ const About = () => (
           </Col>
         </Row>
       </motion.div>
+
+      {/* Learn More */}
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <Row
+          className="mb-5"
+          style={{
+            backgroundColor: 'var(--sage)',
+            borderRadius: '10px',
+            padding: '2rem',
+          }}
+        >
+          <Col>
+            <h2
+              style={{
+                color: 'var(--brunswick-green)',
+                marginBottom: '1rem',
+              }}
+            >
+              Learn More
+            </h2>
+            <a
+              href="https://pantry-pals.github.io/"
+              style={{
+                color: 'var(--brunswick-green)',
+                fontSize: '1.1rem',
+                lineHeight: '1.6',
+              }}
+            >
+              Click to learn more about our development
+              process and our pantry pals team
+            </a>
+          </Col>
+        </Row>
+      </motion.div>
     </Container>
   </main>
 );
