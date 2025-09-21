@@ -1,10 +1,17 @@
 import { Produce } from '@prisma/client';
 import Link from 'next/link';
 
-const ProduceItem = ({ id, name, quantity, type, location, expiration }: Produce) => (
+interface ProduceWithProduct extends Produce {
+  product: {
+    name: string;
+    type: string | null;
+  } | null;
+}
+
+const ProduceItem = ({ id, product, location, quantity, expiration }: ProduceWithProduct) => (
   <tr>
-    <td>{name}</td>
-    <td>{type}</td>
+    <td>{product?.name || 'Unknown'}</td>
+    <td>{product?.type || 'N/A'}</td>
     <td>{location}</td>
     <td>{quantity}</td>
     <td>{expiration ? new Date(expiration).toLocaleDateString() : 'N/A'}</td>

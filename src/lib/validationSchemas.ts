@@ -55,9 +55,7 @@ export const AddShoppingListItemSchema = Yup.object({
 }).test(
   'productId-or-name',
   'Either productId or name must be provided',
-  (value) => {
-    return Boolean(value?.productId || value?.name);
-  },
+  (value) => Boolean(value?.productId || value?.name),
 );
 
 export const EditShoppingListItemSchema = Yup.object({
@@ -71,7 +69,5 @@ export const EditShoppingListItemSchema = Yup.object({
 }).test(
   'productId-or-name',
   'Either productId or name must be provided',
-  (value) => {
-    return Boolean(value?.productId || value?.name);
-  },
+  (value) => Boolean(value?.productId || value?.name),
 );

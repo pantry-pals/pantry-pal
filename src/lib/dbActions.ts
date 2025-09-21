@@ -99,6 +99,9 @@ export async function changePassword({
   return { success: true };
 }
 
+/**
+ * Creates a new produce.
+ */
 export async function addProduce(produce: {
   productId: number;
   userId: number;
@@ -109,8 +112,8 @@ export async function addProduce(produce: {
 }) {
   await prisma.produce.create({
     data: {
-      productId: produce.productId,
-      userId: produce.userId,
+      product: { connect: { id: produce.productId } },
+      user: { connect: { id: produce.userId } },
       location: produce.location,
       quantity: produce.quantity,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
@@ -124,28 +127,33 @@ export async function addProduce(produce: {
 /**
  * Edits an existing produce.
  */
-export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: number }) {
-  let expiration: Date | Prisma.DateTimeFieldUpdateOperationsInput | null | undefined = null;
+export async function editProduce(produce: {
+  id: number;
+  productId?: number;
+  userId?: number;
+  location?: string;
+  quantity?: number;
+  expiration?: Date | string | null;
+  image?: string | null;
+}) {
+  let expirationDate: Date | null = null;
 
   if (produce.expiration) {
-    if (produce.expiration instanceof Date) {
-      expiration = produce.expiration;
-    } else if (typeof produce.expiration === 'string' || typeof produce.expiration === 'number') {
-      expiration = new Date(produce.expiration);
-    } else {
-      expiration = produce.expiration as Prisma.DateTimeFieldUpdateOperationsInput;
-    }
+    expirationDate = produce.expiration instanceof Date
+      ? produce.expiration
+      : new Date(produce.expiration);
   }
 
   await prisma.produce.update({
     where: { id: produce.id },
     data: {
-      productId: produce.productId,
-      userId: produce.userId,
-      location: produce.location,
-      quantity: produce.quantity,
-      expiration,
-      image: produce.image,
+      // Use connect for relation updates
+      ...(produce.productId !== undefined && { product: { connect: { id: produce.productId } } }),
+      ...(produce.userId !== undefined && { user: { connect: { id: produce.userId } } }),
+      ...(produce.location !== undefined && { location: produce.location }),
+      ...(produce.quantity !== undefined && { quantity: produce.quantity }),
+      ...(expirationDate !== undefined && { expiration: expirationDate }),
+      ...(produce.image !== undefined && { image: produce.image }),
     },
   });
 }

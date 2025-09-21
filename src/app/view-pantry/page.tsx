@@ -12,11 +12,24 @@ const ViewPantryPage = async () => {
   const session = (await getServerSession(authOptions)) as { user: SessionUser } | null;
   loggedInProtectedPage(session);
 
-  const owner = session?.user?.email || '';
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return <div>User not found</div>;
+  }
 
   const produce = await prisma.produce.findMany({
-    where: { owner },
-    orderBy: [{ name: 'asc' }],
+    where: {
+      userId: parseInt(userId, 10),
+    },
+    orderBy: {
+      product: {
+        name: 'asc',
+      },
+    },
+    include: {
+      product: true,
+    },
   });
 
   return (

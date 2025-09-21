@@ -5,9 +5,18 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { Produce } from '@prisma/client';
 import ProduceItem from './ProduceItem';
 
-type Props = { initialProduce: Produce[] };
+// Define the type for produce with product relation
+interface ProduceWithProduct extends Produce {
+  product: {
+    name: string;
+    type: string | null;
+    price?: number | null; // Include other product fields if needed
+  } | null;
+}
 
-// order the “known” sections first; everything else appears after, alphabetically
+type Props = { initialProduce: ProduceWithProduct[] };
+
+// order the "known" sections first; everything else appears after, alphabetically
 const LOCATION_ORDER = ['Freezer', 'Fridge', 'Pantry'] as const;
 
 // safely get a timestamp; put null/invalid dates at the end (Infinity)
@@ -18,7 +27,7 @@ const toTime = (d: unknown): number => {
 };
 
 // --- helper components (kept in this file to avoid eslint on nested ternaries) ---
-function FlatTable({ rows }: { rows: Produce[] }) {
+function FlatTable({ rows }: { rows: ProduceWithProduct[] }) {
   return (
     <Table striped bordered hover>
       <thead>
@@ -49,7 +58,7 @@ function capitalizeFirst(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function GroupedSections({ groups }: { groups: Array<[string, Produce[]]> }) {
+function GroupedSections({ groups }: { groups: Array<[string, ProduceWithProduct[]]> }) {
   if (groups.length === 0) {
     return <div className="text-center">No items found</div>;
   }
@@ -85,28 +94,37 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
   const [sort, setSort] = useState<
   '' | 'name-asc' | 'name-desc' | 'location-asc' | 'type-asc' | 'expiration-soon' | 'qty-desc'
   >('');
-  const [groupByLocation, setGroupByLocation] = useState(false); // default = flat list
+  const [groupByLocation, setGroupByLocation] = useState(false);
 
   const filteredSorted = useMemo(() => {
     const q = search.trim().toLowerCase();
     let arr = [...initialProduce];
 
     if (q) {
-      arr = arr.filter((p) => p.name.toLowerCase().includes(q)
-        || (p.type?.toLowerCase().includes(q) ?? false)
-        || (p.location?.toLowerCase().includes(q) ?? false));
+      arr = arr.filter((p) => p.product?.name.toLowerCase().includes(q)
+        || (p.product?.type?.toLowerCase().includes(q) ?? false)
+        || p.location.toLowerCase().includes(q));
     }
 
     switch (sort) {
-      case 'name-asc': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
-      case 'name-desc': arr.sort((a, b) => b.name.localeCompare(a.name)); break;
-      case 'location-asc': arr.sort((a, b) => (a.location ?? '').localeCompare(b.location ?? '')); break;
-      case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
+      case 'name-asc':
+        arr.sort((a, b) => (a.product?.name || '').localeCompare(b.product?.name || ''));
+        break;
+      case 'name-desc':
+        arr.sort((a, b) => (b.product?.name || '').localeCompare(a.product?.name || ''));
+        break;
+      case 'location-asc':
+        arr.sort((a, b) => a.location.localeCompare(b.location));
+        break;
+      case 'type-asc':
+        arr.sort((a, b) => (a.product?.type || '').localeCompare(b.product?.type || ''));
+        break;
       case 'expiration-soon':
         arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
         break;
-
-      case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
+      case 'qty-desc':
+        arr.sort((a, b) => b.quantity - a.quantity);
+        break;
       default: break;
     }
 
@@ -114,32 +132,39 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
   }, [initialProduce, search, sort]);
 
   const grouped = useMemo(() => {
-    if (!groupByLocation) return [] as Array<[string, Produce[]]>;
+    if (!groupByLocation) return [] as Array<[string, ProduceWithProduct[]]>;
 
-    const map = new Map<string, Produce[]>();
+    const map = new Map<string, ProduceWithProduct[]>();
     for (const item of filteredSorted) {
       const key = item.location?.trim() || 'Unknown';
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(item);
     }
 
-    const sortInside = (list: Produce[]) => {
+    const sortInside = (list: ProduceWithProduct[]) => {
       const arr = [...list];
-      // reuse the current sort inside each section (except location-asc which doesn’t matter inside a single location)
       switch (sort) {
-        case 'name-asc': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
-        case 'name-desc': arr.sort((a, b) => b.name.localeCompare(a.name)); break;
-        case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
+        case 'name-asc':
+          arr.sort((a, b) => (a.product?.name || '').localeCompare(b.product?.name || ''));
+          break;
+        case 'name-desc':
+          arr.sort((a, b) => (b.product?.name || '').localeCompare(a.product?.name || ''));
+          break;
+        case 'type-asc':
+          arr.sort((a, b) => (a.product?.type || '').localeCompare(b.product?.type || ''));
+          break;
         case 'expiration-soon':
           arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
           break;
-        case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
+        case 'qty-desc':
+          arr.sort((a, b) => b.quantity - a.quantity);
+          break;
         default: break;
       }
       return arr;
     };
 
-    const sections: Array<[string, Produce[]]> = [];
+    const sections: Array<[string, ProduceWithProduct[]]> = [];
 
     // preferred order first
     for (const loc of LOCATION_ORDER) {
