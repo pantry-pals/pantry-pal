@@ -18,5 +18,75 @@
     {"name": "Broccoli", "type": "vegetable", "price": 0.50, "location": "fridge", "quantity": 8, "expiration": "2025-10-10T00:00:00.000Z", "owner": "john@foo.com"},
     {"name": "Chicken Breast", "type": "meat", "price": 16.99, "location": "freezer", "quantity": 5, "expiration": "2026-01-20T00:00:00.000Z", "owner": "john@foo.com"},
     {"name": "Salmon Fillet", "type": "meat", "price": 20.99, "location": "freezer", "quantity": 4, "expiration": "2026-02-15T00:00:00.000Z", "owner": "john@foo.com"}
+  ],
+
+  "defaultShoppingList": [
+    {
+      "name": "Weekly Groceries",
+      "owner": "john@foo.com",
+      "items": [
+        {
+          "name": "Milk",
+          "price": 3.99,
+          "quantity": 2,
+          "notes": "Organic whole milk"
+        },
+        {
+          "name": "Eggs",
+          "price": 4.50,
+          "quantity": 1,
+          "notes": "Large brown eggs"
+        },
+        {
+          "name": "Bread",
+          "price": 2.99,
+          "quantity": 1,
+          "notes": "Whole wheat"
+        },
+        {
+          "name": "Coffee",
+          "price": 8.99,
+          "quantity": 1,
+          "notes": "Dark roast"
+        },
+        {
+          "name": "Yogurt",
+          "price": 5.49,
+          "quantity": 3,
+          "notes": "Greek yogurt"
+        }
+      ]
+    },
+    {
+      "name": "Party Supplies",
+      "owner": "admin@foo.com",
+      "items": [
+        {
+          "name": "Paper Plates",
+          "price": 4.99,
+          "quantity": 2,
+          "notes": "Large size"
+        },
+        {
+          "name": "Napkins",
+          "price": 2.49,
+          "quantity": 3,
+          "notes": "Colorful design"
+        },
+        {
+          "name": "Chips",
+          "price": 3.99,
+          "quantity": 4,
+          "notes": "Variety pack"
+        },
+        {
+          "name": "Soda",
+          "price": 6.99,
+          "quantity": 2,
+          "notes": "Assorted flavors"
+        }
+      ]
+    }
   ]
+
 }

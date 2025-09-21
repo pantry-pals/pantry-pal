@@ -43,6 +43,8 @@ model User {
 
   produces      Produce[]
   shoppingLists ShoppingList[]
+
+  @@map("user")
 }
 
 model EmailVerificationCode {

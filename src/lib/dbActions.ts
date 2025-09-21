@@ -99,22 +99,17 @@ export async function changePassword({
   return { success: true };
 }
 
-/**
- * Adds a new produce.
- */
 export async function addProduce(produce: {
-  name: string;
-  type: string;
+  productId: number;
+  userId: number;
   location: string;
   quantity: number;
-  expiration: string | Date | null;
-  owner: string;
+  expiration?: string | Date | null;
 }) {
   await prisma.produce.create({
     data: {
-      name: produce.name,
-      type: produce.type,
-      owner: produce.owner,
+      productId: produce.productId,
+      userId: produce.userId,
       location: produce.location,
       quantity: produce.quantity,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
@@ -143,12 +138,11 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
   await prisma.produce.update({
     where: { id: produce.id },
     data: {
-      name: produce.name,
-      type: produce.type,
+      productId: produce.productId,
+      userId: produce.userId,
       location: produce.location,
       quantity: produce.quantity,
       expiration,
-      owner: produce.owner,
     },
   });
 }
@@ -162,4 +156,149 @@ export async function deleteProduce(id: number) {
   });
 
   redirect('/list');
+}
+
+/**
+ * Creates a new shopping list.
+ */
+export async function createShoppingList(list: {
+  name: string;
+  userId: number;
+}) {
+  const shoppingList = await prisma.shoppingList.create({
+    data: {
+      name: list.name,
+      userId: list.userId,
+    },
+  });
+
+  return shoppingList;
+}
+
+/**
+ * Edits an existing shopping list.
+ */
+export async function editShoppingList(list: {
+  id: number;
+  name: string;
+}) {
+  await prisma.shoppingList.update({
+    where: { id: list.id },
+    data: {
+      name: list.name,
+    },
+  });
+}
+
+/**
+ * Deletes a shopping list by id.
+ */
+export async function deleteShoppingList(id: number) {
+  await prisma.shoppingList.delete({
+    where: { id },
+  });
+}
+
+/**
+ * Adds a new item to a shopping list.
+ */
+export async function addShoppingListItem(item: {
+  shoppingListId: number;
+  productId?: number;
+  name?: string;
+  price?: number;
+  quantity?: number;
+  notes?: string;
+}) {
+  const shoppingListItem = await prisma.shoppingListItem.create({
+    data: {
+      shoppingListId: item.shoppingListId,
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity || 1,
+      notes: item.notes,
+    },
+  });
+
+  return shoppingListItem;
+}
+
+/**
+ * Edits an existing shopping list item.
+ */
+export async function editShoppingListItem(item: {
+  id: number;
+  productId?: number | null;
+  name?: string | null;
+  price?: number | null;
+  quantity?: number;
+  notes?: string | null;
+}) {
+  await prisma.shoppingListItem.update({
+    where: { id: item.id },
+    data: {
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      notes: item.notes,
+    },
+  });
+}
+
+/**
+ * Deletes a shopping list item by id.
+ */
+export async function deleteShoppingListItem(id: number) {
+  await prisma.shoppingListItem.delete({
+    where: { id },
+  });
+}
+
+/**
+ * Creates a new product.
+ */
+export async function createProduct(product: {
+  name: string;
+  type?: string;
+  price?: number;
+}) {
+  const newProduct = await prisma.product.create({
+    data: {
+      name: product.name,
+      type: product.type,
+      price: product.price,
+    },
+  });
+
+  return newProduct;
+}
+
+/**
+ * Edits an existing product
+ */
+export async function editProduct(product: {
+  id: number;
+  name: string;
+  type?: string | null;
+  price?: number | null;
+}) {
+  await prisma.product.update({
+    where: { id: product.id },
+    data: {
+      name: product.name,
+      type: product.type,
+      price: product.price,
+    },
+  });
+}
+
+/**
+ * Deletes a product by id.
+ */
+export async function deleteProduct(id: number) {
+  await prisma.product.delete({
+    where: { id },
+  });
 }

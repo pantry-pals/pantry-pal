@@ -97,6 +97,40 @@ async function main() {
     });
   }
 
+  // Seed shopping lists
+  if (config.defaultShoppingList) {
+    for (let index = 0; index < config.defaultShoppingList.length; index++) {
+      const listData = config.defaultShoppingList[index];
+      console.log(`  Adding shopping list: ${listData.name}`);
+
+      // Find the owner user by email
+      const user = await prisma.user.findUnique({
+        where: { email: listData.owner },
+      });
+
+      if (!user) {
+        console.warn(`  Skipping shopping list: user not found for ${listData.owner}`);
+        continue;
+      }
+
+      // Create shopping list with items
+      await prisma.shoppingList.create({
+        data: {
+          name: listData.name,
+          userId: user.id,
+          items: {
+            create: listData.items.map((item, itemIndex) => ({
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              notes: item.notes,
+            })),
+          },
+        },
+      });
+    }
+  }
+
   console.log('Seeding complete!');
 }
 
