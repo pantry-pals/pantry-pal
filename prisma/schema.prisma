@@ -82,6 +82,7 @@ model Produce {
   location   String
   quantity   Int
   expiration DateTime?
+  image      String?
 
   @@map("produce")
 }
