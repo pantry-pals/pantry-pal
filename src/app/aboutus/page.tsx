@@ -173,12 +173,15 @@ const About = () => (
             >
               Learn More
             </h2>
-            <a href="https://pantry-pals.github.io/" 
-              style={{ color: 'var(--brunswick-green)', 
-              fontSize: '1.1rem', 
-              lineHeight: '1.6' }}>
-              Click to learn more about our development 
-              process and our pantry pals team 
+            <a
+              href="https://pantry-pals.github.io/"
+              style={{
+                color: 'var(--brunswick-green)',
+                fontSize: '1.1rem',
+                lineHeight: '1.6',
+              }}>
+              Click to learn more about our development
+              process and our pantry pals team
             </a>
           </Col>
         </Row>
