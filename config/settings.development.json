@@ -1,7 +1,7 @@
 {
   "defaultAccounts": [
-    { "email": "admin@foo.com", "password": "password", "role": "ADMIN", "verified": true, "verificationToken": "test-token-123" },
-    { "email": "john@foo.com", "password": "password", "role": "USER", "verified": true, "verificationToken": "test-token-123" }
+    { "email": "admin@foo.com", "password": "changme", "role": "ADMIN", "verified": true, "verificationToken": "test-token-123" },
+    { "email": "john@foo.com", "password": "changeme", "role": "USER", "verified": true, "verificationToken": "test-token-123" }
   ],
 
   "defaultData": [

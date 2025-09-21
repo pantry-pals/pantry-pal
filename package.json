@@ -9,7 +9,6 @@
     "start": "next start",
     "lint": "next lint",
     "playwright-development": "npx playwright test",
-
     "test-acceptance-vercel": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --selector-timeout 3000 --window-size 1920,1080",
     "test-acceptance-single": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --window-size 1920,1080"
   },
@@ -55,7 +54,7 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.1",
     "prettier-eslint": "^16.3.0",
-    "prisma": "^6.15.0",
+    "prisma": "^6.16.2",
     "testcafe": "^3.7.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
