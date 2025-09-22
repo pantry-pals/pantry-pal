@@ -73,7 +73,7 @@ const authOptions: NextAuthOptions = {
       };
     },
     redirect({ baseUrl }) {
-      return `${baseUrl}/list`;
+      return `${baseUrl}/view-pantry`;
     },
   },
   pages: {
