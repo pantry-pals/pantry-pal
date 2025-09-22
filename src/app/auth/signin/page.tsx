@@ -22,7 +22,7 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/list');
+      router.replace('/view-pantry');
     }
   }, [status, router]);
 
@@ -66,7 +66,7 @@ export default function SignInPage() {
 
     const result = await signIn('credentials', {
       redirect: false,
-      callbackUrl: '/list',
+      callbackUrl: '/view-pantry',
       email,
       password,
     });
@@ -109,7 +109,7 @@ export default function SignInPage() {
       if (signInResult?.error) throw new Error(signInResult.error);
 
       setVerificationSuccess('Email verified! Redirecting...');
-      router.push('/list');
+      router.push('/view-pantry');
     } catch (err: any) {
       setVerificationError(err.message || 'Verification failed.');
     } finally {
