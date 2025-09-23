@@ -27,7 +27,11 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
 
   const onSubmit = async (data: ProduceValues) => {
   // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
-    await editProduce({ ...data, expiration: data.expiration ?? null, image: data.image ?? null });
+    await editProduce({
+      ...data,
+      expiration: data.expiration ?? null,
+      image: data.image === '' ? null : data.image,
+    });
     swal('Success', 'Your item has been updated', 'success', {
       timer: 2000,
     });
@@ -96,6 +100,16 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
                     className={`form-control ${errors.expiration ? 'is-invalid' : ''}`}
                   />
                   <div className="invalid-feedback">{errors.expiration?.message}</div>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Image</Form.Label>
+                  <input
+                    type="url"
+                    {...register('image')}
+                    defaultValue={produce.image ?? ''}
+                    className={`form-control ${errors.image ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.image?.message}</div>
                 </Form.Group>
                 <input type="hidden" {...register('owner')} value={produce.owner} />
                 <Form.Group className="form-group">
