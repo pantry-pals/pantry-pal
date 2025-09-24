@@ -14,9 +14,7 @@ const NavBar: React.FC = () => {
   const pathname = usePathname();
 
   // Avoid implicit arrow linebreak + avoid string concat (prefer-template)
-  const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <Navbar className="navandfooter" expand="lg">
