@@ -1,6 +1,7 @@
 import { PrismaClient, Role, Condition } from '@prisma/client';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
+import ProduceCard from '@/components/ProduceCard';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,7 @@ async function main() {
     console.log(`  Adding produce: ${JSON.stringify(produce)}`);
 
     await prisma.produce.upsert({
-      where: { id: index + 1 },
+      where: { name_owner: { name: produce.name, owner: produce.owner } },
       update: {},
       create: {
         name: produce.name,
@@ -61,6 +62,48 @@ async function main() {
       },
     });
   }
+
+  // Seed shopping lists
+  for (const shoppinglist of config.defaultShoppingList) {
+    console.log(`  Adding shopping list: ${JSON.stringify(shoppinglist)}`);
+
+    const createdList = await prisma.shoppingList.upsert({
+      where: { name_owner: { name: shoppinglist.name, owner: shoppinglist.owner } },
+      update: {},
+      create: {
+        name: shoppinglist.name,
+        owner: shoppinglist.owner,
+      },
+    });
+
+    for (const item of shoppinglist.items) {
+      const produce = await prisma.produce.findFirst({
+        where: { name: item.produceName },
+      });
+
+      if (!produce) {
+        console.warn(`Produce "${item.produceName}" not found, skipping item.`);
+        continue;
+      }
+
+      await prisma.shoppingListItem.upsert({
+        where: {
+          shoppingListId_produceId: {
+            shoppingListId: createdList.id,
+            produceId: produce.id,
+          },
+        },
+        update: {},
+        create: {
+          shoppingListId: createdList.id,
+          produceId: produce.id,
+          quantity: item.quantity,
+          price: item.price,
+        },
+      });
+    }
+}
+
 
   console.log('Seeding complete!');
 }
