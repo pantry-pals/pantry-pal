@@ -1,10 +1,11 @@
 :root {
   --timberwolf: #DAD7CD; /* Light grayish yellow */
-  --sage: #A3B18A; /* Muted green */
+  --sage: #A3B18A;       /* Muted green */
   --fern-green: #588157; /* Deep green */
   --hunter-green: #3A5A40; /* Dark green */
   --brunswick-green: #344E41; /* Very dark green */
 }
+
 html,
 body {
   --bs-light-rgb: 236, 236, 236;
@@ -14,6 +15,7 @@ body {
   margin: 0;
   background-color: var(--timberwolf);
 }
+
 .wrapper {
   box-sizing: border-box;
   min-height: 100%;
@@ -28,8 +30,26 @@ body {
   padding: 1rem;
 }
 
-#add-stuff-nav, #list-stuff-nav, #view-pantry-nav, #login-dropdown, .navandfooter .navbar-brand {
+/* Default nav/link colors (use classes, not IDs) */
+.navandfooter .nav-link,
+.navandfooter .navbar-brand,
+.navandfooter .dropdown-toggle {
   color: white !important;
+}
+
+/* Hover state */
+.navandfooter .nav-link:hover,
+.navandfooter .navbar-brand:hover {
+  color: #d4af37 !important;
+}
+
+/* Active state (links + brand on home) */
+.navandfooter .nav-link.active,
+.navandfooter .nav-item.show .nav-link,
+.navandfooter .nav-link.show,
+.navandfooter .navbar-brand.active {
+  color: #d4af37 !important;
+  font-weight: 700 !important;
 }
 
 footer a {
