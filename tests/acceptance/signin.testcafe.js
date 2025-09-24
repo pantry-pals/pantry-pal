@@ -16,5 +16,5 @@ test('Can sign in as admin', async t => {
 
   // Wait for redirect to /list (up to 10s)
   await t.expect(t.eval(() => window.location.pathname))
-         .eql('/list', { timeout: 10000 }, 'Expected redirect to /list after sign in');
+         .eql('/view-pantry', { timeout: 10000 }, 'Expected redirect to /view-pantry after sign in');
 });
