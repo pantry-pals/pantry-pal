@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
@@ -10,45 +11,48 @@ const NavBar: React.FC = () => {
   const currentUser = session?.user?.email;
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
-  const pathName = usePathname();
+  const pathname = usePathname();
+
+  // helper for active state (also matches subpaths like /add/123)
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + '/');
+
   return (
     <Navbar className="navandfooter" expand="lg">
       <Container>
-        <Navbar.Brand href="/">Pantry Pals</Navbar.Brand>
+        <Navbar.Brand as={Link} href="/">Pantry Pals</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto justify-content-start">
-            {currentUser
-              ? [
-                <Nav.Link id="add-stuff-nav" href="/add" key="add" active={pathName === '/add'}>
+            {currentUser ? (
+              <>
+                <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
                   Add Stuff
-                </Nav.Link>,
-                <Nav.Link id="list-stuff-nav" href="/list" key="list" active={pathName === '/list'}>
+                </Nav.Link>
+                <Nav.Link as={Link} id="list-stuff-nav" href="/list" active={isActive('/list')}>
                   List Stuff
-                </Nav.Link>,
-                <Nav.Link id="view-pantry-nav" href="/view-pantry" key="view" active={pathName === '/view-pantry'}>
+                </Nav.Link>
+                <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
                   View Pantry
-                </Nav.Link>,
-              ]
-              : ''}
+                </Nav.Link>
+              </>
+            ) : null}
+
             {currentUser && role === 'ADMIN' ? (
-              <Nav.Link id="admin-stuff-nav" href="/admin" key="admin" active={pathName === '/admin'}>
+              <Nav.Link as={Link} id="admin-stuff-nav" href="/admin" active={isActive('/admin')}>
                 Admin
               </Nav.Link>
-            ) : (
-              ''
-            )}
+            ) : null}
           </Nav>
+
           <Nav>
             {session ? (
-              <NavDropdown id="login-dropdown" title={currentUser}>
-                <NavDropdown.Item id="login-dropdown-sign-out" href="/auth/signout">
-                  <BoxArrowRight />
-                  Sign Out
+              <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
+                <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
+                  <BoxArrowRight /> Sign Out
                 </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-change-password" href="/auth/change-password">
-                  <Lock />
-                  Change Password
+                <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
+                  <Lock /> Change Password
                 </NavDropdown.Item>
               </NavDropdown>
             ) : null}
