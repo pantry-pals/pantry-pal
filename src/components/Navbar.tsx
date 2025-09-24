@@ -17,11 +17,7 @@ const NavBar: React.FC = () => {
   return (
     <Navbar className="navandfooter" expand="lg">
       <Container>
-        <Navbar.Brand
-          as={Link}
-          href="/"
-          className={pathname === '/' ? 'active' : undefined}
-        >
+        <Navbar.Brand as={Link} href="/" className={pathname === '/' ? 'active' : undefined}>
           Pantry Pals
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -32,15 +28,8 @@ const NavBar: React.FC = () => {
                 <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
                   Add Stuff
                 </Nav.Link>
-                <Nav.Link as={Link} id="list-stuff-nav" href="/list" active={isActive('/list')}>
-                  List Stuff
-                </Nav.Link>
-                <Nav.Link
-                  as={Link}
-                  id="view-pantry-nav"
-                  href="/view-pantry"
-                  active={isActive('/view-pantry')}
-                >
+
+                <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
                   View Pantry
                 </Nav.Link>
               </>
@@ -60,11 +49,7 @@ const NavBar: React.FC = () => {
                   <BoxArrowRight />
                   <span className="ms-2">Sign Out</span>
                 </NavDropdown.Item>
-                <NavDropdown.Item
-                  as={Link}
-                  id="login-dropdown-change-password"
-                  href="/auth/change-password"
-                >
+                <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
                   <Lock />
                   <span className="ms-2">Change Password</span>
                 </NavDropdown.Item>
