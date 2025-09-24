@@ -12,14 +12,18 @@ const NavBar: React.FC = () => {
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
   const pathname = usePathname();
-
-  // Avoid implicit arrow linebreak + avoid string concat (prefer-template)
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <Navbar className="navandfooter" expand="lg">
       <Container>
-        <Navbar.Brand as={Link} href="/">Pantry Pals</Navbar.Brand>
+        <Navbar.Brand
+          as={Link}
+          href="/"
+          className={pathname === '/' ? 'active' : undefined}
+        >
+          Pantry Pals
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto justify-content-start">
