@@ -20,7 +20,10 @@ export const AddProduceSchema = Yup.object({
   type: Yup.string().required(),
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
-  expiration: Yup.date().nullable().notRequired(),
+  expiration: Yup.date()
+    .nullable()
+    .transform((curr: Date | null, orig: string) => (orig === '' ? null : curr))
+    .notRequired(),
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
 });
@@ -31,7 +34,10 @@ export const EditProduceSchema = Yup.object({
   type: Yup.string().required(),
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
-  expiration: Yup.date().nullable().notRequired(),
+  expiration: Yup.date()
+    .nullable()
+    .transform((curr: Date | null, orig: string) => (orig === '' ? null : curr))
+    .notRequired(),
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
 });
