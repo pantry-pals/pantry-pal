@@ -13,9 +13,10 @@ const NavBar: React.FC = () => {
   const role = userWithRole?.randomKey;
   const pathname = usePathname();
 
-  // helper for active state (also matches subpaths like /add/123)
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + '/');
+  // Avoid implicit arrow linebreak + avoid string concat (prefer-template)
+  const isActive = (href: string) => {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <Navbar className="navandfooter" expand="lg">
@@ -32,7 +33,12 @@ const NavBar: React.FC = () => {
                 <Nav.Link as={Link} id="list-stuff-nav" href="/list" active={isActive('/list')}>
                   List Stuff
                 </Nav.Link>
-                <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
+                <Nav.Link
+                  as={Link}
+                  id="view-pantry-nav"
+                  href="/view-pantry"
+                  active={isActive('/view-pantry')}
+                >
                   View Pantry
                 </Nav.Link>
               </>
@@ -49,10 +55,16 @@ const NavBar: React.FC = () => {
             {session ? (
               <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
                 <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
-                  <BoxArrowRight /> Sign Out
+                  <BoxArrowRight />
+                  <span className="ms-2">Sign Out</span>
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
-                  <Lock /> Change Password
+                <NavDropdown.Item
+                  as={Link}
+                  id="login-dropdown-change-password"
+                  href="/auth/change-password"
+                >
+                  <Lock />
+                  <span className="ms-2">Change Password</span>
                 </NavDropdown.Item>
               </NavDropdown>
             ) : null}
