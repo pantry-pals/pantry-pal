@@ -30,19 +30,26 @@ body {
   padding: 1rem;
 }
 
-/* Default nav link colors */
-#add-stuff-nav,
-#list-stuff-nav,
-#view-pantry-nav,
-#login-dropdown,
-.navandfooter .navbar-brand {
+/* Default nav/link colors (use classes, not IDs) */
+.navandfooter .nav-link,
+.navandfooter .navbar-brand,
+.navandfooter .dropdown-toggle {
   color: white !important;
 }
 
-/* Highlight the active link in yellow */
-.navandfooter .nav-link.active {
-  color: #ffc107 !important;  /* Bootstrap warning yellow */
-  font-weight: 600;
+/* Hover state */
+.navandfooter .nav-link:hover,
+.navandfooter .navbar-brand:hover {
+  color: #d4af37 !important;
+}
+
+/* Active state (links + brand on home) */
+.navandfooter .nav-link.active,
+.navandfooter .nav-item.show .nav-link,
+.navandfooter .nav-link.show,
+.navandfooter .navbar-brand.active {
+  color: #d4af37 !important;
+  font-weight: 700 !important;
 }
 
 footer a {
