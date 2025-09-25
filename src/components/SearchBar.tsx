@@ -106,7 +106,7 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
         arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
         break;
 
-      case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
+      case 'qty-desc': arr.sort((a, b) => Number(b.quantity ?? 0) - Number(a.quantity ?? 0)); break;
       default: break;
     }
 
@@ -133,7 +133,7 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
         case 'expiration-soon':
           arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
           break;
-        case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
+        case 'qty-desc': arr.sort((a, b) => Number(b.quantity ?? 0) - Number(a.quantity ?? 0)); break;
         default: break;
       }
       return arr;

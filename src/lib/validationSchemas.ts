@@ -20,6 +20,7 @@ export const AddProduceSchema = Yup.object({
   type: Yup.string().required(),
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
+  unit: Yup.string().required(),
   expiration: Yup.date().required(),
   owner: Yup.string().required(),
 });
@@ -30,6 +31,7 @@ export const EditProduceSchema = Yup.object({
   type: Yup.string().required(),
   location: Yup.string().required(),
   quantity: Yup.number().positive().required(),
+  unit: Yup.string().required(),
   expiration: Yup.date().required(),
   owner: Yup.string().required(),
 });
