@@ -68,8 +68,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row>
             <Col xs={4} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Name</Form.Label>
-                <input
+                <Form.Label className="mb-0">Name</Form.Label>
+                <Form.Control
                   type="text"
                   {...register('name')}
                   defaultValue={produce.name}
@@ -81,8 +81,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={4} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Type</Form.Label>
-                <input
+                <Form.Label className="mb-0">Type</Form.Label>
+                <Form.Control
                   type="text"
                   {...register('type')}
                   defaultValue={produce.type}
@@ -93,8 +93,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={4} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Location</Form.Label>
-                <input
+                <Form.Label className="mb-0">Location</Form.Label>
+                <Form.Control
                   type="text"
                   {...register('location')}
                   defaultValue={produce.location}
@@ -107,8 +107,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row>
             <Col xs={6} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Quantity</Form.Label>
-                <input
+                <Form.Label className="mb-0">Quantity</Form.Label>
+                <Form.Control
                   type="number"
                   {...register('quantity')}
                   defaultValue={produce.quantity}
@@ -120,9 +120,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Unit</Form.Label>
-                <select
-                  value={unitChoice}
+                <Form.Label className="mb-0">Unit</Form.Label>
+                <Form.Select
+                  defaultValue={unitChoice}
                   className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
@@ -139,10 +139,10 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                       {u}
                     </option>
                   ))}
-                </select>
+                </Form.Select>
 
                 {unitChoice === 'Other' && (
-                  <input
+                  <Form.Control
                     type="text"
                     {...register('unit')}
                     defaultValue={!unitOptions.includes(produce.unit) ? produce.unit : ''}
@@ -157,8 +157,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Expiration Date</Form.Label>
-                <input
+                <Form.Label className="mb-0">Expiration Date</Form.Label>
+                <Form.Control
                   type="date"
                   {...register('expiration')}
                   defaultValue={produce.expiration ? produce.expiration.toISOString().split('T')[0] : ''}
@@ -169,8 +169,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center mb-3">
               <Form.Group>
-                <Form.Label>Image</Form.Label>
-                <input
+                <Form.Label className="mb-0">Image</Form.Label>
+                <Form.Control
                   type="url"
                   {...register('image')}
                   defaultValue={produce.image ?? ''}
