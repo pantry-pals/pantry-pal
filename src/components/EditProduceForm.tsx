@@ -9,6 +9,7 @@ import { EditProduceSchema } from '@/lib/validationSchemas';
 import { editProduce } from '@/lib/dbActions';
 import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 type ProduceValues = InferType<typeof EditProduceSchema>;
 
@@ -17,6 +18,7 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(EditProduceSchema),
@@ -24,6 +26,12 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
   // console.log(produce);
 
   const router = useRouter();
+
+  const [unitChoice, setUnitChoice] = useState(
+    ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l'].includes(produce.unit)
+      ? produce.unit
+      : 'Other',
+  );
 
   const onSubmit = async (data: ProduceValues) => {
   // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
@@ -95,12 +103,42 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Unit</Form.Label>
-                  <input
-                    type="text"
-                    {...register('unit')}
-                    defaultValue={produce.unit}
+                  <Form.Select
+                    value={unitChoice}
                     className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
-                  />
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      setUnitChoice(value);
+                      if (value !== 'Other') {
+                        setValue('unit', value); // preset goes directly into form
+                      } else {
+                        setValue('unit', ''); // clear for custom typing
+                      }
+                    }}
+                  >
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="lb">lb</option>
+                    <option value="oz">oz</option>
+                    <option value="pcs">pcs</option>
+                    <option value="ml">ml</option>
+                    <option value="l">l</option>
+                    <option value="Other">Other</option>
+                  </Form.Select>
+
+                  {unitChoice === 'Other' && (
+                    <input
+                      type="text"
+                      {...register('unit')}
+                      defaultValue={
+                        !['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l'].includes(produce.unit)
+                          ? produce.unit
+                          : ''
+                      }
+                      placeholder="Enter custom unit"
+                      className={`form-control mt-2 ${errors.unit ? 'is-invalid' : ''}`}
+                    />
+                  )}
                   <div className="invalid-feedback">{errors.unit?.message}</div>
                 </Form.Group>
                 <Form.Group>
