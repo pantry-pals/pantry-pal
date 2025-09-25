@@ -27,10 +27,12 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
 
   const router = useRouter();
 
+  // Available unit options
+  const unitOptions = ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'];
+
+  // Track dropdown state
   const [unitChoice, setUnitChoice] = useState(
-    ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l'].includes(produce.unit)
-      ? produce.unit
-      : 'Other',
+    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
   );
 
   const onSubmit = async (data: ProduceValues) => {
@@ -103,37 +105,32 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Unit</Form.Label>
-                  <Form.Select
+                  <select
                     value={unitChoice}
                     className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
                     onChange={(e) => {
                       const { value } = e.target;
                       setUnitChoice(value);
                       if (value !== 'Other') {
-                        setValue('unit', value); // preset goes directly into form
+                        setValue('unit', value); // preset
                       } else {
                         setValue('unit', ''); // clear for custom typing
                       }
                     }}
                   >
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="lb">lb</option>
-                    <option value="oz">oz</option>
-                    <option value="pcs">pcs</option>
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                    <option value="Other">Other</option>
-                  </Form.Select>
+                    {unitOptions.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
 
                   {unitChoice === 'Other' && (
                     <input
                       type="text"
                       {...register('unit')}
                       defaultValue={
-                        !['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l'].includes(produce.unit)
-                          ? produce.unit
-                          : ''
+                        !unitOptions.includes(produce.unit) ? produce.unit : ''
                       }
                       placeholder="Enter custom unit"
                       className={`form-control mt-2 ${errors.unit ? 'is-invalid' : ''}`}
