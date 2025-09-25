@@ -71,7 +71,7 @@ model Produce {
   name              String
   type              String
   location          String
-  quantity          Decimal            @db.Decimal(10, 2)
+  quantity          Float
   unit              String
   expiration        DateTime?
   owner             String
