@@ -37,6 +37,7 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
     });
 
     router.push('/view-pantry');
+    router.refresh();
   };
 
   return (
@@ -87,9 +88,20 @@ const EditProduceForm = ({ produce }: { produce: Produce }) => {
                     type="number"
                     {...register('quantity')}
                     defaultValue={produce.quantity}
+                    step={0.1}
                     className={`form-control ${errors.quantity ? 'is-invalid' : ''}`}
                   />
                   <div className="invalid-feedback">{errors.quantity?.message}</div>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Unit</Form.Label>
+                  <input
+                    type="text"
+                    {...register('unit')}
+                    defaultValue={produce.unit}
+                    className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.unit?.message}</div>
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Expiration Date</Form.Label>
