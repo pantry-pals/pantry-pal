@@ -75,6 +75,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   defaultValue={produce.name}
                   required
                   className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Chicken"
                 />
                 <div className="invalid-feedback">{errors.name?.message}</div>
               </Form.Group>
@@ -87,6 +88,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('type')}
                   defaultValue={produce.type}
                   className={`form-control ${errors.type ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Meat"
                 />
                 <div className="invalid-feedback">{errors.type?.message}</div>
               </Form.Group>
@@ -99,6 +101,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('location')}
                   defaultValue={produce.location}
                   className={`form-control ${errors.location ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Freezer"
                 />
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
@@ -171,10 +174,11 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
               <Form.Group>
                 <Form.Label className="mb-0">Image</Form.Label>
                 <Form.Control
-                  type="url"
+                  type="text"
                   {...register('image')}
                   defaultValue={produce.image ?? ''}
                   className={`form-control ${errors.image ? 'is-invalid' : ''}`}
+                  placeholder="Image URL"
                 />
                 <div className="invalid-feedback">{errors.image?.message}</div>
               </Form.Group>
