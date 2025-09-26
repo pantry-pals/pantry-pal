@@ -17,9 +17,8 @@ const signIn = async () => {
 fixture('View Pantry & Edit Flow')
     .page('https://pantry-pal-gamma.vercel.app');
 
-test('List page loads', async t => {
+test('View Pantry page loads', async t => {
     await signIn();
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const viewPantryContainer = Selector('#view-pantry');
     await t.expect(viewPantryContainer.exists).ok('Expected view pantry container to exist');
@@ -27,7 +26,6 @@ test('List page loads', async t => {
 
 test('Click edit link works', async t => {
     await signIn();
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('button').withText('Edit');
     await t.expect(firstEditLink.exists).ok('Expected first edit link to exist');
@@ -40,7 +38,6 @@ test('Click edit link works', async t => {
 
 test('Edit form can modify item', async t => {
     await signIn();
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('button').withText('Edit');
     await t.click(firstEditLink);
