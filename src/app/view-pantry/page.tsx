@@ -21,7 +21,7 @@ const ViewPantryPage = async () => {
 
   return (
     <main>
-      <Container id="list" className="py-3">
+      <Container id="view-pantry" className="py-3">
         <Row>
           <Col>
             <h1>Your Pantry at a Glance</h1>
