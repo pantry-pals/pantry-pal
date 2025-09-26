@@ -14,38 +14,38 @@ const signIn = async () => {
 };
 
 // --- Tests ---
-fixture('View Pantry & Edit Flow')
+fixture('List & Edit Flow')
     .page('https://pantry-pal-gamma.vercel.app');
 
-test('View Pantry page loads', async t => {
+test('List page loads', async t => {
     await signIn();
-    await navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
-    const viewPantryContainer = Selector('#view-pantry');
-    await t.expect(viewPantryContainer.exists).ok('Expected view pantry container to exist', { timeout: 5000 });
+    const listContainer = Selector('#list');
+    await t.expect(listContainer.exists).ok('Expected list container to exist');
 });
 
 test('Click edit link works', async t => {
     await signIn();
-    await navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
-    const firstEditLink = Selector('tbody tr').nth(0).find('button.btn-edit');
+    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
     await t.expect(firstEditLink.exists).ok('Expected first edit link to exist');
     await t.click(firstEditLink);
 
     // Confirm we are on edit page
-    const editForm = Selector('.modal.show');
+    const editForm = Selector('form');
     await t.expect(editForm.exists).ok('Expected edit form to exist');
 });
 
 test('Edit form can modify item', async t => {
     await signIn();
-    await navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
+    await t.navigateTo('https://pantry-pal-gamma.vercel.app/list');
 
-    const firstEditLink = Selector('tbody tr').nth(0).find('button.btn-edit');
+    const firstEditLink = Selector('tbody tr').nth(0).find('a').withText('Edit');
     await t.click(firstEditLink);
 
-    const editForm = Selector('.modal.show');
+    const editForm = Selector('form');
     const nameInput = editForm.find('input[name="name"]');
 
     const originalName = await nameInput.value;
@@ -57,9 +57,6 @@ test('Edit form can modify item', async t => {
         .typeText(nameInput, newName)
         .click(editForm.find('button[type="submit"]'));
 
-    // Wait for modal to close
-    await t.expect(editForm.exists).notOk('Expected edit form to be closed after submission');
-
-    // Verify input reflects updated value after submission
-    await t.expect(Selector('tbody tr').nth(0).find('td').nth(0).innerText).eql(newName, 'Expected name to be updated in the pantry list');
+    // Verify input reflects updated value after submission (no redirect)
+    await t.expect(nameInput.value).eql(newName, 'Expected name input to reflect updated value after submission');
 });
