@@ -5,7 +5,7 @@ const signIn = async () => {
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signin');
 
     await t
-        .typeText('input[name="email"]', 'john@foo.com', { replace: true })
+        .typeText('input[name="email"]', 'admin@foo.com', { replace: true })
         .typeText('input[name="password"]', 'changeme', { replace: true })
         .click('button[type="submit"]');
 
