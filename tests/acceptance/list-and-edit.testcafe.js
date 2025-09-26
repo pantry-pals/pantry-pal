@@ -62,4 +62,15 @@ test('Edit form can modify item', async t => {
 
     // Verify input reflects updated value after submission
     await t.expect(Selector('tbody tr').nth(0).find('td').nth(0).innerText).eql(newName, 'Expected name to be updated in the pantry list');
+
+    // Cleanup: revert name change
+    await t.click(Selector('tbody tr').nth(0).find('button.btn-edit'));
+    await t
+        .selectText(nameInput)
+        .pressKey('delete')
+        .typeText(nameInput, originalName)
+        .click(editForm.find('button[type="submit"]'));
+
+    await t.expect(editForm.exists).notOk('Expected edit form to be closed after reverting name change');
+    await t.expect(Selector('tbody tr').nth(0).find('td').nth(0).innerText).eql(originalName, 'Expected name to be reverted in the pantry list');
 });
