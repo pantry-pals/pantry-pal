@@ -9,7 +9,7 @@ import { EditProduceSchema } from '@/lib/validationSchemas';
 import { editProduce } from '@/lib/dbActions';
 import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../styles/buttons.css';
 
 type ProduceValues = InferType<typeof EditProduceSchema>;
@@ -35,12 +35,38 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const router = useRouter();
 
   // Available unit options
-  const unitOptions = ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'];
+  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
   // Track dropdown state
   const [unitChoice, setUnitChoice] = useState(
     unitOptions.includes(produce.unit) ? produce.unit : 'Other',
   );
+
+  // 🔑 Reset form values every time modal closes or produce changes
+  useEffect(() => {
+    if (!show) {
+      reset({
+        ...produce,
+        expiration: produce.expiration
+          ? produce.expiration.toISOString().split('T')[0] // YYYY-MM-DD for input[type=date]
+          : '',
+        image: produce.image ?? '',
+      } as any);
+      setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
+    }
+  }, [show, produce, reset, unitOptions]);
+
+  const handleClose = () => {
+    reset({
+      ...produce,
+      expiration: produce.expiration
+        ? produce.expiration.toISOString().split('T')[0]
+        : '',
+      image: produce.image ?? '',
+    } as any);
+    setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
+    onHide();
+  };
 
   const onSubmit = async (data: ProduceValues) => {
   // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
@@ -54,7 +80,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
     });
 
     router.refresh();
-    onHide();
+    handleClose();
   };
 
   return (
@@ -65,8 +91,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...register('id')} value={produce.id} />
-          <Row>
-            <Col xs={4} className="text-center mb-3">
+          <Row className="mb-3">
+            <Col xs={4} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Name</Form.Label>
                 <Form.Control
@@ -74,41 +100,41 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('name')}
                   defaultValue={produce.name}
                   required
-                  className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                  className={`${errors.name ? 'is-invalid' : ''}`}
                   placeholder="e.g., Chicken"
                 />
                 <div className="invalid-feedback">{errors.name?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center mb-3">
+            <Col xs={4} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
                   defaultValue={produce.type}
-                  className={`form-control ${errors.type ? 'is-invalid' : ''}`}
+                  className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
                 />
                 <div className="invalid-feedback">{errors.type?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center mb-3">
+            <Col xs={4} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
                   defaultValue={produce.location}
-                  className={`form-control ${errors.location ? 'is-invalid' : ''}`}
+                  className={`${errors.location ? 'is-invalid' : ''}`}
                   placeholder="e.g., Freezer"
                 />
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
           </Row>
-          <Row>
-            <Col xs={6} className="text-center mb-3">
+          <Row className="mb-3">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Quantity</Form.Label>
                 <Form.Control
@@ -116,17 +142,17 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('quantity')}
                   defaultValue={produce.quantity}
                   step={0.1}
-                  className={`form-control ${errors.quantity ? 'is-invalid' : ''}`}
+                  className={`${errors.quantity ? 'is-invalid' : ''}`}
                 />
                 <div className="invalid-feedback">{errors.quantity?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center mb-3">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitChoice}
-                  className={`form-control ${errors.unit ? 'is-invalid' : ''}`}
+                  className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
                     setUnitChoice(value);
@@ -150,7 +176,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                     {...register('unit')}
                     defaultValue={!unitOptions.includes(produce.unit) ? produce.unit : ''}
                     placeholder="Enter custom unit"
-                    className={`form-control mt-2 ${errors.unit ? 'is-invalid' : ''}`}
+                    className={`form-select mt-2 ${errors.unit ? 'is-invalid' : ''}`}
                   />
                 )}
                 <div className="invalid-feedback">{errors.unit?.message}</div>
@@ -158,26 +184,26 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
           </Row>
           <Row className="mb-3">
-            <Col xs={6} className="text-center mb-3">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
                   {...register('expiration')}
                   defaultValue={produce.expiration ? produce.expiration.toISOString().split('T')[0] : ''}
-                  className={`form-control ${errors.expiration ? 'is-invalid' : ''}`}
+                  className={`${errors.expiration ? 'is-invalid' : ''}`}
                 />
                 <div className="invalid-feedback">{errors.expiration?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center mb-3">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Image</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('image')}
                   defaultValue={produce.image ?? ''}
-                  className={`form-control ${errors.image ? 'is-invalid' : ''}`}
+                  className={`${errors.image ? 'is-invalid' : ''}`}
                   placeholder="Image URL"
                 />
                 <div className="invalid-feedback">{errors.image?.message}</div>
