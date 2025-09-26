@@ -1,3 +1,4 @@
+import { time } from 'console';
 import { Selector, t } from 'testcafe';
 
 // Helper to sign in first
@@ -18,7 +19,7 @@ fixture('Sign Out')
 
 // ✅ Test if Sign Out page loads
 test('Sign Out page loads', async t => {
-    await signIn();
+    await signIn(timeout(10000));
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signout');
 
     const signOutTitle = Selector('h1').withText('Sign Out');
@@ -27,7 +28,7 @@ test('Sign Out page loads', async t => {
 
 // ✅ Test if the Sign Out button works
 test('Sign out button works', async t => {
-    await signIn();
+    await signIn(timeout(10000));
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signout');
 
     const signOutButton = Selector('[data-testid="signout-button"]');
