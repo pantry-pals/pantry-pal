@@ -17,7 +17,9 @@ const ProduceItem = ({ id, name, quantity, unit, type, location, expiration, own
           {quantity.toString()}
           {unit ? ` ${unit}` : ''}
         </td>
-        <td>{expiration ? new Date(expiration).toLocaleDateString() : 'N/A'}</td>
+        <td>
+          {expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}
+        </td>
         <td>
           <Button className="btn-edit" onClick={() => setShowModal(true)}>
             Edit
