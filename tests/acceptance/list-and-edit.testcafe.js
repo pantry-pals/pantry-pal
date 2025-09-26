@@ -1,4 +1,3 @@
-import { time } from 'console';
 import { Selector, t } from 'testcafe';
 
 // --- Helpers ---
@@ -6,7 +5,7 @@ const signIn = async () => {
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signin');
 
     await t
-        .typeText('input[name="email"]', 'john@foo.com', { replace: true })
+        .typeText('input[name="email"]', 'admin@foo.com', { replace: true })
         .typeText('input[name="password"]', 'changeme', { replace: true })
         .click('button[type="submit"]');
 
@@ -19,7 +18,7 @@ fixture('View Pantry & Edit Flow')
     .page('https://pantry-pal-gamma.vercel.app');
 
 test('View Pantry page loads', async t => {
-    await signIn(timeout(10000));
+    await signIn();
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const viewPantryContainer = Selector('#view-pantry');
@@ -27,7 +26,7 @@ test('View Pantry page loads', async t => {
 });
 
 test('Click edit link works', async t => {
-    await signIn(timeout(10000));
+    await signIn();
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('button.btn-edit');
@@ -40,7 +39,7 @@ test('Click edit link works', async t => {
 });
 
 test('Edit form can modify item', async t => {
-    await signIn(timeout(10000));
+    await signIn();
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     const firstEditLink = Selector('tbody tr').nth(0).find('button.btn-edit');

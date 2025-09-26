@@ -1,4 +1,3 @@
-import { time } from 'console';
 import SignInPage from './pages/SignInPage';
 import { t } from 'testcafe';
 
@@ -13,7 +12,7 @@ test('Can sign in as admin', async t => {
   const email = 'admin@foo.com';
   const password = 'changeme';
 
-  await SignInPage.signIn(email, password, timeout(10000));
+  await SignInPage.signInAdmin(email, password, timeout(10000));
 
   // Wait for redirect to /list (up to 10s)
   await t.expect(t.eval(() => window.location.pathname))
