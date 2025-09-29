@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, ListGroup, Image } from 'react-bootstrap/';
+import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
 import Link from 'next/link';
 import type { Produce } from '@prisma/client';
 
@@ -33,7 +33,7 @@ export default function ProduceCard({ produce }: Props) {
           alt={produce.name || 'No image'}
           height="200px"
           width="100%"
-          className="mb-2 image-shadow"
+          className="mb-2 cardimage"
           style={{ objectFit: 'cover' }}
         />
 
@@ -54,6 +54,14 @@ export default function ProduceCard({ produce }: Props) {
             {formatDate(produce.expiration)}
           </ListGroup.Item>
         </ListGroup>
+        <Card.Footer className="d-flex">
+          <Button className="me-2 editbutton" href={`/edit/${produce.id}`}>
+            Edit
+          </Button>
+          <Button variant="danger" className="deletebutton" href={`/delete/${produce.id}`}>
+            Delete
+          </Button>
+        </Card.Footer>
       </Card.Body>
     </Card>
   );
