@@ -57,6 +57,7 @@ async function main() {
         type: produce.type,
         location: produce.location,
         quantity: produce.quantity,
+        unit: produce.unit,
         expiration: new Date(produce.expiration),
         owner: produce.owner,
       },
