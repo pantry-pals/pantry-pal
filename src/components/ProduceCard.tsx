@@ -1,8 +1,10 @@
 'use client';
 
-import { Card, ListGroup, Image } from 'react-bootstrap/';
+import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
 import Link from 'next/link';
 import type { Produce } from '@prisma/client';
+import { useState } from 'react';
+import EditProduceModal from './EditProduceModal';
 
 type Props = { produce: Produce };
 
@@ -15,6 +17,7 @@ const formatDate = (d?: Date | string | null) => {
 
 export default function ProduceCard({ produce }: Props) {
   const imageSrc = produce.image || '/no-image.png'; // default image if none provided
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <Card className="h-100 mb-3 image-shadow">
@@ -33,7 +36,7 @@ export default function ProduceCard({ produce }: Props) {
           alt={produce.name || 'No image'}
           height="200px"
           width="100%"
-          className="mb-2 image-shadow"
+          className="mb-2 cardimage"
           style={{ objectFit: 'cover' }}
         />
 
@@ -54,7 +57,22 @@ export default function ProduceCard({ produce }: Props) {
             {formatDate(produce.expiration)}
           </ListGroup.Item>
         </ListGroup>
+        <Card.Footer className="d-flex">
+          <Button className="me-2 editbutton" onClick={() => setShowModal(true)}>
+            Edit
+          </Button>
+          <Button variant="danger" className="deletebutton" href={`/delete/${produce.id}`}>
+            Delete
+          </Button>
+        </Card.Footer>
       </Card.Body>
+
+      {/* Modal component for editing produce item */}
+      <EditProduceModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        produce={produce}
+      />
     </Card>
   );
 }
