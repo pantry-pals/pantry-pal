@@ -26,7 +26,7 @@ const NavBar: React.FC = () => {
             {currentUser ? (
               <>
                 <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
-                  Add Stuff
+                  Add Items
                 </Nav.Link>
 
                 <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>

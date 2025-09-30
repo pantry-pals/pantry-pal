@@ -13,7 +13,17 @@ const AddStuff = async () => {
   );
   return (
     <main>
-      <AddStuffForm />
+      <AddStuffForm
+        name=""
+        id={0}
+        type=""
+        location=""
+        quantity={0}
+        unit="kg"
+        expiration={null}
+        owner={session?.user?.email || ''}
+        image={null}
+      />
     </main>
   );
 };
