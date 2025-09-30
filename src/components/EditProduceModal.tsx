@@ -30,7 +30,6 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   } = useForm<ProduceValues>({
     resolver: yupResolver(EditProduceSchema),
   });
-  // console.log(produce);
 
   const router = useRouter();
 
@@ -42,7 +41,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
     unitOptions.includes(produce.unit) ? produce.unit : 'Other',
   );
 
-  // 🔑 Reset form values every time modal closes or produce changes
+  // Reset form values every time modal closes or produce changes
   useEffect(() => {
     if (!show) {
       reset({
@@ -69,7 +68,6 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   };
 
   const onSubmit = async (data: ProduceValues) => {
-  // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
     await editProduce({
       ...data,
       expiration: data.expiration ?? null,
