@@ -20,7 +20,6 @@ const NavBar: React.FC = () => {
         <Navbar.Brand as={Link} href="/" className={pathname === '/' ? 'active' : undefined}>
           Pantry Pals
         </Navbar.Brand>
-
         {session && (
         <>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

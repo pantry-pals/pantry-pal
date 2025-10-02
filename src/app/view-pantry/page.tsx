@@ -1,10 +1,10 @@
 // src/app/producelist/page.tsx
 import { getServerSession } from 'next-auth';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
-import ProduceListWithGrouping from '@/components/SearchBar'; // client component
+import PantryClient from '@/components/PantryClient';
 
 type SessionUser = { id: string; email: string; randomKey: string };
 
@@ -22,12 +22,7 @@ const ViewPantryPage = async () => {
   return (
     <main>
       <Container id="view-pantry" className="py-3">
-        <Row>
-          <Col>
-            <h1>Your Pantry at a Glance</h1>
-            <ProduceListWithGrouping initialProduce={produce} />
-          </Col>
-        </Row>
+        <PantryClient initialProduce={produce} owner={owner} />
       </Container>
     </main>
   );
