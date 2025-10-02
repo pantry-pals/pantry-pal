@@ -20,7 +20,7 @@ test('Add Produce modal opens and form loads', async t => {
     await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
 
     // Click the "Add Item" button to open the modal
-    const addButton = Selector('tbody tr').nth(0).find('button.btn-add');
+    const addButton = Selector('button.btn-add');
     await t.click(addButton);
 
     // Check that the modal appeared and has a form
