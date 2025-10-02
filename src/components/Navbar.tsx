@@ -20,34 +20,30 @@ const NavBar: React.FC = () => {
         <Navbar.Brand as={Link} href="/" className={pathname === '/' ? 'active' : undefined}>
           Pantry Pals
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto justify-content-start">
-            {currentUser ? (
-              <>
-                <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
-                  Add Stuff
-                </Nav.Link>
 
-                <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
-                  View Pantry
-                </Nav.Link>
+        {session && (
+        <>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto justify-content-start">
+              <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
+                Add Stuff
+              </Nav.Link>
+              <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
+                View Pantry
+              </Nav.Link>
+              <Nav.Link as={Link} id="shopping-list-nav" href="/shopping-list" active={isActive('/shopping-list')}>
+                Shopping List
+              </Nav.Link>
 
-                <Nav.Link as={Link} id="shopping-list-nav" href="/shopping-list" active={isActive('/shopping-list')}>
-                  Shopping List
-                </Nav.Link>
-              </>
-            ) : null}
-
-            {currentUser && role === 'ADMIN' ? (
+              {role === 'ADMIN' && (
               <Nav.Link as={Link} id="admin-stuff-nav" href="/admin" active={isActive('/admin')}>
                 Admin
               </Nav.Link>
-            ) : null}
-          </Nav>
+              )}
+            </Nav>
 
-          <Nav>
-            {session ? (
+            <Nav>
               <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
                 <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
                   <BoxArrowRight />
@@ -58,11 +54,13 @@ const NavBar: React.FC = () => {
                   <span className="ms-2">Change Password</span>
                 </NavDropdown.Item>
               </NavDropdown>
-            ) : null}
-          </Nav>
-        </Navbar.Collapse>
+            </Nav>
+          </Navbar.Collapse>
+        </>
+        )}
       </Container>
     </Navbar>
+
   );
 };
 
