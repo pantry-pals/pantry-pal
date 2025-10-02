@@ -51,3 +51,21 @@
     background-color: red;
     transform: translateY(-2px);
 }
+
+.btn-add {
+    padding: 8px 16px;
+    background-color: var(--fern-green);
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.btn-add:hover {
+    background-color: var(--sage);
+    transform: translateY(-2px);
+}

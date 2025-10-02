@@ -21,6 +21,9 @@ interface AddProduceModalProps {
 }
 
 const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
+  // Available unit options
+  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
+
   const {
     register,
     handleSubmit,
@@ -29,17 +32,15 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(AddProduceSchema),
+    defaultValues: {
+      unit: unitOptions[0],
+    },
   });
 
   const router = useRouter();
 
-  // Available unit options
-  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
-
   // Track dropdown state
-  const [unitChoice, setUnitChoice] = useState(
-    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
-  );
+  const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
 
   // Reset form values every time modal closes or produce changes
   useEffect(() => {
@@ -66,7 +67,6 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
 
     handleClose();
     router.refresh();
-    router.push('/view-pantry');
   };
 
   return (
@@ -133,7 +133,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               <Form.Group>
                 <Form.Label className="mb-0">Unit</Form.Label>
                 <Form.Select
-                  defaultValue={unitChoice}
+                  defaultValue={unitOptions[0]}
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;

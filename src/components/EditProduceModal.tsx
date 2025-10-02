@@ -77,8 +77,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       timer: 2000,
     });
 
-    router.refresh();
     handleClose();
+    router.refresh();
   };
 
   return (
