@@ -43,3 +43,22 @@ export const EditProduceSchema = Yup.object({
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
 });
+
+export const shoppingListItemCreate = {} as {
+  shoppingListId: number;
+  produceId: number;
+  quantity: number;
+  price?: number | null;
+};
+
+// Update
+export const shoppingListItemUpdate = {} as {
+  id: number;
+  quantity?: number;
+  price?: number | null;
+};
+
+// Delete
+export const shoppingListItemDelete = {} as {
+  id: number;
+};

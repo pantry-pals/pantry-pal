@@ -169,3 +169,42 @@ export async function deleteProduce(id: number) {
 
   redirect('/list');
 }
+
+/** Add item to a shopping list */
+export async function addShoppingListItem(input: {
+  shoppingListId: number;
+  produceId: number;
+  quantity: number;
+  price?: number | null;
+}) {
+  return prisma.shoppingListItem.create({
+    data: {
+      shoppingListId: input.shoppingListId,
+      produceId: input.produceId,
+      quantity: input.quantity,
+      price: input.price ?? null,
+    },
+  });
+}
+
+/** Edit an existing shopping list item */
+export async function editShoppingListItem(input: {
+  id: number;
+  quantity?: number;
+  price?: number | null;
+}) {
+  return prisma.shoppingListItem.update({
+    where: { id: input.id },
+    data: {
+      quantity: input.quantity,
+      price: input.price ?? null,
+    },
+  });
+}
+
+/** Delete an item from the shopping list */
+export async function deleteShoppingListItem(id: number) {
+  return prisma.shoppingListItem.delete({
+    where: { id },
+  });
+}
