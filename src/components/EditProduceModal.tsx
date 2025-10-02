@@ -84,7 +84,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header className="justify-content-center">
-        <Modal.Title>Edit Produce Item</Modal.Title>
+        <Modal.Title>Edit Pantry Item</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>

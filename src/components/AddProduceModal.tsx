@@ -72,7 +72,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header className="justify-content-center">
-        <Modal.Title>Add Produce Item</Modal.Title>
+        <Modal.Title>Add Pantry Item</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
