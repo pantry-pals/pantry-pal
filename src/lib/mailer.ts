@@ -59,3 +59,17 @@ export async function sendPasswordResetEmail(to: string, token: string) {
     `,
   });
 }
+
+// Expiration Notification
+export async function sendExpirationNotification(to: string, item: string) {
+  await transporter.sendMail({
+    from: `"Pantry Pal Support" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: '[Pantry Pal] Expiring item alert',
+    html: `
+      <p>Hi there!</p>
+      <p>Your ${item} is expiring tomorrow, log into your Pantry Pal account to add ${item} to shopping list</p>
+      <p>— The Pantry Pal Team</p>
+    `,
+  });
+}
