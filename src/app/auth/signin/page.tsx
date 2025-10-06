@@ -80,21 +80,19 @@ export default function SignInPage() {
       } else {
         setError('Invalid email or password');
       }
-    } 
+    }
 
     // Fetch expiring items for notifications
     if (result?.url) {
       try {
         const res = await fetch(`/api/expiring?owner=${encodeURIComponent(email)}`);
         const data = await res.json();
-    
         if (data.expiringItems?.length > 0) {
           const itemList = data.expiringItems
             .map(
-              (item: any) => `${item.name} (expires on ${new Date(item.expiration).toLocaleDateString()})`
+              (item: any) => `${item.name} (expires on ${new Date(item.expiration).toLocaleDateString()})`,
             )
             .join('\n');
-        
           swal({
             title: 'Expiring Items!',
             text: `You have the following items expiring soon:\n\n${itemList}`,
@@ -123,9 +121,7 @@ export default function SignInPage() {
       } catch (err) {
         console.error('Failed to fetch expiring items:', err);
       }
-    
     }
-    
 
     setIsSigningIn(false);
   };
