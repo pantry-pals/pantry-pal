@@ -12,7 +12,7 @@ export default function AddRecipeCard() {
       <Card className="h-100 shadow-sm">
         <Card.Body
           className="d-flex flex-column justify-content-center align-items-center text-center"
-          style={{ minHeight: 300 }}  // tweak 260–340 to match your other cards
+          style={{ minHeight: 300 }} // tweak 260–340 to match your other cards
         >
           <Card.Title className="mb-2">Add a New Recipe</Card.Title>
           <Card.Text className="text-muted">Create and share your recipe.</Card.Text>
