@@ -1,11 +1,10 @@
 'use client';
 
 import { Card, ListGroup, Button, Badge } from 'react-bootstrap';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useState } from 'react';
-import EditShoppingListModal from './EditShoppingListModal';
-import { Trash } from "react-bootstrap-icons";
-
+import ViewShoppingListModal from './ViewShoppingListModal';
+// import { Trash } from "react-bootstrap-icons";
 
 type ShoppingListCardProps = {
   shoppingList: any;
@@ -29,9 +28,7 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
   return (
     <Card className="h-100 mb-3 image-shadow">
       <Card.Header>
-        <Link href={`/shoppinglist/${shoppingList.id}`} className="link-dark">
-          <Card.Title className="mt-2">{shoppingList.name}</Card.Title>
-        </Link>
+        <Card.Title className="mt-2">{shoppingList.name}</Card.Title>
       </Card.Header>
 
       <Card.Body className="bg-light">
@@ -49,7 +46,8 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
           <ListGroup.Item className="bg-light">
             <strong>Estimated Cost:</strong>
             {' '}
-            ${totalCost.toFixed(2)}
+            $
+            {totalCost.toFixed(2)}
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
@@ -58,17 +56,21 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
         <Button className="me-2 editbutton" onClick={() => setShowModal(true)}>
           View
         </Button>
-        <Button
+
+        {/* Button to delete a shopping list; currently disabled until we can implement */}
+
+        {/* <Button
           variant="danger"
           className="deletebutton d-flex align-items-center justify-content-center"
           href={`/shoppinglist/delete/${shoppingList.id}`}
           style={{ width: '40px', height: '40px', padding: 0 }}
         >
           <Trash color="white" size={18} />
-        </Button>
+        </Button> */}
+
       </Card.Footer>
 
-      <EditShoppingListModal
+      <ViewShoppingListModal
         show={showModal}
         onHide={() => setShowModal(false)}
         shoppingList={shoppingList}

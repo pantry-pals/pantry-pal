@@ -219,7 +219,9 @@ export async function deleteShoppingList(id: number) {
 /**
  * Adds a new item to a shopping list.
  */
-export async function addShoppingListItem(item: { shoppingListId: number; produceId: number; quantity: number; price?: number }) {
+export async function addShoppingListItem(
+  item: { shoppingListId: number; produceId: number; quantity: number; price?: number },
+) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,

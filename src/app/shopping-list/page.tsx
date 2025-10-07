@@ -28,7 +28,7 @@ const ViewShoppingListPage = async () => {
   return (
     <main>
       <Container id="view-shopping-list" className="py-3">
-        <ShoppingListClient initialShoppingLists={shoppingLists} owner={owner} />
+        <ShoppingListClient initialShoppingLists={shoppingLists} />
       </Container>
     </main>
   );
