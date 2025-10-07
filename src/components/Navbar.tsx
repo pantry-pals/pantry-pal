@@ -43,31 +43,28 @@ const NavBar: React.FC = () => {
               </>
             ) : null}
 
-              {role === 'ADMIN' && (
+            {role === 'ADMIN' && (
               <Nav.Link as={Link} id="admin-stuff-nav" href="/admin" active={isActive('/admin')}>
                 Admin
               </Nav.Link>
-              )}
-            </Nav>
+            )}
+          </Nav>
 
-            <Nav>
-              <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
-                <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
-                  <BoxArrowRight />
-                  <span className="ms-2">Sign Out</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
-                  <Lock />
-                  <span className="ms-2">Change Password</span>
-                </NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
-          </Navbar.Collapse>
-        </>
-        )}
+          <Nav>
+            <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
+              <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
+                <BoxArrowRight />
+                <span className="ms-2">Sign Out</span>
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
+                <Lock />
+                <span className="ms-2">Change Password</span>
+              </NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
-
   );
 };
 
