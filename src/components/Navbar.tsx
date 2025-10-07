@@ -20,43 +20,51 @@ const NavBar: React.FC = () => {
         <Navbar.Brand as={Link} href="/" className={pathname === '/' ? 'active' : undefined}>
           Pantry Pals
         </Navbar.Brand>
-        {session && (
-        <>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto justify-content-start">
-              <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
-                View Pantry
-              </Nav.Link>
-              <Nav.Link as={Link} id="shopping-list-nav" href="/shopping-list" active={isActive('/shopping-list')}>
-                Shopping List
-              </Nav.Link>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto justify-content-start">
+            {currentUser ? (
+              <>
+                <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
+                  Add Stuff
+                </Nav.Link>
 
-              {role === 'ADMIN' && (
+                <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
+                  View Pantry
+                </Nav.Link>
+
+                <Nav.Link as={Link} id="shopping-list-nav" href="/shopping-list" active={isActive('/shopping-list')}>
+                  Shopping List
+                </Nav.Link>
+
+                <Nav.Link as={Link} id="recipe-nav" href="/recipe" active={isActive('/recipe')}>
+                  Recipes
+                </Nav.Link>
+              </>
+            ) : null}
+
+            {role === 'ADMIN' && (
               <Nav.Link as={Link} id="admin-stuff-nav" href="/admin" active={isActive('/admin')}>
                 Admin
               </Nav.Link>
-              )}
-            </Nav>
+            )}
+          </Nav>
 
-            <Nav>
-              <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
-                <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
-                  <BoxArrowRight />
-                  <span className="ms-2">Sign Out</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
-                  <Lock />
-                  <span className="ms-2">Change Password</span>
-                </NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
-          </Navbar.Collapse>
-        </>
-        )}
+          <Nav>
+            <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
+              <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
+                <BoxArrowRight />
+                <span className="ms-2">Sign Out</span>
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} id="login-dropdown-change-password" href="/auth/change-password">
+                <Lock />
+                <span className="ms-2">Change Password</span>
+              </NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
-
   );
 };
 
