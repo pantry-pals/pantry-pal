@@ -32,14 +32,11 @@ const NavBar: React.FC = () => {
           Pantry Pals
         </Navbar.Brand>
 
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          {currentUser && (
-            <>
+        {session && (
+          <>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto justify-content-start">
-                <Nav.Link as={Link} id="add-stuff-nav" href="/add" active={isActive('/add')}>
-                  Add Stuff
-                </Nav.Link>
                 <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
                   View Pantry
                 </Nav.Link>
@@ -63,9 +60,9 @@ const NavBar: React.FC = () => {
                   </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
-            </>
-          )}
-        </Navbar.Collapse>
+            </Navbar.Collapse>
+          </>
+        )}
       </Container>
     </Navbar>
   );
