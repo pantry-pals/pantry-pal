@@ -169,3 +169,89 @@ export async function deleteProduce(id: number) {
 
   redirect('/view-pantry');
 }
+
+/**
+ * Adds a new shopping list.
+ */
+export async function addShoppingList(list: { name: string; owner: string }) {
+  const shoppingList = await prisma.shoppingList.create({
+    data: {
+      name: list.name,
+      owner: list.owner,
+    },
+  });
+
+  redirect('/shopping-list');
+  return shoppingList;
+}
+
+/**
+ * Edits an existing shopping list.
+ */
+export async function editShoppingList(list: Prisma.ShoppingListUpdateInput & { id: number }) {
+  const updatedList = await prisma.shoppingList.update({
+    where: { id: list.id },
+    data: {
+      name: list.name,
+      owner: list.owner,
+    },
+  });
+
+  return updatedList;
+}
+
+/**
+ * Deletes a shopping list and its items.
+ */
+export async function deleteShoppingList(id: number) {
+  // delete items first to maintain relational integrity
+  await prisma.shoppingListItem.deleteMany({
+    where: { shoppingListId: id },
+  });
+
+  await prisma.shoppingList.delete({
+    where: { id },
+  });
+
+  redirect('/shopping-list');
+}
+
+/**
+ * Adds a new item to a shopping list.
+ */
+export async function addShoppingListItem(item: { shoppingListId: number; produceId: number; quantity: number; price?: number }) {
+  const newItem = await prisma.shoppingListItem.create({
+    data: {
+      shoppingListId: item.shoppingListId,
+      produceId: item.produceId,
+      quantity: item.quantity,
+      price: item.price !== undefined ? new Prisma.Decimal(item.price) : undefined,
+    },
+  });
+
+  return newItem;
+}
+
+/**
+ * Edits a shopping list item.
+ */
+export async function editShoppingListItem(item: Prisma.ShoppingListItemUpdateInput & { id: number }) {
+  const updatedItem = await prisma.shoppingListItem.update({
+    where: { id: item.id },
+    data: {
+      quantity: item.quantity,
+      price: item.price,
+    },
+  });
+
+  return updatedItem;
+}
+
+/**
+ * Deletes a shopping list item.
+ */
+export async function deleteShoppingListItem(id: number) {
+  await prisma.shoppingListItem.delete({
+    where: { id },
+  });
+}
