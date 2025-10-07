@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import styles from '@/styles/signin.module.css';
+import swal from 'sweetalert';
 
 export default function SignInPage() {
   const { status } = useSession();
@@ -79,8 +80,47 @@ export default function SignInPage() {
       } else {
         setError('Invalid email or password');
       }
-    } else if (result?.url) {
-      window.location.href = result.url;
+    }
+
+    // Fetch expiring items for notifications
+    if (result?.url) {
+      try {
+        const res = await fetch(`/api/expiring?owner=${encodeURIComponent(email)}`);
+        const data = await res.json();
+        if (data.expiringItems?.length > 0) {
+          const itemList = data.expiringItems
+            .map(
+              (item: any) => `${item.name} (expires on ${new Date(item.expiration).toLocaleDateString()})`,
+            )
+            .join('\n');
+          swal({
+            title: 'Expiring Items!',
+            text: `You have the following items expiring soon:\n\n${itemList}`,
+            icon: 'warning',
+            buttons: {
+              go: {
+                text: 'Go to pantry',
+                value: 'go',
+              },
+              later: {
+                text: 'Remind me later',
+                value: 'later',
+              },
+            },
+          }).then((value) => {
+            if (value === 'go') {
+              // redirect after the user clicks "add to shopping list"
+              window.location.href = result.url || 'view-pantry';
+            } else {
+              // Do nothing, user chose "Remind me later"
+            }
+          });
+        } else {
+          window.location.href = result.url; // no expiring items, redirect immediately
+        }
+      } catch (err) {
+        console.error('Failed to fetch expiring items:', err);
+      }
     }
 
     setIsSigningIn(false);

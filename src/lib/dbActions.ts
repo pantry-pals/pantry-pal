@@ -125,7 +125,7 @@ export async function addProduce(produce: {
     },
   });
 
-  redirect('/list');
+  redirect('/view-pantry');
 }
 
 /**
@@ -167,5 +167,5 @@ export async function deleteProduce(id: number) {
     where: { id },
   });
 
-  redirect('/list');
+  redirect('/view-pantry');
 }
