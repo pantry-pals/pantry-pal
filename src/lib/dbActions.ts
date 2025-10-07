@@ -167,5 +167,5 @@ export async function deleteProduce(id: number) {
     where: { id },
   });
 
-  redirect('/list');
+  redirect('/view-pantry');
 }
