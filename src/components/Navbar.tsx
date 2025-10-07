@@ -43,15 +43,14 @@ const NavBar: React.FC = () => {
               </>
             ) : null}
 
-            {currentUser && role === 'ADMIN' ? (
+              {role === 'ADMIN' && (
               <Nav.Link as={Link} id="admin-stuff-nav" href="/admin" active={isActive('/admin')}>
                 Admin
               </Nav.Link>
-            ) : null}
-          </Nav>
+              )}
+            </Nav>
 
-          <Nav>
-            {session ? (
+            <Nav>
               <NavDropdown id="login-dropdown" title={currentUser ?? ''}>
                 <NavDropdown.Item as={Link} id="login-dropdown-sign-out" href="/auth/signout">
                   <BoxArrowRight />
@@ -62,11 +61,13 @@ const NavBar: React.FC = () => {
                   <span className="ms-2">Change Password</span>
                 </NavDropdown.Item>
               </NavDropdown>
-            ) : null}
-          </Nav>
-        </Navbar.Collapse>
+            </Nav>
+          </Navbar.Collapse>
+        </>
+        )}
       </Container>
     </Navbar>
+
   );
 };
 

@@ -56,3 +56,32 @@ footer a {
   color: #fff;
   text-decoration: underline;
 }
+
+.card {
+  background-color: whitesmoke;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cardimage {
+  border-radius: 5px;
+  max-height: 200px;
+  object-fit: cover;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+}
+
+.editbutton {
+  background-color: var(--sage);
+  border: none;
+  &:hover {
+    background-color: var(--brunswick-green);
+  }
+}
+
+.deletebutton {
+  background-color: var(--fern-green);
+  border: none;
+  &:hover {
+    background-color: var(--brunswick-green);
+  }
+}
