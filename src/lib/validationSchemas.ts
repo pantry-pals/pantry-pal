@@ -43,3 +43,35 @@ export const EditProduceSchema = Yup.object({
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
 });
+
+export const AddShoppingListSchema = Yup.object({
+  name: Yup.string().required('List name is required'),
+  owner: Yup.string().required('Owner is required'),
+});
+
+export const EditShoppingListSchema = Yup.object({
+  id: Yup.number().required('ID is required'),
+  name: Yup.string().required('List name is required'),
+  owner: Yup.string().required('Owner is required'),
+});
+
+export const AddShoppingListItemSchema = Yup.object({
+  shoppingListId: Yup.number().required('Shopping list ID is required'),
+  produceId: Yup.number().required('Produce ID is required'),
+  quantity: Yup.number().positive('Quantity must be positive').required('Quantity is required'),
+  price: Yup.number()
+    .nullable()
+    .transform((curr, orig) => (orig === '' ? null : curr))
+    .min(0, 'Price cannot be negative')
+    .notRequired(),
+});
+
+export const EditShoppingListItemSchema = Yup.object({
+  id: Yup.number().required('ID is required'),
+  quantity: Yup.number().positive('Quantity must be positive').required('Quantity is required'),
+  price: Yup.number()
+    .nullable()
+    .transform((curr, orig) => (orig === '' ? null : curr))
+    .min(0, 'Price cannot be negative')
+    .notRequired(),
+});
