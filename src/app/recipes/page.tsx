@@ -1,11 +1,27 @@
-import { Col, Container, Row, Button } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 import RecipeCard from '@/components/RecipeCard';
+import AddRecipeCard from '@/components/AddRecipeCard';
 import { getRecipes } from '@/lib/recipes';
+import { getServerSession } from 'next-auth';
+import authOptions from '@/lib/authOptions';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export default async function RecipeListPage() {
-  const recipes = await getRecipes();
+  const [recipes, session] = await Promise.all([
+    getRecipes(),
+    getServerSession(authOptions),
+  ]);
+
+  let isAdmin = false;
+  if (session?.user?.email) {
+    const u = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { role: true },
+    });
+    isAdmin = u?.role === 'ADMIN';
+  }
 
   return (
     <main>
@@ -14,14 +30,6 @@ export default async function RecipeListPage() {
           <Row>
             <Col>
               <h2 className="text-center">Recipes</h2>
-
-              <Row className="mt-4">
-                <Col className="text-center">
-                  <Button href="/recipes/add" className="btn-dark" type="button">
-                    Add Recipe
-                  </Button>
-                </Col>
-              </Row>
 
               <Row xs={1} md={2} lg={3} className="g-4 mt-4">
                 {recipes.map((r) => (
@@ -37,6 +45,13 @@ export default async function RecipeListPage() {
                     />
                   </Col>
                 ))}
+
+                {/* Add Recipe Card (admin only) */}
+                {isAdmin && (
+                  <Col>
+                    <AddRecipeCard />
+                  </Col>
+                )}
               </Row>
             </Col>
           </Row>
