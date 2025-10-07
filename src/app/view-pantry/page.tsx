@@ -5,7 +5,6 @@ import { prisma } from '@/lib/prisma';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import PantryClient from '@/components/PantryClient';
-import AddToShoppingList from '@/components/AddToShoppingList';
 
 type SessionUser = { id: string; email: string; randomKey: string };
 
@@ -23,8 +22,7 @@ const ViewPantryPage = async () => {
   return (
     <main>
       <Container id="view-pantry" className="py-3">
-        <PantryClient initialProduce={produce} owner={owner} />
-        <AddToShoppingList />
+        <PantryClient initialProduce={produce} owner={owner} /> 
       </Container>
     </main>
   );

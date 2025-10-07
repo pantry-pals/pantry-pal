@@ -3,7 +3,9 @@
 import { Condition, Prisma } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 import { prisma } from './prisma';
+import authOptions from './authOptions';
 
 /**
  * Adds a new stuff to the database.
@@ -168,4 +170,47 @@ export async function deleteProduce(id: number) {
   });
 
   redirect('/list');
+}
+
+type AddReq = { name: string; quantity: number; price?: string | null; shoppingListId: number };
+
+export async function addToShoppingList({ name, quantity, price, shoppingListId }: AddReq) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error('Unauthorized');
+  const owner = session.user.email;
+
+  // ensure list belongs to owner
+  const list = await prisma.shoppingList.findFirst({ where: { id: shoppingListId, owner }, select: { id: true } });
+  if (!list) throw new Error('List not found');
+
+  // ensure produce exists (unique on (name, owner))
+  const existing = await prisma.produce.findUnique({
+    where: { name_owner: { name, owner } },
+    select: { id: true },
+  });
+
+  const produceId = existing?.id
+    ?? (await prisma.produce.create({
+      data: {
+        name,
+        type: 'Other',
+        location: 'Pantry',
+        unit: 'ea',
+        quantity: 0,
+        owner,
+      },
+      select: { id: true },
+    })).id;
+
+  // upsert item on (shoppingListId, produceId)
+  const decimalPrice = price && price.length ? new Prisma.Decimal(price) : null;
+
+  await prisma.shoppingListItem.upsert({
+    where: { shoppingListId_produceId: { shoppingListId, produceId } },
+    update: {
+      quantity: { increment: quantity },
+      ...(decimalPrice !== null ? { price: decimalPrice } : {}),
+    },
+    create: { shoppingListId, produceId, quantity, price: decimalPrice },
+  });
 }

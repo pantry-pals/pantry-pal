@@ -17,27 +17,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    // Defaults
-    const type = body?.type?.trim() || 'Other';
-    const location = body?.location?.trim() || 'Pantry';
-    const unit = body?.unit?.trim() || 'ea';
-    const quantity = Number(body?.quantity ?? 0);
-    const image = body?.image || null;
-
-    // Reuse if exists
-    const existing = await prisma.produce.findUnique({
+    const existing = await prisma.shoppingList.findUnique({
       where: { name_owner: { name, owner } },
       select: { id: true, name: true },
     });
     if (existing) return NextResponse.json(existing, { status: 200 });
 
-    const created = await prisma.produce.create({
-      data: { name, type, location, unit, quantity, owner, image },
+    const created = await prisma.shoppingList.create({
+      data: { name, owner },
       select: { id: true, name: true },
     });
 
     return NextResponse.json(created, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Error creating produce' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Error creating shopping list' }, { status: 500 });
   }
 }
