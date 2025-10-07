@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const soon = new Date();
   soon.setDate(now.getDate() + 1);
 
-  const expiringItems = await prisma.Produce.findMany({
+  const expiringItems = await prisma.produce.findMany({
     where: { owner: ownerEmail, expiration: { lte: soon } },
   });
 
