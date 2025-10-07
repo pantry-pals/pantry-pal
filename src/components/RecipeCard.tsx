@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, Button, Image } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
 export type RecipeCardProps = {
   id: number;
@@ -37,7 +38,11 @@ export default function RecipeCard(props: RecipeCardProps) {
             ) : null}
             <br />
             {ingredients?.length ? (
-              <small className="text-muted">Ingredients: {ingredients.join(', ')}</small>
+              <>
+                <small className="text-muted">Ingredients:</small>
+                <br />
+                <small className="text-muted">{ingredients.join(', ')}</small>
+              </>
             ) : null}
           </div>
         </div>
@@ -48,3 +53,8 @@ export default function RecipeCard(props: RecipeCardProps) {
     </Card>
   );
 }
+
+RecipeCard.defaultProps = {
+  description: null,
+  imageUrl: null,
+};
