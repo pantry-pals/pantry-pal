@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, Button, Image } from 'react-bootstrap';
-import PropTypes from 'prop-types';
 
 export type RecipeCardProps = {
   id: number;
