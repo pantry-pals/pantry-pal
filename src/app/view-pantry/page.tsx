@@ -22,7 +22,7 @@ const ViewPantryPage = async () => {
   return (
     <main>
       <Container id="view-pantry" className="py-3">
-        <PantryClient initialProduce={produce} owner={owner} /> 
+        <PantryClient initialProduce={produce} owner={owner} />
       </Container>
     </main>
   );
