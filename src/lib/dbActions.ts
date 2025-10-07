@@ -125,7 +125,7 @@ export async function addProduce(produce: {
     },
   });
 
-  redirect('/list');
+  redirect('/view-pantry');
 }
 
 /**
