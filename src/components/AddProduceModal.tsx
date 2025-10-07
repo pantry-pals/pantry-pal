@@ -122,8 +122,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="number"
                   {...register('quantity')}
-                  step={0.1}
-                  placeholder="eg., 1"
+                  step={1}
+                  placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
                 />
                 <div className="invalid-feedback">{errors.quantity?.message}</div>
