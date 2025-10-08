@@ -60,7 +60,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       ...data,
       expiration: data.expiration ?? null,
       image: data.image ? data.image : null,
-      restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
+      restockThreshold: Number(data.restockThreshold ?? 0),
     });
     swal('Success', 'Your item has been added', 'success', {
       timer: 2000,

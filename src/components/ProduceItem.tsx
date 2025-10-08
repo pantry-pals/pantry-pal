@@ -42,7 +42,18 @@ const ProduceItem = ({
       <EditProduceModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        produce={{ id, name, quantity, unit, type, location, expiration, owner, image }}
+        produce={{
+          id,
+          name,
+          quantity,
+          unit,
+          type,
+          location,
+          expiration,
+          owner,
+          image,
+          restockThreshold,
+        }}
       />
     </>
   );

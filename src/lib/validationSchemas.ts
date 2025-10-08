@@ -27,6 +27,11 @@ export const AddProduceSchema = Yup.object({
     .notRequired(),
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
+  restockThreshold: Yup.number()
+    .nullable()
+    .transform((curr, orig) => (orig === '' ? null : curr))
+    .min(0, 'Threshold cannot be negative')
+    .notRequired(),
 });
 
 export const EditProduceSchema = Yup.object({

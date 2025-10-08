@@ -176,7 +176,6 @@ export async function addProduce(produce: {
  */
 export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: number }) {
   let expiration: Date | Prisma.DateTimeFieldUpdateOperationsInput | null | undefined = null;
-
   if (produce.expiration) {
     if (produce.expiration instanceof Date) {
       expiration = produce.expiration;
