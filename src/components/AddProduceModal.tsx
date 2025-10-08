@@ -72,7 +72,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
         produceId: addedProduce.id,
         newQuantity: addedProduce.quantity,
         ownerEmail: addedProduce.owner,
-        //restockThreshold: addedProduce.restockThreshold ?? 1,
+        // restockThreshold: addedProduce.restockThreshold ?? 1,
       }),
     });
     swal('Success', 'Your item has been added', 'success', {

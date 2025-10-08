@@ -155,7 +155,7 @@ export async function addProduce(produce: {
     },
   });
 
-  //redirect('/view-pantry');
+  // redirect('/view-pantry');
   // Auto-add to a default shopping list if quantity ≤ restockThreshold
   const threshold = newProduce.restockThreshold ?? 1;
   if (newProduce.quantity <= threshold) {
