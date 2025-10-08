@@ -2,7 +2,7 @@ import { Selector, t } from 'testcafe';
 
 const adminEmail = 'admin@foo.com';
 const password = 'changeme';
-const baseUrl = 'https://pantry-pal-gamma.vercel.app';
+const baseUrl = 'http://localhost:3000/';
 
 // ----------
 // HELPERS

@@ -16,7 +16,7 @@ const signIn = async (email, password) => {
 
 // Helper to check that signout page loads
 const signOut = async () => {
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signout');
+    await t.navigateTo('http://localhost:3000/auth/signout');
 
     // Check for a heading or text that exists on the signout page
     const signOutHeading = Selector('h1').withText(/sign out/i);
@@ -24,12 +24,12 @@ const signOut = async () => {
 };
 
 fixture('Change Password Tests')
-    .page('https://pantry-pal-gamma.vercel.app');
+            .page('http://localhost:3000');
 
 // 1️⃣ Check Change Password page loads
 test('Change password page loads', async t => {
     await signIn(adminEmail, oldPassword);
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/change-password');
+    await t.navigateTo('http://localhost:3000/auth/change-password');
 
     const title = Selector('h1').withText('Change Password');
     await t.expect(title.exists).ok({ timeout: 5000 });
