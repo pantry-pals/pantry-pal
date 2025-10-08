@@ -85,3 +85,11 @@ footer a {
     background-color: var(--brunswick-green);
   }
 }
+
+.addbutton {
+  background-color: var(--fern-green);
+  border: none;
+  &:hover {
+    background-color: var(--hunter-green);
+  }
+}

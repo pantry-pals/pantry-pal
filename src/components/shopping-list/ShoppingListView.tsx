@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Row, Col, Form } from 'react-bootstrap';
+import { Row, Col, Form, Button } from 'react-bootstrap';
 import ShoppingListCard from './ShoppingListCard';
+import AddToShoppingListModal from '../AddToShoppingListModal';
 
 type ShoppingListViewProps = {
   initialShoppingLists: any[];
@@ -10,6 +11,7 @@ type ShoppingListViewProps = {
 
 export default function ShoppingListView({ initialShoppingLists }: ShoppingListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [show, setShow] = useState(false);
 
   const filteredLists = initialShoppingLists.filter((list) => (
     list.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -17,13 +19,21 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
 
   return (
     <>
-      <Row className="mb-4">
-        <Col md={6} className="mx-auto">
+      <Row className="mb-4 align-items-center">
+        <Col xs={12} md={8} className="mb-2 mb-md-0">
           <Form.Control
             type="text"
             placeholder="Search shopping lists..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Col>
+        <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
+          <Button onClick={() => setShow(true)} className="addbutton">+ Add Item to List</Button>
+          <AddToShoppingListModal
+            show={show}
+            onHide={() => setShow(false)}
+            shoppingLists={initialShoppingLists}
           />
         </Col>
       </Row>

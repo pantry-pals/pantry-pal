@@ -3,9 +3,7 @@
 import { Condition, Prisma } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 import { prisma } from './prisma';
-import authOptions from './authOptions';
 
 /**
  * Adds a new stuff to the database.
@@ -113,9 +111,11 @@ export async function addProduce(produce: {
   expiration: string | Date | null;
   owner: string;
   image: string | null;
+  restockThreshold?: number;
 }) {
-  await prisma.produce.create({
-    data: {
+  const newProduce = await prisma.produce.upsert({
+    where: { name_owner: { name: produce.name, owner: produce.owner } },
+    update: {
       name: produce.name,
       type: produce.type,
       owner: produce.owner,
@@ -124,8 +124,49 @@ export async function addProduce(produce: {
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
       image: produce.image ? produce.image : null,
+      restockThreshold: produce.restockThreshold ?? 0,
+    },
+    create: {
+      name: produce.name,
+      type: produce.type,
+      owner: produce.owner,
+      location: produce.location,
+      quantity: produce.quantity,
+      unit: produce.unit,
+      expiration: produce.expiration ? new Date(produce.expiration) : null,
+      image: produce.image ? produce.image : null,
+      restockThreshold: produce.restockThreshold ?? 0,
     },
   });
+
+  // AUTO-ADD to shopping list if below threshold
+  if (newProduce.restockThreshold !== null && newProduce.quantity <= newProduce.restockThreshold) {
+    const shoppingList = await prisma.shoppingList.upsert({
+      where: { name_owner: { name: 'Auto Restock', owner: newProduce.owner } },
+      update: {},
+      create: {
+        name: 'Auto Restock',
+        owner: newProduce.owner,
+      },
+    });
+
+    const existingItem = await prisma.shoppingListItem.findFirst({
+      where: {
+        shoppingListId: shoppingList.id,
+        produceId: newProduce.id,
+      },
+    });
+
+    if (!existingItem) {
+      await prisma.shoppingListItem.create({
+        data: {
+          shoppingListId: shoppingList.id,
+          produceId: newProduce.id,
+          quantity: newProduce.restockThreshold, // or default quantity
+        },
+      });
+    }
+  }
 
   redirect('/view-pantry');
 }
@@ -135,7 +176,6 @@ export async function addProduce(produce: {
  */
 export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: number }) {
   let expiration: Date | Prisma.DateTimeFieldUpdateOperationsInput | null | undefined = null;
-
   if (produce.expiration) {
     if (produce.expiration instanceof Date) {
       expiration = produce.expiration;
@@ -146,7 +186,7 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     }
   }
 
-  await prisma.produce.update({
+  const updatedProduce = await prisma.produce.update({
     where: { id: produce.id },
     data: {
       name: produce.name,
@@ -157,8 +197,40 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       expiration,
       owner: produce.owner,
       image: produce.image,
+      restockThreshold: produce.restockThreshold ?? 0,
     },
   });
+
+  // Auto-add to shopping list if below threshold
+  if (updatedProduce.restockThreshold !== null && updatedProduce.quantity <= updatedProduce.restockThreshold) {
+    const shoppingList = await prisma.shoppingList.upsert({
+      where: { name_owner: { name: 'Auto Restock', owner: updatedProduce.owner } },
+      update: {},
+      create: {
+        name: 'Auto Restock',
+        owner: updatedProduce.owner,
+      },
+    });
+
+    const existingItem = await prisma.shoppingListItem.findFirst({
+      where: {
+        shoppingListId: shoppingList.id,
+        produceId: updatedProduce.id,
+      },
+    });
+
+    if (!existingItem) {
+      await prisma.shoppingListItem.create({
+        data: {
+          shoppingListId: shoppingList.id,
+          produceId: updatedProduce.id,
+          quantity: updatedProduce.restockThreshold,
+        },
+      });
+    }
+  }
+
+  return updatedProduce;
 }
 
 /**
@@ -228,9 +300,12 @@ export async function deleteShoppingList(id: number) {
 /**
  * Adds a new item to a shopping list.
  */
-export async function addShoppingListItem(
-  item: { shoppingListId: number; produceId: number; quantity: number; price?: number },
-) {
+export async function addShoppingListItem(item: {
+  shoppingListId: number;
+  produceId: number;
+  quantity: number;
+  price?: number;
+}) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,
@@ -264,48 +339,5 @@ export async function editShoppingListItem(item: Prisma.ShoppingListItemUpdateIn
 export async function deleteShoppingListItem(id: number) {
   await prisma.shoppingListItem.delete({
     where: { id },
-  });
-}
-
-type AddReq = { name: string; quantity: number; price?: string | null; shoppingListId: number };
-
-export async function addToShoppingList({ name, quantity, price, shoppingListId }: AddReq) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error('Unauthorized');
-  const owner = session.user.email;
-
-  // ensure list belongs to owner
-  const list = await prisma.shoppingList.findFirst({ where: { id: shoppingListId, owner }, select: { id: true } });
-  if (!list) throw new Error('List not found');
-
-  // ensure produce exists (unique on (name, owner))
-  const existing = await prisma.produce.findUnique({
-    where: { name_owner: { name, owner } },
-    select: { id: true },
-  });
-
-  const produceId = existing?.id
-    ?? (await prisma.produce.create({
-      data: {
-        name,
-        type: 'Other',
-        location: 'Pantry',
-        unit: 'ea',
-        quantity: 0,
-        owner,
-      },
-      select: { id: true },
-    })).id;
-
-  // upsert item on (shoppingListId, produceId)
-  const decimalPrice = price && price.length ? new Prisma.Decimal(price) : null;
-
-  await prisma.shoppingListItem.upsert({
-    where: { shoppingListId_produceId: { shoppingListId, produceId } },
-    update: {
-      quantity: { increment: quantity },
-      ...(decimalPrice !== null ? { price: decimalPrice } : {}),
-    },
-    create: { shoppingListId, produceId, quantity, price: decimalPrice },
   });
 }
