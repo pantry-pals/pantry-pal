@@ -1,7 +1,7 @@
 import { PrismaClient, Role, Condition } from '@prisma/client';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
-import ProduceCard from '@/components/ProduceCard';
+//import ProduceCard from '@/components/ProduceCard';
 
 const prisma = new PrismaClient();
 
@@ -22,6 +22,7 @@ async function main() {
         password,
         role,
         emailVerified: true,
+        defaultRestockThreshold: 1.0,
       },
     });
   }
@@ -60,6 +61,7 @@ async function main() {
         unit: produce.unit,
         expiration: new Date(produce.expiration),
         owner: produce.owner,
+        restockThreshold: produce.restockThreshold ?? 1.0,
       },
     });
   }
@@ -103,8 +105,7 @@ async function main() {
         },
       });
     }
-}
-
+  }
 
   console.log('Seeding complete!');
 }

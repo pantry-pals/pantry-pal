@@ -56,10 +56,24 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
 
   const onSubmit = async (data: ProduceValues) => {
     console.log('Submitting new produce item');
-    await addProduce({
+
+    const restockThreshold = data.restockThreshold ? parseFloat(data.restockThreshold.toString()) : 1;
+
+    const addedProduce = await addProduce({
       ...data,
       expiration: data.expiration ?? null,
       image: data.image ? data.image : null,
+      restockThreshold,
+    });
+    await fetch('/api/pantry', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        produceId: addedProduce.id,
+        newQuantity: addedProduce.quantity,
+        ownerEmail: addedProduce.owner,
+        //restockThreshold: addedProduce.restockThreshold ?? 1,
+      }),
     });
     swal('Success', 'Your item has been added', 'success', {
       timer: 2000,
@@ -186,6 +200,19 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                   placeholder="Image URL"
                 />
                 <div className="invalid-feedback">{errors.image?.message}</div>
+              </Form.Group>
+            </Col>
+            <Col xs={4} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.1}
+                  min={0}
+                  {...register('restockThreshold')}
+                  defaultValue={produce.restockThreshold ?? 1.0}
+                  placeholder="e.g., 2"
+                />
               </Form.Group>
             </Col>
           </Row>

@@ -37,9 +37,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
   // Track dropdown state
-  const [unitChoice, setUnitChoice] = useState(
-    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
-  );
+  const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
   // Reset form values every time modal closes or produce changes
   useEffect(() => {
@@ -58,9 +56,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const handleClose = () => {
     reset({
       ...produce,
-      expiration: produce.expiration
-        ? produce.expiration.toISOString().split('T')[0]
-        : '',
+      expiration: produce.expiration ? produce.expiration.toISOString().split('T')[0] : '',
       image: produce.image ?? '',
     } as any);
     setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
@@ -73,9 +69,19 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       expiration: data.expiration ?? null,
       image: data.image === '' ? null : data.image,
     });
-    swal('Success', 'Your item has been updated', 'success', {
-      timer: 2000,
+
+    await fetch('/api/pantry', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        produceId: data.id,
+        newQuantity: data.quantity,
+        restockThreshold: data.restockThreshold ?? 1, // optional if you add threshold input
+        ownerEmail: data.owner,
+      }),
     });
+
+    swal('Success', 'Produce item updated successfully', 'success');
 
     handleClose();
     router.refresh();

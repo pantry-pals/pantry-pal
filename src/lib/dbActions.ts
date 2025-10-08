@@ -111,9 +111,26 @@ export async function addProduce(produce: {
   expiration: string | Date | null;
   owner: string;
   image: string | null;
+  restockThreshold?: number;
 }) {
-  await prisma.produce.create({
-    data: {
+  const newProduce = await prisma.produce.upsert({
+    where: {
+      name_owner: {
+        // Prisma generates this from @@unique([name, owner])
+        name: produce.name,
+        owner: produce.owner,
+      },
+    },
+    update: {
+      type: produce.type,
+      location: produce.location,
+      quantity: produce.quantity,
+      unit: produce.unit,
+      expiration: produce.expiration ? new Date(produce.expiration) : null,
+      image: produce.image ?? null,
+      restockThreshold: produce.restockThreshold ?? 1,
+    },
+    create: {
       name: produce.name,
       type: produce.type,
       owner: produce.owner,
@@ -121,11 +138,37 @@ export async function addProduce(produce: {
       quantity: produce.quantity,
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
-      image: produce.image ? produce.image : null,
+      image: produce.image ?? null,
+      restockThreshold: produce.restockThreshold ?? 1,
+    },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      owner: true,
+      location: true,
+      quantity: true,
+      unit: true,
+      expiration: true,
+      image: true,
+      restockThreshold: true,
     },
   });
 
-  redirect('/view-pantry');
+  //redirect('/view-pantry');
+  // Auto-add to a default shopping list if quantity ≤ restockThreshold
+  const threshold = newProduce.restockThreshold ?? 1;
+  if (newProduce.quantity <= threshold) {
+    // Replace `1` with your default shopping list ID or logic to get the user's list
+    await prisma.shoppingListItem.create({
+      data: {
+        shoppingListId: 1, // default list ID
+        produceId: newProduce.id,
+        quantity: threshold,
+      },
+    });
+  }
+  return newProduce;
 }
 
 /**
@@ -219,9 +262,12 @@ export async function deleteShoppingList(id: number) {
 /**
  * Adds a new item to a shopping list.
  */
-export async function addShoppingListItem(
-  item: { shoppingListId: number; produceId: number; quantity: number; price?: number },
-) {
+export async function addShoppingListItem(item: {
+  shoppingListId: number;
+  produceId: number;
+  quantity: number;
+  price?: number;
+}) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,
