@@ -1,7 +1,8 @@
 import { Container, Row, Col, Image } from 'react-bootstrap';
-import { Facebook, Twitter, Linkedin, Instagram, GeoAlt, Envelope, Telephone, Github } from 'react-bootstrap-icons';
+import { GeoAlt, Envelope, Github } from 'react-bootstrap-icons';
 
 const Footer = () => {
+  // We build the copyright string in a variable to avoid JSX formatting errors.
   const copyrightText = `© ${new Date().getFullYear()} Pantry Pals. All Rights Reserved.`;
 
   return (
@@ -28,15 +29,6 @@ const Footer = () => {
               Keep track of your pantry, cut down on food waste, and discover recipes with
               what you already have. Smarter cooking, simplified.
             </p>
-
-            {/* GITHUB LINK */}
-            <a
-              href="https://github.com/pantry-pals"
-              className="d-inline-flex align-items-center"
-            >
-              <Github className="me-2" />
-              <span className="small">View on GitHub</span>
-            </a>
           </Col>
 
           {/* Browse Links */}
@@ -73,21 +65,18 @@ const Footer = () => {
               <li className="d-flex align-items-center mb-2">
                 <Envelope className="me-2 flex-shrink-0" />
                 {' '}
-                contact@pantrypals.com
+                pantrypal808@gmail.com
               </li>
               <li className="d-flex align-items-center">
-                <Telephone className="me-2 flex-shrink-0" />
-                {' '}
-                (808) 555-0123
+                <a
+                  href="https://github.com/pantry-pals"
+                  className="d-inline-flex align-items-center"
+                >
+                  <Github className="me-2" />
+                  View on GitHub
+                </a>
               </li>
             </ul>
-
-            <div className="d-flex gap-3 mt-3">
-              <a href="/" className="social-icon"><Facebook /></a>
-              <a href="/" className="social-icon"><Twitter /></a>
-              <a href="/" className="social-icon"><Linkedin /></a>
-              <a href="/" className="social-icon"><Instagram /></a>
-            </div>
           </Col>
         </Row>
       </Container>
