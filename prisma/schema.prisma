@@ -77,6 +77,7 @@ model Produce {
   owner             String
   image             String?
   ShoppingListItems ShoppingListItem[]
+  restockThreshold  Float?
 
   @@unique([name, owner])
 }

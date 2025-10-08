@@ -60,6 +60,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       ...data,
       expiration: data.expiration ?? null,
       image: data.image ? data.image : null,
+      restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
     });
     swal('Success', 'Your item has been added', 'success', {
       timer: 2000,
@@ -161,6 +162,22 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                   />
                 )}
                 <div className="invalid-feedback">{errors.unit?.message}</div>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col xs={6} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  {...register('restockThreshold')}
+                  step={1}
+                  min={0}
+                  placeholder="e.g., 1"
+                  className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
+                />
+                <div className="invalid-feedback">{errors.restockThreshold?.message}</div>
               </Form.Group>
             </Col>
           </Row>

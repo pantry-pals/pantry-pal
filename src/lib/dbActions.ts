@@ -111,9 +111,11 @@ export async function addProduce(produce: {
   expiration: string | Date | null;
   owner: string;
   image: string | null;
+  restockThreshold?: number;
 }) {
-  await prisma.produce.create({
-    data: {
+  const newProduce = await prisma.produce.upsert({
+    where: { name_owner: { name: produce.name, owner: produce.owner } },
+    update: {
       name: produce.name,
       type: produce.type,
       owner: produce.owner,
@@ -122,8 +124,49 @@ export async function addProduce(produce: {
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
       image: produce.image ? produce.image : null,
+      restockThreshold: produce.restockThreshold ?? 0,
+    },
+    create: {
+      name: produce.name,
+      type: produce.type,
+      owner: produce.owner,
+      location: produce.location,
+      quantity: produce.quantity,
+      unit: produce.unit,
+      expiration: produce.expiration ? new Date(produce.expiration) : null,
+      image: produce.image ? produce.image : null,
+      restockThreshold: produce.restockThreshold ?? 0,
     },
   });
+
+  // AUTO-ADD to shopping list if below threshold
+  if (newProduce.restockThreshold !== null && newProduce.quantity <= newProduce.restockThreshold) {
+    const shoppingList = await prisma.shoppingList.upsert({
+      where: { name_owner: { name: 'Auto Restock', owner: newProduce.owner } },
+      update: {},
+      create: {
+        name: 'Auto Restock',
+        owner: newProduce.owner,
+      },
+    });
+
+    const existingItem = await prisma.shoppingListItem.findFirst({
+      where: {
+        shoppingListId: shoppingList.id,
+        produceId: newProduce.id,
+      },
+    });
+
+    if (!existingItem) {
+      await prisma.shoppingListItem.create({
+        data: {
+          shoppingListId: shoppingList.id,
+          produceId: newProduce.id,
+          quantity: newProduce.restockThreshold, // or default quantity
+        },
+      });
+    }
+  }
 
   redirect('/view-pantry');
 }
@@ -144,7 +187,7 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     }
   }
 
-  await prisma.produce.update({
+  const updatedProduce = await prisma.produce.update({
     where: { id: produce.id },
     data: {
       name: produce.name,
@@ -155,8 +198,43 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       expiration,
       owner: produce.owner,
       image: produce.image,
+      restockThreshold: produce.restockThreshold ?? 0,
     },
   });
+
+  // Auto-add to shopping list if below threshold
+  if (updatedProduce.restockThreshold !== null && updatedProduce.quantity <= updatedProduce.restockThreshold) {
+    // Find or create user's shopping list
+    const shoppingList = await prisma.shoppingList.upsert({
+      where: { name_owner: { name: 'Auto Restock', owner: updatedProduce.owner } },
+      update: {},
+      create: {
+        name: 'Auto Restock',
+        owner: updatedProduce.owner,
+      },
+    });
+
+    // Check if item already exists in shopping list
+    const existingItem = await prisma.shoppingListItem.findFirst({
+      where: {
+        shoppingListId: shoppingList.id,
+        produceId: updatedProduce.id,
+      },
+    });
+
+    if (!existingItem) {
+      // Add item to shopping list
+      await prisma.shoppingListItem.create({
+        data: {
+          shoppingListId: shoppingList.id,
+          produceId: updatedProduce.id,
+          quantity: updatedProduce.restockThreshold, // or default quantity
+        },
+      });
+    }
+  }
+
+  return updatedProduce;
 }
 
 /**
@@ -219,9 +297,12 @@ export async function deleteShoppingList(id: number) {
 /**
  * Adds a new item to a shopping list.
  */
-export async function addShoppingListItem(
-  item: { shoppingListId: number; produceId: number; quantity: number; price?: number },
-) {
+export async function addShoppingListItem(item: {
+  shoppingListId: number;
+  produceId: number;
+  quantity: number;
+  price?: number;
+}) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,

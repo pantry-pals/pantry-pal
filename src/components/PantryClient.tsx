@@ -15,7 +15,9 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
         <Row className="mb-3">
           <Col className="d-flex justify-content-between align-items-center">
             <h1>Your Pantry at a Glance</h1>
-            <Button className="btn-add" onClick={() => setShowModal(true)}>+ Add Item</Button>
+            <Button className="btn-add" onClick={() => setShowModal(true)}>
+              + Add Item
+            </Button>
           </Col>
         </Row>
         <Row>
@@ -39,6 +41,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           expiration: null,
           image: null,
           owner,
+          restockThreshold: 0,
         }}
       />
     </main>
