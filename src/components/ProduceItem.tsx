@@ -19,6 +19,8 @@ const ProduceItem = ({
 }: Produce & { restockThreshold?: number }) => {
   const [showModal, setShowModal] = useState(false);
 
+  const safeRestock = restockThreshold ?? 1;
+
   return (
     <>
       <tr>
@@ -29,7 +31,7 @@ const ProduceItem = ({
           {quantity.toString()}
           {unit ? ` ${unit}` : ''}
         </td>
-        <td>{restockThreshold !== undefined ? restockThreshold : 'N/A'}</td>
+        <td>{safeRestock}</td>
         <td>{expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}</td>
         <td>
           <Button className="btn-edit" onClick={() => setShowModal(true)}>
@@ -52,7 +54,7 @@ const ProduceItem = ({
           expiration,
           owner,
           image,
-          restockThreshold,
+          restockThreshold: safeRestock,
         }}
       />
     </>
