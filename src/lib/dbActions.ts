@@ -204,7 +204,6 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
 
   // Auto-add to shopping list if below threshold
   if (updatedProduce.restockThreshold !== null && updatedProduce.quantity <= updatedProduce.restockThreshold) {
-    // Find or create user's shopping list
     const shoppingList = await prisma.shoppingList.upsert({
       where: { name_owner: { name: 'Auto Restock', owner: updatedProduce.owner } },
       update: {},
@@ -214,7 +213,6 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       },
     });
 
-    // Check if item already exists in shopping list
     const existingItem = await prisma.shoppingListItem.findFirst({
       where: {
         shoppingListId: shoppingList.id,
@@ -223,12 +221,11 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     });
 
     if (!existingItem) {
-      // Add item to shopping list
       await prisma.shoppingListItem.create({
         data: {
           shoppingListId: shoppingList.id,
           produceId: updatedProduce.id,
-          quantity: updatedProduce.restockThreshold, // or default quantity
+          quantity: updatedProduce.restockThreshold,
         },
       });
     }
