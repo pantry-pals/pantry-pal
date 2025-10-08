@@ -17,7 +17,7 @@ type ProduceValues = InferType<typeof EditProduceSchema>;
 interface EditProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce: Produce;
+  produce: Produce & { restockThreshold?: number | null };
 }
 
 const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
@@ -37,9 +37,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
   // Track dropdown state
-  const [unitChoice, setUnitChoice] = useState(
-    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
-  );
+  const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
   // Reset form values every time modal closes or produce changes
   useEffect(() => {
@@ -58,9 +56,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const handleClose = () => {
     reset({
       ...produce,
-      expiration: produce.expiration
-        ? produce.expiration.toISOString().split('T')[0]
-        : '',
+      expiration: produce.expiration ? produce.expiration.toISOString().split('T')[0] : '',
       image: produce.image ?? '',
     } as any);
     setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
@@ -72,6 +68,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       ...data,
       expiration: data.expiration ?? null,
       image: data.image === '' ? null : data.image,
+      restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
     });
     swal('Success', 'Your item has been updated', 'success', {
       timer: 2000,
@@ -146,6 +143,25 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.quantity?.message}</div>
               </Form.Group>
             </Col>
+            <Col xs={6} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.1}
+                  {...register('restockThreshold')}
+                  defaultValue={produce.restockThreshold ?? ''}
+                  placeholder="e.g., 2.5"
+                  className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
+                />
+                <div className="invalid-feedback">{errors.restockThreshold?.message}</div>
+                <Form.Text className="text-muted">
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Unit</Form.Label>

@@ -17,16 +17,25 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, expiration, ow
           </Col>
           <Card>
             <Card.Body>
-              <Button onClick={() => setShowModal(true)}>
-                Add New Item
-              </Button>
+              <Button onClick={() => setShowModal(true)}>Add New Item</Button>
             </Card.Body>
 
             {/* Modal component for editing produce item */}
             <AddProduceModal
               show={showModal}
               onHide={() => setShowModal(false)}
-              produce={{ id, name, quantity, unit, type, location, expiration, owner, image }}
+              produce={{
+                id,
+                name,
+                quantity,
+                unit,
+                type,
+                location,
+                expiration,
+                owner,
+                image,
+                restockThreshold: 1,
+              }}
             />
           </Card>
         </Col>

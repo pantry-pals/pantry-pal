@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable operator-linebreak, @typescript-eslint/indent, implicit-arrow-linebreak */
+
 import React, { useMemo, useState } from 'react';
 import { Container, Row, Col, Form, Button, Table, ButtonGroup } from 'react-bootstrap';
 import { Produce } from '@prisma/client';
@@ -34,10 +36,12 @@ function FlatTable({ rows }: { rows: Produce[] }) {
       </thead>
       <tbody>
         {rows.length ? (
-          rows.map((p) => <ProduceItem key={p.id} {...p} />)
+          rows.map((p) => <ProduceItem key={p.id} {...p} restockThreshold={p.restockThreshold ?? 1} />)
         ) : (
           <tr>
-            <td colSpan={6} className="text-center">No items found</td>
+            <td colSpan={6} className="text-center">
+              No items found
+            </td>
           </tr>
         )}
       </tbody>
@@ -97,7 +101,7 @@ function GroupedCardSections({ groups }: { groups: Array<[string, Produce[]]> })
 const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<
-  '' | 'name-asc' | 'location-asc' | 'type-asc' | 'expiration-soon' | 'qty-desc' | 'qty-asc'
+    '' | 'name-asc' | 'location-asc' | 'type-asc' | 'expiration-soon' | 'qty-desc' | 'qty-asc'
   >('');
   const [groupByLocation, setGroupByLocation] = useState(false);
   const [view, setView] = useState<ViewMode>('table');
@@ -107,19 +111,35 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
     let arr = [...initialProduce];
 
     if (q) {
-      arr = arr.filter((p) => p.name.toLowerCase().includes(q)
-        || (p.type?.toLowerCase().includes(q) ?? false)
-        || (p.location?.toLowerCase().includes(q) ?? false));
+      arr = arr.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.type?.toLowerCase().includes(q) ?? false) ||
+          (p.location?.toLowerCase().includes(q) ?? false),
+      );
     }
 
     switch (sort) {
-      case 'name-asc': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
-      case 'location-asc': arr.sort((a, b) => (a.location ?? '').localeCompare(b.location ?? '')); break;
-      case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
-      case 'expiration-soon': arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration)); break;
-      case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
-      case 'qty-asc': arr.sort((a, b) => (a.quantity ?? 0) - (b.quantity ?? 0)); break;
-      default: break;
+      case 'name-asc':
+        arr.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'location-asc':
+        arr.sort((a, b) => (a.location ?? '').localeCompare(b.location ?? ''));
+        break;
+      case 'type-asc':
+        arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
+        break;
+      case 'expiration-soon':
+        arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
+        break;
+      case 'qty-desc':
+        arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0));
+        break;
+      case 'qty-asc':
+        arr.sort((a, b) => (a.quantity ?? 0) - (b.quantity ?? 0));
+        break;
+      default:
+        break;
     }
 
     return arr;
@@ -138,19 +158,33 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
     const sortInside = (list: Produce[]) => {
       const arr = [...list];
       switch (sort) {
-        case 'name-asc': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
-        case 'type-asc': arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? '')); break;
-        case 'expiration-soon': arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration)); break;
-        case 'qty-desc': arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0)); break;
-        case 'qty-asc': arr.sort((a, b) => (a.quantity ?? 0) - (b.quantity ?? 0)); break;
-        default: break;
+        case 'name-asc':
+          arr.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'type-asc':
+          arr.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
+          break;
+        case 'expiration-soon':
+          arr.sort((a, b) => toTime(a.expiration) - toTime(b.expiration));
+          break;
+        case 'qty-desc':
+          arr.sort((a, b) => (b.quantity ?? 0) - (a.quantity ?? 0));
+          break;
+        case 'qty-asc':
+          arr.sort((a, b) => (a.quantity ?? 0) - (b.quantity ?? 0));
+          break;
+        default:
+          break;
       }
       return arr;
     };
 
     const sections: Array<[string, Produce[]]> = [];
     for (const loc of LOCATION_ORDER) {
-      if (map.has(loc)) { sections.push([loc, sortInside(map.get(loc)!)]); map.delete(loc); }
+      if (map.has(loc)) {
+        sections.push([loc, sortInside(map.get(loc)!)]);
+        map.delete(loc);
+      }
     }
     for (const [loc, items] of Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))) {
       sections.push([loc, sortInside(items)]);
@@ -158,7 +192,10 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
     return sections;
   }, [filteredSorted, groupByLocation, sort]);
 
-  const clear = () => { setSearch(''); setSort(''); };
+  const clear = () => {
+    setSearch('');
+    setSort('');
+  };
 
   return (
     <>
@@ -174,11 +211,7 @@ const ProduceListWithGrouping: React.FC<Props> = ({ initialProduce }) => {
             style={{ maxWidth: '280px' }}
           />
 
-          <Form.Select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as any)}
-            style={{ maxWidth: '180px' }}
-          >
+          <Form.Select value={sort} onChange={(e) => setSort(e.target.value as any)} style={{ maxWidth: '180px' }}>
             <option value="">Sort by…</option>
             <option value="name-asc">Name (A–Z)</option>
             <option value="location-asc">Location (A–Z)</option>
