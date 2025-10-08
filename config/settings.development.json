@@ -28,7 +28,7 @@
       "quantity": 15.00,
       "unit": "pieces",
       "expiration": "2025-11-30T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     },
     {
       "name": "Carrot",
@@ -37,7 +37,7 @@
       "quantity": 10.00,
       "unit": "pieces",
       "expiration": "2025-10-15T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     },
     {
       "name": "Broccoli",
@@ -64,7 +64,7 @@
       "quantity": 4.00,
       "unit": "fillets",
       "expiration": "2026-02-15T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     }
   ],
 
