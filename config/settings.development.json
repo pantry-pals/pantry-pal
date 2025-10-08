@@ -28,7 +28,7 @@
       "quantity": 15.00,
       "unit": "pieces",
       "expiration": "2025-11-30T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     },
     {
       "name": "Carrot",
@@ -37,7 +37,7 @@
       "quantity": 10.00,
       "unit": "pieces",
       "expiration": "2025-10-15T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     },
     {
       "name": "Broccoli",
@@ -64,30 +64,139 @@
       "quantity": 4.00,
       "unit": "fillets",
       "expiration": "2026-02-15T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "admin@foo.com"
     }
   ],
 
   "defaultShoppingList": [
-  {
-    "name": "Weekly Groceries",
-    "owner": "john@foo.com",
-    "items": [
-      { "produceName": "Banana", "quantity": 6, "price": 0.5 },
-      { "produceName": "Apple", "quantity": 4, "price": 0.75 },
-      { "produceName": "Carrot", "quantity": 3, "price": 0.3 }
-    ]
-  },
-  {
-    "name": "Party Prep",
-    "owner": "admin@foo.com",
-    "items": [
-      { "produceName": "Broccoli", "quantity": 2, "price": 1.2 },
-      { "produceName": "Chicken Breast", "quantity": 2, "price": 5.0 },
-      { "produceName": "Salmon Fillet", "quantity": 1, "price": 7.5 }
-    ]
-  }
-]
+    {
+      "name": "Weekly Groceries",
+      "owner": "john@foo.com",
+      "items": [
+        { "produceName": "Banana", "quantity": 6, "price": 0.5 },
+        { "produceName": "Apple", "quantity": 4, "price": 0.75 },
+        { "produceName": "Carrot", "quantity": 3, "price": 0.3 }
+      ]
+    },
+    {
+      "name": "Party Prep",
+      "owner": "admin@foo.com",
+      "items": [
+        { "produceName": "Broccoli", "quantity": 2, "price": 1.2 },
+        { "produceName": "Chicken Breast", "quantity": 2, "price": 5.0 },
+        { "produceName": "Salmon Fillet", "quantity": 1, "price": 7.5 }
+      ]
+    }
+  ],
 
-
+  "defaultRecipes": [
+    {
+      "title": "Chicken Katsu Curry",
+      "cuisine": "Japanese",
+      "description": "Crispy panko chicken cutlet with Japanese curry over rice.",
+      "imageUrl": "https://feedgrump.com/wp-content/uploads/2023/05/hawaii-chicken-katsu-curry-plating-feature-500x500.jpg",
+      "dietary": ["Dairy-Free"],
+      "ingredients": ["chicken thighs", "panko", "eggs", "flour", "oil", "onion", "carrot", "potato", "curry roux", "chicken stock", "rice"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Beef Wellington",
+      "cuisine": "British",
+      "description": "Tenderloin wrapped with mushroom duxelles, prosciutto, puff pastry.",
+      "imageUrl": "https://static01.nyt.com/images/2019/12/13/dining/mc-beef-wellington/mc-beef-wellington-mediumSquareAt3X-v2.jpg",
+      "dietary": ["Contains Dairy"],
+      "ingredients": ["beef tenderloin", "mushrooms", "shallots", "garlic", "thyme", "prosciutto", "puff pastry", "egg", "dijon mustard", "butter"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Chicken Enchiladas",
+      "cuisine": "Mexican",
+      "description": "Tortillas filled with shredded chicken, topped with enchilada sauce and cheese.",
+      "imageUrl": "https://www.tasteofhome.com/wp-content/uploads/2024/03/Easy-Chicken-Enchiladas_FT24_32264_JR_0312_3.jpg?fit=700%2C1024",
+      "dietary": ["Contains Dairy"],
+      "ingredients": ["corn tortillas", "shredded chicken", "enchilada sauce", "cheddar cheese", "onion", "cilantro", "cumin", "chili powder", "sour cream (optional)"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Spring Rolls",
+      "cuisine": "Vietnamese",
+      "description": "Crispy rolls with pork, shrimp, and veggies; serve with nuoc cham.",
+      "imageUrl": "https://themom100.com/wp-content/uploads/2024/01/vietnamese-spring-rolls-5580.jpg",
+      "dietary": ["Dairy-Free"],
+      "ingredients": ["spring roll wrappers", "ground pork", "shrimp", "cabbage", "carrot", "glass noodles", "garlic", "fish sauce", "oil"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Loco Moco",
+      "cuisine": "Hawaiian",
+      "description": "Beef patty over rice, brown gravy, sunny-side egg.",
+      "imageUrl": "https://www.tasteofhome.com/wp-content/uploads/2025/01/EXPS_TOHD25_279299_NancyMock_07.jpg",
+      "dietary": ["Contains Dairy"],
+      "ingredients": ["ground beef", "rice", "onion", "beef stock", "butter", "flour", "egg"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Garlic Shrimp",
+      "cuisine": "Hawaiian",
+      "description": "Garlicky butter shrimp with rice and lemon.",
+      "imageUrl": "https://www.allrecipes.com/thmb/us00EX6PHgu4Dwfq9xfH6SyliA0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/220597-Simple-garlic-shrimp-beauty3x4_38539-63f687e1ec6a41e88dfb5a9c9021e194.jpg",
+      "dietary": ["Gluten-Free"],
+      "ingredients": ["shrimp", "garlic", "butter", "olive oil", "paprika", "lemon", "rice"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Pad Thai",
+      "cuisine": "Thai",
+      "description": "Stir-fried rice noodles with tamarind sauce, egg, tofu/shrimp, peanuts.",
+      "imageUrl": "https://inquiringchef.com/wp-content/uploads/2023/02/Authentic-Pad-Thai_square-1908.jpg",
+      "dietary": ["Contains Nuts"],
+      "ingredients": ["rice noodles", "tamarind", "fish sauce", "palm sugar", "egg", "tofu", "shrimp", "bean sprouts", "peanuts", "lime"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Margherita Pizza",
+      "cuisine": "Italian",
+      "description": "Tomato, mozzarella, basil on thin crust.",
+      "imageUrl": "https://kitchenswagger.com/wp-content/uploads/2023/05/margherita-pizza-close.jpg",
+      "dietary": ["Vegetarian", "Contains Dairy"],
+      "ingredients": ["pizza dough", "san marzano tomatoes", "mozzarella", "basil", "olive oil", "salt"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Butter Chicken",
+      "cuisine": "Indian",
+      "description": "Creamy tomato-butter sauce with spiced chicken.",
+      "imageUrl": "https://www.allrecipes.com/thmb/8L5gq8V7Kyl3qfoDe5vhCU_rvZI=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/AR-141169-Easy-Indian-Butter-Chicken-DDMFS-4x3-beauty-588ff54d1e0f4a0788906e851e27d540.jpg",
+      "dietary": ["Contains Dairy", "Gluten-Free"],
+      "ingredients": ["chicken", "yogurt", "garam masala", "tomato puree", "butter", "cream", "garlic", "ginger"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Shakshuka",
+      "cuisine": "Middle Eastern",
+      "description": "Eggs poached in spicy tomato-pepper sauce.",
+      "imageUrl": "https://downshiftology.com/wp-content/uploads/2023/12/Shakshuka-main-1-500x500.jpg",
+      "dietary": ["Vegetarian", "Gluten-Free"],
+      "ingredients": ["egg", "tomatoes", "bell pepper", "onion", "garlic", "paprika", "cumin", "olive oil"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Bibimbap",
+      "cuisine": "Korean",
+      "description": "Mixed rice bowl with veggies, beef, egg, and gochujang.",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/44/Dolsot-bibimbap.jpg",
+      "dietary": ["Dairy-Free"],
+      "ingredients": ["rice", "spinach", "bean sprouts", "carrot", "shiitake", "beef", "egg", "gochujang", "sesame oil"],
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Pho Ga",
+      "cuisine": "Vietnamese",
+      "description": "Light chicken broth with rice noodles and herbs.",
+      "imageUrl": "https://delightfulplate.com/wp-content/uploads/2019/04/Pho-Ga-Hanoi-Vietnamese-Chicken-Noodle-Soup.jpg",
+      "dietary": ["Dairy-Free", "Gluten-Free"],
+      "ingredients": ["chicken", "rice noodles", "onion", "ginger", "star anise", "cinnamon", "fish sauce", "scallion", "cilantro"],
+      "owner": "admin@foo.com"
+    }
+  ]
 }

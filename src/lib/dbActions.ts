@@ -248,6 +248,13 @@ export async function deleteProduce(id: number) {
   redirect('/view-pantry');
 }
 
+export async function getUserProduceByEmail(owner: string) {
+  return prisma.produce.findMany({
+    where: { owner },
+    select: { name: true },
+  });
+}
+
 /**
  * Adds a new shopping list.
  */

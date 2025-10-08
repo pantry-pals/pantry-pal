@@ -1,60 +1,36 @@
-import { Col, Container, Row } from 'react-bootstrap';
-import RecipeCard from '@/components/RecipeCard';
-import AddRecipeCard from '@/components/AddRecipeCard';
+import { Container } from 'react-bootstrap';
+import RecipesClient from '@/components/RecipesClient';
 import { getRecipes } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
+import { getUserProduceByEmail } from '@/lib/dbActions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function RecipeListPage() {
-  const [recipes, session] = await Promise.all([
-    getRecipes(),
-    getServerSession(authOptions),
-  ]);
+  const session = await getServerSession(authOptions);
 
   let isAdmin = false;
+  let pantry: any[] = [];
+
   if (session?.user?.email) {
     const u = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { role: true },
     });
     isAdmin = u?.role === 'ADMIN';
+    pantry = await getUserProduceByEmail(session.user.email);
   }
+
+  const recipes = await getRecipes();
 
   return (
     <main>
       <Container id="list" fluid className="py-3">
         <Container>
-          <Row>
-            <Col>
-              <h2 className="text-center">Recipes</h2>
-
-              <Row xs={1} md={2} lg={3} className="g-4 mt-4">
-                {recipes.map((r) => (
-                  <Col key={r.id}>
-                    <RecipeCard
-                      id={r.id}
-                      title={r.title}
-                      description={r.description}
-                      imageUrl={r.imageUrl ?? undefined}
-                      cuisine={r.cuisine}
-                      dietary={r.dietary ?? []}
-                      ingredients={r.ingredients ?? []}
-                    />
-                  </Col>
-                ))}
-
-                {/* Add Recipe Card (admin only) */}
-                {isAdmin && (
-                  <Col>
-                    <AddRecipeCard />
-                  </Col>
-                )}
-              </Row>
-            </Col>
-          </Row>
+          <h2 className="text-center mb-4">Recipes</h2>
+          <RecipesClient recipes={recipes} produce={pantry} isAdmin={isAdmin} />
         </Container>
       </Container>
     </main>

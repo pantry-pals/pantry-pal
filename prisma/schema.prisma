@@ -121,5 +121,6 @@ model Recipe {
 
   @@index([title])
   @@index([cuisine])
+  @@unique([title, owner], name: "title_owner")
 }
 
