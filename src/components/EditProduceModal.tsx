@@ -17,7 +17,7 @@ type ProduceValues = InferType<typeof EditProduceSchema>;
 interface EditProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce: Produce;
+  produce: Produce & { restockThreshold?: number | null };
 }
 
 const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
