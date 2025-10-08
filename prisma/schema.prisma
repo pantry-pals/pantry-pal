@@ -104,3 +104,22 @@ model ShoppingListItem {
 
   @@unique([shoppingListId, produceId])
 }
+
+model Recipe {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  imageUrl    String?
+  cuisine     String
+  dietary     String[]          // e.g., ["Vegan","Gluten-Free"]
+  ingredients String[]          // e.g., ["onion","tomato","basil"]
+  owner       String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([title])
+  @@index([cuisine])
+  @@unique([title, owner], name: "title_owner")
+}
+
