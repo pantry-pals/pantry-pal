@@ -97,7 +97,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           expiration: null,
           image: null,
           owner,
-        }}
+        } as any}
       />
     </main>
   );
