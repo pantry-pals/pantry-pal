@@ -30,6 +30,7 @@ function FlatTable({ rows }: { rows: Produce[] }) {
           <th>Type</th>
           <th>Location</th>
           <th>Quantity</th>
+          <th>Restock Threshhold</th>
           <th>Expiration</th>
           <th>Edit</th>
         </tr>
