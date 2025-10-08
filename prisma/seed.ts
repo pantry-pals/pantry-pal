@@ -1,7 +1,6 @@
 import { PrismaClient, Role, Condition } from '@prisma/client';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
-import ProduceCard from '@/components/ProduceCard';
 
 const prisma = new PrismaClient();
 
@@ -103,8 +102,41 @@ async function main() {
         },
       });
     }
-}
+  }
 
+  // Seed Recipe
+  if ((config as any).defaultRecipes?.length) {
+    for (const r of (config as any).defaultRecipes as Array<{
+      title: string;
+      cuisine: string;
+      description?: string;
+      imageUrl?: string;
+      dietary?: string[];
+      ingredients?: string[];
+      owner: string;
+    }>) {
+      console.log(`  upsert recipe: ${r.title} (${r.owner})`);
+      await prisma.recipe.upsert({
+        where: { title_owner: { title: r.title, owner: r.owner } },
+        update: {
+          cuisine: r.cuisine,
+          description: r.description ?? null,
+          imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
+          dietary: r.dietary ?? [],
+          ingredients: r.ingredients ?? [],
+        },
+        create: {
+          title: r.title,
+          cuisine: r.cuisine,
+          description: r.description ?? null,
+          imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
+          dietary: r.dietary ?? [],
+          ingredients: r.ingredients ?? [],
+          owner: r.owner,
+        },
+      });
+    }
+  }
 
   console.log('Seeding complete!');
 }
