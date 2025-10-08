@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap';
 import EditProduceModal from './EditProduceModal';
 import '../styles/buttons.css';
 
+/* eslint-disable react/require-default-props */
 const ProduceItem = ({
   id,
   name,
@@ -14,7 +15,7 @@ const ProduceItem = ({
   expiration,
   owner,
   image,
-  restockThreshold,
+  restockThreshold = 1,
 }: Produce & { restockThreshold?: number }) => {
   const [showModal, setShowModal] = useState(false);
 

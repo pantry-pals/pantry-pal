@@ -99,7 +99,6 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           owner,
           restockThreshold: 0,
         }}
-        } as any}
       />
     </main>
   );
