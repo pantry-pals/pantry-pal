@@ -71,6 +71,7 @@ model Produce {
   name              String
   type              String
   location          String
+  storage           String
   quantity          Float
   unit              String
   expiration        DateTime?

@@ -3,7 +3,7 @@
 import { Button, Col, Container, Row, Nav } from 'react-bootstrap';
 import { useMemo, useState } from 'react';
 import AddProduceModal from './AddProduceModal';
-import ProduceListWithGrouping from './SearchBar';
+import ProduceListWithGrouping from './produce/ProduceListWithGrouping';
 import '../styles/buttons.css';
 
 function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner: string }) {
@@ -92,6 +92,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           name: '',
           type: '',
           location: '',
+          storage: '',
           quantity: 0,
           unit: 'kg',
           expiration: null,
