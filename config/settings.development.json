@@ -15,7 +15,8 @@
     {
       "name": "Banana",
       "type": "fruit",
-      "location": "pantry",
+      "location": "House 1",
+      "storage": "pantry",
       "quantity": 20.00,
       "unit": "pieces",
       "expiration": "2025-12-31T00:00:00.000Z",
@@ -24,7 +25,8 @@
     {
       "name": "Apple",
       "type": "fruit",
-      "location": "pantry",
+      "location": "House 1",
+      "storage": "pantry",
       "quantity": 15.00,
       "unit": "pieces",
       "expiration": "2025-11-30T00:00:00.000Z",
@@ -33,7 +35,8 @@
     {
       "name": "Carrot",
       "type": "vegetable",
-      "location": "fridge",
+      "location": "House 2",
+      "storage": "fridge",
       "quantity": 10.00,
       "unit": "pieces",
       "expiration": "2025-10-15T00:00:00.000Z",
@@ -42,7 +45,8 @@
     {
       "name": "Broccoli",
       "type": "vegetable",
-      "location": "fridge",
+      "location": "House 2",
+      "storage": "fridge",
       "quantity": 8.00,
       "unit": "heads",
       "expiration": "2025-10-10T00:00:00.000Z",
@@ -51,7 +55,8 @@
     {
       "name": "Chicken Breast",
       "type": "meat",
-      "location": "freezer",
+      "location": "House 1",
+      "storage": "freezer",
       "quantity": 5.00,
       "unit": "pieces",
       "expiration": "2026-01-20T00:00:00.000Z",
@@ -60,7 +65,8 @@
     {
       "name": "Salmon Fillet",
       "type": "meat",
-      "location": "freezer",
+      "location": "House 2",
+      "storage": "freezer",
       "quantity": 4.00,
       "unit": "fillets",
       "expiration": "2026-02-15T00:00:00.000Z",

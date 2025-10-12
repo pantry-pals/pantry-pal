@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Produce } from '@prisma/client';
 import AddProduceModal from './AddProduceModal';
 
-const AddStuffForm = ({ id, name, quantity, unit, type, location, expiration, owner, image }: Produce) => {
+const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expiration, owner, image }: Produce) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -31,6 +31,7 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, expiration, ow
                 unit,
                 type,
                 location,
+                storage,
                 expiration,
                 owner,
                 image,
