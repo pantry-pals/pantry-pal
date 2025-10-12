@@ -24,7 +24,7 @@ test('Add Produce modal opens and form loads', async t => {
     await t.click(addButton);
 
     // Check that the modal appeared and has a form
-    const addModal = Selector('.modal-dialog');
+    const addModal = Selector('.modal.show');
     await t.expect(addModal.exists).ok('Expected AddProduceModal to appear');
 
     const addForm = addModal.find('form');
