@@ -1,10 +1,10 @@
 'use client';
 
 import { Card, ListGroup, Button, Badge } from 'react-bootstrap';
-// import Link from 'next/link';
 import { useState } from 'react';
+import { Trash } from 'react-bootstrap-icons';
 import ViewShoppingListModal from './ViewShoppingListModal';
-// import { Trash } from "react-bootstrap-icons";
+import DeleteShoppingListModal from './DeleteShoppingListModal';
 
 type ShoppingListCardProps = {
   shoppingList: any;
@@ -18,7 +18,8 @@ const formatDate = (d?: Date | string | null) => {
 };
 
 export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps) {
-  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const totalItems = shoppingList.items?.length || 0;
   const totalCost = shoppingList.items?.reduce((sum: number, item: any) => {
     const price = item.price ? parseFloat(item.price.toString()) : 0;
@@ -53,26 +54,30 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
       </Card.Body>
 
       <Card.Footer className="d-flex">
-        <Button className="me-2 editbutton" onClick={() => setShowModal(true)}>
+        <Button className="me-2 editbutton" onClick={() => setShowViewModal(true)}>
           View
         </Button>
 
-        {/* Button to delete a shopping list; currently disabled until we can implement */}
-
-        {/* <Button
+        <Button
           variant="danger"
-          className="deletebutton d-flex align-items-center justify-content-center"
-          href={`/shoppinglist/delete/${shoppingList.id}`}
+          className="d-flex align-items-center justify-content-center"
+          onClick={() => setShowDeleteModal(true)}
           style={{ width: '40px', height: '40px', padding: 0 }}
         >
           <Trash color="white" size={18} />
-        </Button> */}
+        </Button>
 
       </Card.Footer>
 
       <ViewShoppingListModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        shoppingList={shoppingList}
+      />
+
+      <DeleteShoppingListModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
         shoppingList={shoppingList}
       />
     </Card>
