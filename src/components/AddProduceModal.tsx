@@ -60,6 +60,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       ...data,
       expiration: data.expiration ?? null,
       image: data.image ? data.image : null,
+      restockThreshold: Number(data.restockThreshold ?? 0),
     });
     swal('Success', 'Your item has been added', 'success', {
       timer: 2000,
@@ -77,7 +78,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Row className="mb-3">
-            <Col xs={4} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Name</Form.Label>
                 <Form.Control
@@ -102,16 +103,30 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <div className="invalid-feedback">{errors.type?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center">
+          </Row>
+          <Row>
+            <Col xs={5} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
                   className={`${errors.location ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Freezer"
+                  placeholder="e.g., House, Work"
                 />
                 <div className="invalid-feedback">{errors.location?.message}</div>
+              </Form.Group>
+            </Col>
+            <Col xs={5} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Control
+                  type="text"
+                  {...register('storage')}
+                  className={`${errors.storage ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Freezer"
+                />
+                <div className="invalid-feedback">{errors.storage?.message}</div>
               </Form.Group>
             </Col>
           </Row>
@@ -186,6 +201,40 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                   placeholder="Image URL"
                 />
                 <div className="invalid-feedback">{errors.image?.message}</div>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-1" style={{ fontWeight: '500' }}>
+                  Restock Threshold
+                </Form.Label>
+
+                <div className="d-flex justify-content-center mb-2">
+                  <Form.Control
+                    type="number"
+                    step={0.1}
+                    {...register('restockThreshold')}
+                    defaultValue={produce.restockThreshold ?? ''}
+                    placeholder="e.g., 2.5"
+                    className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
+                    style={{ width: '100px', textAlign: 'center' }}
+                  />
+                </div>
+
+                <Form.Text
+                  className="text-muted d-block mx-auto"
+                  style={{
+                    maxWidth: '320px',
+                    fontSize: '0.85rem',
+                    lineHeight: '1.3',
+                  }}
+                >
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+
+                <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
               </Form.Group>
             </Col>
           </Row>

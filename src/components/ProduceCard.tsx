@@ -42,7 +42,10 @@ export default function ProduceCard({ produce }: Props) {
 
         <ListGroup variant="flush">
           <ListGroup.Item>
-            <strong>Located At:</strong>
+            <strong>Location: </strong>
+            {produce.storage || 'Not Available'}
+            {' '}
+            at
             {' '}
             {produce.location || 'Not Available'}
           </ListGroup.Item>

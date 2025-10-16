@@ -1,7 +1,7 @@
 import { Selector, t } from 'testcafe';
 
 fixture('Forgot Password Page')
-    .page('https://pantry-pal-gamma.vercel.app/auth/forgot-password');
+    .page('http://localhost:3000/auth/forgot-password');
 
 // ✅ Test that the Forgot Password page loads
 test('Forgot Password page loads', async t => {

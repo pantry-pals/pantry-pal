@@ -71,12 +71,14 @@ model Produce {
   name              String
   type              String
   location          String
+  storage           String
   quantity          Float
   unit              String
   expiration        DateTime?
   owner             String
   image             String?
   ShoppingListItems ShoppingListItem[]
+  restockThreshold  Float?
 
   @@unique([name, owner])
 }
@@ -120,5 +122,6 @@ model Recipe {
 
   @@index([title])
   @@index([cuisine])
+  @@unique([title, owner], name: "title_owner")
 }
 

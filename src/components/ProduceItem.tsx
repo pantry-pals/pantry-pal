@@ -4,22 +4,42 @@ import { Button } from 'react-bootstrap';
 import EditProduceModal from './EditProduceModal';
 import '../styles/buttons.css';
 
-const ProduceItem = ({ id, name, quantity, unit, type, location, expiration, owner, image }: Produce) => {
+/* eslint-disable react/require-default-props */
+const ProduceItem = ({
+  id,
+  name,
+  quantity,
+  unit,
+  type,
+  location,
+  storage,
+  expiration,
+  owner,
+  image,
+  restockThreshold = 1,
+}: Produce & { restockThreshold?: number }) => {
   const [showModal, setShowModal] = useState(false);
+
+  const safeRestock = restockThreshold ?? 1;
 
   return (
     <>
       <tr>
         <td>{name}</td>
         <td>{type}</td>
-        <td>{location}</td>
+        <td>
+          {storage}
+          {' '}
+          at
+          {' '}
+          {location}
+        </td>
         <td>
           {quantity.toString()}
           {unit ? ` ${unit}` : ''}
         </td>
-        <td>
-          {expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}
-        </td>
+        <td>{safeRestock}</td>
+        <td>{expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}</td>
         <td>
           <Button className="btn-edit" onClick={() => setShowModal(true)}>
             Edit
@@ -31,7 +51,19 @@ const ProduceItem = ({ id, name, quantity, unit, type, location, expiration, own
       <EditProduceModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        produce={{ id, name, quantity, unit, type, location, expiration, owner, image }}
+        produce={{
+          id,
+          name,
+          quantity,
+          unit,
+          type,
+          location,
+          storage,
+          expiration,
+          owner,
+          image,
+          restockThreshold: safeRestock,
+        }}
       />
     </>
   );
