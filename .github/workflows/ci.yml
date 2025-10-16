@@ -27,5 +27,5 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Run TestCafe Acceptance Tests on Vercel
-        run: npm run test-acceptance-vercel
+      - name: Run TestCafe Acceptance Tests
+        run: npm run test-acceptance-ci

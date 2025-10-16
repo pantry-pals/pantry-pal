@@ -1,7 +1,7 @@
 import { Selector, t } from 'testcafe';
 
 fixture('About Us Page')
-    .page('https://pantry-pal-gamma.vercel.app/aboutus');
+    .page('http://localhost:3000/aboutus');
 
 test('About Us page loads', async t => {
     // Check for main heading
@@ -9,6 +9,7 @@ test('About Us page loads', async t => {
     await t.expect(mainHeading.exists).ok('Expected main heading "About Pantry Pal"');
 
     // Check for a secondary heading
+    console.log('Checking for subheading "Why We Built It"');
     const subHeading = Selector('h2').withText('Why We Built It');
     await t.expect(subHeading.exists).ok('Expected subheading "Why We Built It"');
 
