@@ -28,8 +28,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run TestCafe Acceptance Tests
-        env:
-          NEXTAUTH_URL = "http://localhost:3000"
-          NEXTAUTH_SECRET = "nQQY7B01qutekn5BidxhTU9oK8zPtmypzIkM2fQomY6NxfTV1HRmHmf3GPuQ0f352u73g4gq3Yss2PeZprlSr4jt32vv4f5dX7oWBsJ89zKzc5qr3DmenhLEoq9vz2Lv5lQY3behyeXnN6jJ3Qne5TAsw44cbqVUUnlvX49fIqZnZH2g7EfeabbSikcNTsBMX5jTS6O10HIVdyw02ynxxn1NNbKqeFzEGk27vojrif7FKasT9CuIMQsyooDbxFwndN4kxWa2PsSWqQ6sSq8MoUByKaUkCB8vV6w2UkSsll6tcp1NRf7piqb8Im4fDaDZ"
-          DATABASE_URL = "postgres://da09cf69a4333e8101eb25ff7fa6cb0742f1a1a560f450532ce6218605759dcb:sk_-smQsNrt25nE7eF_8hh4h@db.prisma.io:5432/postgres?sslmode=require"
         run: npm run test-acceptance-ci
