@@ -207,7 +207,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row>
             <Col xs={12} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-1" style={{ fontWeight: '500' }}>
+                <Form.Label className="mb-0">
                   Restock Threshold
                 </Form.Label>
 
@@ -216,10 +216,9 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     type="number"
                     step={0.5}
                     {...register('restockThreshold')}
-                    defaultValue={produce.restockThreshold ?? ''}
-                    placeholder="e.g., 2.5"
+                    placeholder="e.g., 0.5"
                     className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                    style={{ width: '100px', textAlign: 'center' }}
+                    style={{ width: '100px' }}
                   />
                 </div>
 

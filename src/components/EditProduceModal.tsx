@@ -231,9 +231,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                     step={0.5}
                     {...register('restockThreshold')}
                     defaultValue={produce.restockThreshold ?? ''}
-                    placeholder="e.g., 2.5"
+                    placeholder="e.g., 0.5"
                     className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                    style={{ width: '100px', textAlign: 'center' }}
+                    style={{ width: '100px' }}
                   />
                 </div>
                 <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>

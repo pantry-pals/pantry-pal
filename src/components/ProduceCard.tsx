@@ -4,7 +4,9 @@ import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
 import Link from 'next/link';
 import type { Produce } from '@prisma/client';
 import { useState } from 'react';
+import { Trash } from 'react-bootstrap-icons';
 import EditProduceModal from './EditProduceModal';
+import DeleteProduceModal from './DeleteProduceModal';
 
 type Props = { produce: Produce };
 
@@ -17,7 +19,8 @@ const formatDate = (d?: Date | string | null) => {
 
 export default function ProduceCard({ produce }: Props) {
   const imageSrc = produce.image || '/no-image.png'; // default image if none provided
-  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   return (
     <Card className="h-100 mb-3 image-shadow">
@@ -53,6 +56,7 @@ export default function ProduceCard({ produce }: Props) {
             <strong>Quantity:</strong>
             {' '}
             {typeof produce.quantity === 'number' ? produce.quantity : 'Not Available'}
+            {produce.unit ? ` ${produce.unit}` : ''}
           </ListGroup.Item>
           <ListGroup.Item>
             <strong>Expiration:</strong>
@@ -61,19 +65,31 @@ export default function ProduceCard({ produce }: Props) {
           </ListGroup.Item>
         </ListGroup>
         <Card.Footer className="d-flex">
-          <Button className="me-2 editbutton" onClick={() => setShowModal(true)}>
+          <Button className="me-2 btn-edit" onClick={() => setShowEditModal(true)}>
             Edit
           </Button>
-          <Button variant="danger" className="deletebutton" href={`/delete/${produce.id}`}>
-            Delete
+          <Button
+            variant="danger"
+            className="btn-delete"
+            // style={{ width: '100px' }}
+            onClick={() => setShowDeleteModal(true)}
+          >
+            <Trash color="white" size={18} />
           </Button>
         </Card.Footer>
       </Card.Body>
 
       {/* Modal component for editing produce item */}
       <EditProduceModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        produce={produce}
+      />
+
+      {/* Modal component for deleting produce item */}
+      <DeleteProduceModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
         produce={produce}
       />
     </Card>
