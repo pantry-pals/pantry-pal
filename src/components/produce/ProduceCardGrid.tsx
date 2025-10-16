@@ -2,7 +2,7 @@
 
 import { Row, Col } from 'react-bootstrap';
 import { Produce } from '@prisma/client';
-import ProduceCard from '../ProduceCard';
+import ProduceCard from './ProduceCard';
 
 const ProduceCardGrid = ({ rows }: { rows: Produce[] }) => {
   if (!rows.length) return <div className="text-center">No items found</div>;

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Button, Col, Modal, Row } from 'react-bootstrap';
 import { deleteProduce } from '@/lib/dbActions';
-import '../styles/buttons.css';
+import '../../styles/buttons.css';
 import { Produce } from '@prisma/client';
 
 interface DeleteProduceModalProps {

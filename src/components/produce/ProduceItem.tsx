@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Trash } from 'react-bootstrap-icons';
 import EditProduceModal from './EditProduceModal';
-import '../styles/buttons.css';
+import '../../styles/buttons.css';
 import DeleteProduceModal from './DeleteProduceModal';
 
 /* eslint-disable react/require-default-props */

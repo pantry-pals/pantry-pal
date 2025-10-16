@@ -2,7 +2,7 @@
 
 import { Table } from 'react-bootstrap';
 import { Produce } from '@prisma/client';
-import ProduceItem from '../ProduceItem';
+import ProduceItem from './ProduceItem';
 
 const ProduceTable = ({ rows }: { rows: Produce[] }) => (
   <Table striped bordered hover style={{ textAlign: 'center' }}>
