@@ -12,6 +12,7 @@ const ProduceItem = ({
   unit,
   type,
   location,
+  storage,
   expiration,
   owner,
   image,
@@ -26,7 +27,13 @@ const ProduceItem = ({
       <tr>
         <td>{name}</td>
         <td>{type}</td>
-        <td>{location}</td>
+        <td>
+          {storage}
+          {' '}
+          at
+          {' '}
+          {location}
+        </td>
         <td>
           {quantity.toString()}
           {unit ? ` ${unit}` : ''}
@@ -51,6 +58,7 @@ const ProduceItem = ({
           unit,
           type,
           location,
+          storage,
           expiration,
           owner,
           image,

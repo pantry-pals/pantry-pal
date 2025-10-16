@@ -106,6 +106,7 @@ export async function addProduce(produce: {
   name: string;
   type: string;
   location: string;
+  storage: string;
   quantity: number;
   unit: string;
   expiration: string | Date | null;
@@ -120,6 +121,7 @@ export async function addProduce(produce: {
       type: produce.type,
       owner: produce.owner,
       location: produce.location,
+      storage: produce.location, // Initially set storage to location
       quantity: produce.quantity,
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
@@ -131,6 +133,7 @@ export async function addProduce(produce: {
       type: produce.type,
       owner: produce.owner,
       location: produce.location,
+      storage: produce.storage, // Initially set storage to location
       quantity: produce.quantity,
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
@@ -192,6 +195,7 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       name: produce.name,
       type: produce.type,
       location: produce.location,
+      storage: produce.storage,
       quantity: produce.quantity,
       unit: produce.unit,
       expiration,

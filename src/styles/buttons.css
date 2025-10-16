@@ -35,6 +35,16 @@
     transform: translateY(-2px);
 }
 
+.btn-danger.btn-submit {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.btn-danger.btn-submit:hover {
+  background-color: #bb2d3b !important;
+  border-color: #b02a37 !important;
+}
+
 .btn-reset {
     width: 100%;
     padding: 12px;

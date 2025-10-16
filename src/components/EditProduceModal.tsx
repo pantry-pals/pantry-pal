@@ -33,19 +33,15 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
 
   const router = useRouter();
 
-  // Available unit options
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
-
-  // Track dropdown state
   const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
-  // Reset form values every time modal closes or produce changes
   useEffect(() => {
     if (!show) {
       reset({
         ...produce,
         expiration: produce.expiration
-          ? produce.expiration.toISOString().split('T')[0] // YYYY-MM-DD for input[type=date]
+          ? produce.expiration.toISOString().split('T')[0]
           : '',
         image: produce.image ?? '',
       } as any);
@@ -70,10 +66,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       image: data.image === '' ? null : data.image,
       restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
     });
-    swal('Success', 'Your item has been updated', 'success', {
-      timer: 2000,
-    });
-
+    swal('Success', 'Your item has been updated', 'success', { timer: 2000 });
     handleClose();
     router.refresh();
   };
@@ -86,8 +79,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...register('id')} value={produce.id} />
+
           <Row className="mb-3">
-            <Col xs={4} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Name</Form.Label>
                 <Form.Control
@@ -101,6 +95,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.name?.message}</div>
               </Form.Group>
             </Col>
+
             <Col xs={4} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Type</Form.Label>
@@ -114,7 +109,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.type?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center">
+          </Row>
+          <Row className="mb-3">
+            <Col xs={5} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
@@ -127,9 +124,23 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
+            <Col xs={5} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Control
+                  type="text"
+                  {...register('storage')}
+                  defaultValue={produce.storage || ''}
+                  className={`${errors.storage ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Fridge, Pantry, Freezer"
+                />
+                <div className="invalid-feedback">{errors.storage?.message}</div>
+              </Form.Group>
+            </Col>
           </Row>
+
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={5} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Quantity</Form.Label>
                 <Form.Control
@@ -145,25 +156,6 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Restock Threshold</Form.Label>
-                <Form.Control
-                  type="number"
-                  step={0.1}
-                  {...register('restockThreshold')}
-                  defaultValue={produce.restockThreshold ?? ''}
-                  placeholder="e.g., 2.5"
-                  className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                />
-                <div className="invalid-feedback">{errors.restockThreshold?.message}</div>
-                <Form.Text className="text-muted">
-                  When quantity falls below this value, the item will be added to your shopping list.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row className="mb-3">
-            <Col xs={6} className="text-center">
-              <Form.Group>
                 <Form.Label className="mb-0">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitChoice}
@@ -172,9 +164,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                     const { value } = e.target;
                     setUnitChoice(value);
                     if (value !== 'Other') {
-                      setValue('unit', value); // preset
+                      setValue('unit', value);
                     } else {
-                      setValue('unit', ''); // clear for custom typing
+                      setValue('unit', '');
                     }
                   }}
                 >
@@ -211,6 +203,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.expiration?.message}</div>
               </Form.Group>
             </Col>
+
             <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Image</Form.Label>
@@ -225,7 +218,31 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+          <Row className="mb-3">
+            <Col xs={12} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-1" style={{ fontWeight: '500' }}>
+                  Restock Threshold
+                </Form.Label>
+
+                <div className="d-flex justify-content-center mb-2">
+                  <Form.Control
+                    type="number"
+                    step={0.1}
+                    {...register('restockThreshold')}
+                    defaultValue={produce.restockThreshold ?? ''}
+                    placeholder="e.g., 2.5"
+                    className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
+                    style={{ width: '100px', textAlign: 'center' }}
+                  />
+                </div>
+                <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
+              </Form.Group>
+            </Col>
+          </Row>
+
           <input type="hidden" {...register('owner')} value={produce.owner} />
+
           <Form.Group className="form-group">
             <Row className="pt-3">
               <Col>
