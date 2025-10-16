@@ -96,7 +96,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
               </Form.Group>
             </Col>
 
-            <Col xs={4} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Type</Form.Label>
                 <Form.Control
@@ -111,7 +111,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
           </Row>
           <Row className="mb-3">
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
@@ -124,7 +124,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Storage</Form.Label>
                 <Form.Control
@@ -140,14 +140,14 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           </Row>
 
           <Row className="mb-3">
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   {...register('quantity')}
                   defaultValue={produce.quantity}
-                  step={1}
+                  step={0.5}
                   placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
                 />
@@ -228,7 +228,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="d-flex justify-content-center mb-2">
                   <Form.Control
                     type="number"
-                    step={0.1}
+                    step={0.5}
                     {...register('restockThreshold')}
                     defaultValue={produce.restockThreshold ?? ''}
                     placeholder="e.g., 2.5"
