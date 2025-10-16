@@ -26,9 +26,6 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      
-      - name: Set up database
-        run: npx prisma migrate deploy && npx prisma db seed
 
       - name: Run TestCafe Acceptance Tests
         env:
