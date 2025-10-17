@@ -2,7 +2,7 @@
 
 import { Button, Col, Container, Row, Nav } from 'react-bootstrap';
 import { useMemo, useState } from 'react';
-import AddProduceModal from './AddProduceModal';
+import AddProduceModal from './produce/AddProduceModal';
 import ProduceListWithGrouping from './produce/ProduceListWithGrouping';
 import '../styles/buttons.css';
 
