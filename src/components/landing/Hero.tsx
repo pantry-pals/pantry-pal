@@ -78,7 +78,7 @@ export default function Hero() {
                     </>
                   ) : (
                     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
-                      <Link href="/view-pantry" className={styles.primaryButton}>
+                      <Link href="/dashboard" className={styles.primaryButton}>
                         Go to Dashboard
                       </Link>
                     </motion.div>
