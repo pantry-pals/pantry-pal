@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button, Form } from 'react-bootstrap';
 import RecipeCard from './RecipeCard';
 import AddRecipeCard from './AddRecipeCard';
 
@@ -13,42 +13,67 @@ type Props = {
 
 export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
   const [showCanMake, setShowCanMake] = useState(false);
+  const [search, setSearch] = useState('');
 
   const pantryNames = useMemo(
     () => new Set(produce.map((p) => p.name.toLowerCase())),
     [produce],
   );
 
-  const filteredRecipes = useMemo(() => {
+  // Step 1: filter by what user can make
+  const canMakeFiltered = useMemo(() => {
     if (!showCanMake) return recipes;
     return recipes.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
   }, [recipes, showCanMake, pantryNames]);
 
+  // Step 2: then filter by search query
+  const filteredRecipes = useMemo(() => {
+    const query = search.toLowerCase();
+    if (!query) return canMakeFiltered;
+    return canMakeFiltered.filter((r) => r.title.toLowerCase().includes(query)
+      || r.cuisine.toLowerCase().includes(query)
+      || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
+      || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)));
+  }, [canMakeFiltered, search]);
+
   return (
     <>
-      <div className="text-center mb-4">
+      <div className="text-center mb-4 d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
         <Button
           variant={showCanMake ? 'success' : 'outline-dark'}
           onClick={() => setShowCanMake((v) => !v)}
         >
           {showCanMake ? 'Show All Recipes' : 'Show Recipes I Can Make'}
         </Button>
+
+        <Form className="w-100 w-md-50" style={{ maxWidth: 400 }}>
+          <Form.Control
+            type="text"
+            placeholder="Search recipes..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Form>
       </div>
 
       <Row xs={1} md={2} lg={3} className="g-4">
-        {filteredRecipes.map((r) => (
-          <Col key={r.id}>
-            <RecipeCard
-              id={r.id}
-              title={r.title}
-              description={r.description}
-              imageUrl={r.imageUrl ?? undefined}
-              cuisine={r.cuisine}
-              dietary={r.dietary ?? []}
-              ingredients={r.ingredients ?? []}
-            />
-          </Col>
-        ))}
+        {filteredRecipes.length > 0 ? (
+          filteredRecipes.map((r) => (
+            <Col key={r.id}>
+              <RecipeCard
+                id={r.id}
+                title={r.title}
+                description={r.description}
+                imageUrl={r.imageUrl ?? undefined}
+                cuisine={r.cuisine}
+                dietary={r.dietary ?? []}
+                ingredients={r.ingredients ?? []}
+              />
+            </Col>
+          ))
+        ) : (
+          <p className="text-center text-muted">No recipes found.</p>
+        )}
 
         {isAdmin && (
           <Col>
