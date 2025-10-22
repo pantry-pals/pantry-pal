@@ -22,7 +22,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         </Col>
       </Row>
 
-      {/* Display items in the shopping list along with quantity and price */}
+      {/* Display items in the shopping list */}
       {shoppingList?.items && shoppingList.items.length > 0 ? (
         <Row>
           <Col>
@@ -38,14 +38,16 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
               <tbody>
                 {shoppingList.items.map((item: any) => (
                   <tr key={item.id}>
-                    <td>{item.produce.name}</td>
+                    <td>{item.name}</td>
                     <td>
                       {item.quantity}
                       {' '}
-                      {item.produce.unit}
+                      {item.unit || '—'}
                     </td>
                     <td>
-                      {item.price ? `$${parseFloat(item.price.toString()).toFixed(2)}` : 'N/A'}
+                      {item.price
+                        ? `$${parseFloat(item.price.toString()).toFixed(2)}`
+                        : 'N/A'}
                     </td>
                   </tr>
                 ))}
