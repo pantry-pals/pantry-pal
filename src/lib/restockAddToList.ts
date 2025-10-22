@@ -32,14 +32,14 @@ export async function checkAndAddToShoppingList(produceId: number, owner: string
   }
 
   const existingItem = await prisma.shoppingListItem.findFirst({
-    where: { shoppingListId: shoppingList.id, produceId: produce.id },
+    where: { shoppingListId: shoppingList.id, name: produce.name },
   });
   if (existingItem) return;
 
   await prisma.shoppingListItem.create({
     data: {
       shoppingListId: shoppingList.id,
-      produceId: produce.id,
+      name: produce.name,
       quantity: 1,
       restockTrigger: produce.restockTrigger,
       customThreshold: produce.customThreshold ?? undefined,
