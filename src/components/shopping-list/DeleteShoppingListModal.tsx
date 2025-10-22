@@ -61,10 +61,10 @@ const DeleteShoppingListModal = ({ show, onHide, shoppingList }: DeleteShoppingL
                 <tbody>
                   {shoppingList.items.map((item: any) => (
                     <tr key={item.id}>
-                      <td>{item.produce.name}</td>
+                      <td>{item.name}</td>
                       <td>
                         {item.quantity}
-                        {item.produce.unit}
+                        {item.unit}
                       </td>
                       <td>
                         {item.price ? `$${parseFloat(item.price.toString()).toFixed(2)}` : 'N/A'}
