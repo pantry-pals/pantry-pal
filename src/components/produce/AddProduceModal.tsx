@@ -115,7 +115,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
@@ -128,10 +128,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
+                  required
                   className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
                 />
@@ -144,10 +145,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Location</Form.Label>
+                <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
+                  required
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   placeholder="e.g., House, Work"
                 />
@@ -156,10 +158,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('storage')}
+                  required
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   placeholder="e.g., Freezer"
                 />
@@ -172,10 +175,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   {...register('quantity')}
+                  required
                   step={0.5}
                   placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
@@ -185,9 +189,10 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitOptions[0]}
+                  required
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
@@ -205,6 +210,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     type="text"
                     {...register('unit')}
                     placeholder="Enter custom unit"
+                    required
                     className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}
                   />
                 )}
