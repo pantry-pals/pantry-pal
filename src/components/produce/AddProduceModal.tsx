@@ -132,6 +132,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('type')}
+                  required
                   className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
                 />
@@ -148,6 +149,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('location')}
+                  required
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   placeholder="e.g., House, Work"
                 />
@@ -160,6 +162,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('storage')}
+                  required
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   placeholder="e.g., Freezer"
                 />
@@ -176,6 +179,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="number"
                   {...register('quantity')}
+                  required
                   step={0.5}
                   placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
@@ -188,6 +192,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Label className="mb-0">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitOptions[0]}
+                  required
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
@@ -205,6 +210,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     type="text"
                     {...register('unit')}
                     placeholder="Enter custom unit"
+                    required
                     className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}
                   />
                 )}

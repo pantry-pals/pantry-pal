@@ -102,6 +102,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('type')}
+                  required
                   defaultValue={produce.type}
                   className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
@@ -117,6 +118,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('location')}
+                  required
                   defaultValue={produce.location}
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   placeholder="e.g., Freezer"
@@ -130,6 +132,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <Form.Control
                   type="text"
                   {...register('storage')}
+                  required
                   defaultValue={produce.storage || ''}
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   placeholder="e.g., Fridge, Pantry, Freezer"
@@ -146,6 +149,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <Form.Control
                   type="number"
                   {...register('quantity')}
+                  required
                   defaultValue={produce.quantity}
                   step={0.5}
                   placeholder="eg., 1, 1.5"
@@ -159,6 +163,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <Form.Label className="mb-0">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitChoice}
+                  required
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
@@ -181,6 +186,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   <Form.Control
                     type="text"
                     {...register('unit')}
+                    required
                     defaultValue={!unitOptions.includes(produce.unit) ? produce.unit : ''}
                     placeholder="Enter custom unit"
                     className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}
