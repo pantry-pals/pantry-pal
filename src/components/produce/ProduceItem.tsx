@@ -69,6 +69,8 @@ const ProduceItem = ({
           owner,
           image,
           restockThreshold: safeRestock,
+          restockTrigger: 'empty',
+          customThreshold: null,
         }}
       />
 
