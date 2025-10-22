@@ -2,7 +2,7 @@ import { Selector, t } from 'testcafe';
 
 // Helper to sign in first
 const signIn = async () => {
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signin');
+    await t.navigateTo('http://localhost:3000/auth/signin');
 
     await t
         .typeText('input[name="email"]', 'admin@foo.com', { replace: true })
@@ -14,12 +14,12 @@ const signIn = async () => {
 };
 
 fixture('Sign Out')
-    .page('https://pantry-pal-gamma.vercel.app');
+    .page('http://localhost:3000');
 
 // ✅ Test if Sign Out page loads
 test('Sign Out page loads', async t => {
     await signIn();
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signout');
+    await t.navigateTo('http://localhost:3000/auth/signout');
 
     const signOutTitle = Selector('h1').withText('Sign Out');
     await t.expect(signOutTitle.exists).ok();
@@ -28,7 +28,7 @@ test('Sign Out page loads', async t => {
 // ✅ Test if the Sign Out button works
 test('Sign out button works', async t => {
     await signIn();
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/auth/signout');
+    await t.navigateTo('http://localhost:3000/auth/signout');
 
     const signOutButton = Selector('[data-testid="signout-button"]');
     await t.click(signOutButton);

@@ -3,7 +3,7 @@
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { useState } from 'react';
 import { Produce } from '@prisma/client';
-import AddProduceModal from './AddProduceModal';
+import AddProduceModal from './produce/AddProduceModal';
 
 const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expiration, owner, image }: Produce) => {
   const [showModal, setShowModal] = useState(false);
