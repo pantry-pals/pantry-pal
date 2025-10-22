@@ -20,7 +20,7 @@ test('Add Produce modal opens and form loads', async t => {
     await t.navigateTo('http://localhost:3000/view-pantry');
 
     // Click the "Add Item" button to open the modal
-    const addButton = Selector('button.btn-add');
+    const addButton = Selector('[data-testid="add-produce-btn"]').with({ timeout: 10000 });
     await t.click(addButton);
 
     // Check that the modal appeared and has a form
