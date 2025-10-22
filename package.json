@@ -12,7 +12,6 @@
     "test-acceptance-ci": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --app 'npm run build && npm run start' --window-size 1920,1080 --app-init-delay 60000",
     "test-acceptance-local": "testcafe 'chrome' tests/acceptance/*.testcafe.js --app 'npm run build && npm run start' --window-size 1920,1080 --app-init-delay 20000",
     "test-acceptance-single": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --window-size 1920,1080"
-
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -21,6 +20,8 @@
     "@hookform/resolvers": "^3.6.0",
     "@ngneat/falso": "^7.2.0",
     "@prisma/client": "^6.15.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
