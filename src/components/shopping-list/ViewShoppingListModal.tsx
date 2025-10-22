@@ -99,7 +99,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                       <td>
                         <select
                           value={item.restockTrigger}
-                          onChange={(e) => handleRestockChange(item.produce.id, e.target.value)}
+                          onChange={(e) => handleRestockChange(item.id, e.target.value)}
                           className="form-select form-select-sm"
                         >
                           <option value="empty">When empty</option>
