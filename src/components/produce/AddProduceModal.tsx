@@ -115,7 +115,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
@@ -128,7 +128,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
@@ -145,7 +145,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Location</Form.Label>
+                <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
@@ -158,7 +158,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('storage')}
@@ -175,7 +175,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   {...register('quantity')}
@@ -189,7 +189,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitOptions[0]}
                   required
