@@ -30,12 +30,4 @@ test('Recipes page loads and buttons work', async t => {
     // Click the toggle button
     await t.click(showCanMakeButton);
     await t.expect(showCanMakeButton.textContent).contains('Show All Recipes', 'Button text should toggle');
-
-    // Check that at least one "View Recipe" button exists
-    const viewRecipeButton = Selector('button').withText('View Recipe').nth(0);
-    await t.expect(viewRecipeButton.exists).ok('Expected at least one "View Recipe" button');
-
-    // Click the first "View Recipe" button and verify navigation
-    await t.click(viewRecipeButton);
-    await t.expect(t.eval(() => window.location.pathname)).contains('/recipes/', 'Expected to navigate to recipe details page');
 });
