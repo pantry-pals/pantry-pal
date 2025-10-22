@@ -91,15 +91,15 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 <tbody>
                   {items.map((item: any) => (
                     <tr key={item.id}>
-                      <td>{item.produce.name}</td>{' '}
+                      <td>{item.name}</td>{' '}
                       <td>
-                        {item.quantity} {item.produce.unit}
+                        {item.quantity} {item.unit}
                       </td>
                       <td>{item.price ? `$${parseFloat(item.price.toString()).toFixed(2)}` : 'N/A'}</td>
                       <td>
                         <select
                           value={item.restockTrigger}
-                          onChange={(e) => handleRestockChange(item.produce.id, e.target.value)}
+                          onChange={(e) => handleRestockChange(item.id, e.target.value)}
                           className="form-select form-select-sm"
                         >
                           <option value="empty">When empty</option>
