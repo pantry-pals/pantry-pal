@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
 import { Result } from '@zxing/library';
 import { Button } from 'react-bootstrap';
+import styles from '../../styles/barcode-scanner.module.css';
 
 interface BarcodeScannerProps {
   onDetected: (code: string) => void;
@@ -27,14 +28,13 @@ const BarcodeScanner = ({ onDetected, onClose }: BarcodeScannerProps) => {
 
         const firstDeviceId = devices[0].deviceId;
 
-        // Start scanning and store controls
         scannerControls = await reader.decodeFromVideoDevice(
           firstDeviceId,
           videoRef.current!,
           (result: Result | undefined) => {
             if (result && isMounted) {
               onDetected(result.getText());
-              scannerControls?.stop(); // stop scanning
+              scannerControls?.stop();
               onClose();
             }
           },
@@ -51,21 +51,20 @@ const BarcodeScanner = ({ onDetected, onClose }: BarcodeScannerProps) => {
 
     return () => {
       isMounted = false;
-      scannerControls?.stop(); // cleanup on unmount
+      scannerControls?.stop();
     };
   }, [onDetected, onClose]);
 
   return (
-    <div className="d-flex flex-column align-items-center p-3 bg-dark text-white rounded">
+    <div className={styles.container}>
       <h5>Scan a Barcode</h5>
-      {error && <p className="text-danger">{error}</p>}
+      {error && <p className={styles.errorText}>{error}</p>}
       {loading && <p>Initializing camera...</p>}
+
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <video
-        ref={videoRef}
-        style={{ width: '100%', maxWidth: '400px', borderRadius: '8px' }}
-      />
-      <Button className="mt-3" variant="secondary" onClick={onClose}>
+      <video ref={videoRef} className={styles.video} />
+
+      <Button onClick={onClose} className={styles.closeButton}>
         Close
       </Button>
     </div>
