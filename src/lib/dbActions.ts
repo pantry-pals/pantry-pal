@@ -147,16 +147,13 @@ export async function addProduce(produce: {
     const shoppingList = await prisma.shoppingList.upsert({
       where: { name_owner: { name: 'Auto Restock', owner: newProduce.owner } },
       update: {},
-      create: {
-        name: 'Auto Restock',
-        owner: newProduce.owner,
-      },
+      create: { name: 'Auto Restock', owner: newProduce.owner },
     });
 
     const existingItem = await prisma.shoppingListItem.findFirst({
       where: {
         shoppingListId: shoppingList.id,
-        produceId: newProduce.id,
+        name: newProduce.name,
       },
     });
 
@@ -164,8 +161,10 @@ export async function addProduce(produce: {
       await prisma.shoppingListItem.create({
         data: {
           shoppingListId: shoppingList.id,
-          produceId: newProduce.id,
-          quantity: newProduce.restockThreshold, // or default quantity
+          name: newProduce.name,
+          quantity: newProduce.restockThreshold ?? 1,
+          unit: newProduce.unit,
+          price: null,
         },
       });
     }
@@ -210,16 +209,13 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     const shoppingList = await prisma.shoppingList.upsert({
       where: { name_owner: { name: 'Auto Restock', owner: updatedProduce.owner } },
       update: {},
-      create: {
-        name: 'Auto Restock',
-        owner: updatedProduce.owner,
-      },
+      create: { name: 'Auto Restock', owner: updatedProduce.owner },
     });
 
     const existingItem = await prisma.shoppingListItem.findFirst({
       where: {
         shoppingListId: shoppingList.id,
-        produceId: updatedProduce.id,
+        name: updatedProduce.name,
       },
     });
 
@@ -227,8 +223,10 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       await prisma.shoppingListItem.create({
         data: {
           shoppingListId: shoppingList.id,
-          produceId: updatedProduce.id,
-          quantity: updatedProduce.restockThreshold,
+          name: updatedProduce.name,
+          quantity: updatedProduce.restockThreshold ?? 1,
+          unit: updatedProduce.unit,
+          price: null,
         },
       });
     }
@@ -306,15 +304,17 @@ export async function deleteShoppingList(id: number) {
  */
 export async function addShoppingListItem(item: {
   shoppingListId: number;
-  produceId: number;
+  name: string;
   quantity: number;
+  unit?: string;
   price?: number;
 }) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,
-      produceId: item.produceId,
+      name: item.name,
       quantity: item.quantity,
+      unit: item.unit,
       price: item.price !== undefined ? new Prisma.Decimal(item.price) : undefined,
     },
   });

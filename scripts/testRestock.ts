@@ -47,7 +47,7 @@ async function testRestock() {
   // Print shopping list items
   const shoppingList = await prisma.shoppingList.findFirst({
     where: { owner, name: 'Auto Restock List' },
-    include: { items: { include: { produce: true } } },
+    include: { items: true },
   });
 
   if (shoppingList) {
