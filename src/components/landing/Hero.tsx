@@ -15,7 +15,7 @@ export default function Hero() {
 
   return (
     <section className="py-5" style={{ backgroundColor: 'var(--timberwolf)' }}>
-      <div className="container" style={{ marginTop: 75 }}>
+      <div className="container">
         <div className="row align-items-center">
           {/* Left: Logo */}
           <div className="col-md-6 mb-4 mb-md-0 mt-5">
@@ -78,7 +78,7 @@ export default function Hero() {
                     </>
                   ) : (
                     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.12 }}>
-                      <Link href="/view-pantry" className={styles.primaryButton}>
+                      <Link href="/dashboard" className={styles.primaryButton}>
                         Go to Dashboard
                       </Link>
                     </motion.div>

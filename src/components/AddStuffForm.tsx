@@ -3,9 +3,9 @@
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { useState } from 'react';
 import { Produce } from '@prisma/client';
-import AddProduceModal from './AddProduceModal';
+import AddProduceModal from './produce/AddProduceModal';
 
-const AddStuffForm = ({ id, name, quantity, unit, type, location, expiration, owner, image }: Produce) => {
+const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expiration, owner, image }: Produce) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -17,22 +17,40 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, expiration, ow
           </Col>
           <Card>
             <Card.Body>
-              <Button onClick={() => setShowModal(true)}>
-                Add New Item
-              </Button>
+              <Button onClick={() => setShowModal(true)}>Add New Item</Button>
             </Card.Body>
 
             {/* Modal component for editing produce item */}
             <AddProduceModal
               show={showModal}
               onHide={() => setShowModal(false)}
-              produce={{ id, name, quantity, unit, type, location, expiration, owner, image }}
+              produce={{
+                id,
+                name,
+                quantity,
+                unit,
+                type,
+                location,
+                storage,
+                expiration,
+                owner,
+                image,
+                restockThreshold: 1,
+                restockTrigger: 'empty',
+                customThreshold: null,
+              }}
             />
           </Card>
         </Col>
       </Row>
     </Container>
   );
+};
+
+AddStuffForm.defaultProps = {
+  restockTrigger: 'empty',
+  customThreshold: null,
+  restockThreshold: null,
 };
 
 export default AddStuffForm;

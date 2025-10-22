@@ -10,7 +10,8 @@ import { addProduce } from '@/lib/dbActions';
 import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import '../styles/buttons.css';
+import BarcodeScanner from './BarcodeScanner';
+import '../../styles/buttons.css';
 
 type ProduceValues = InferType<typeof AddProduceSchema>;
 
@@ -21,7 +22,6 @@ interface AddProduceModalProps {
 }
 
 const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
-  // Available unit options
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
   const {
@@ -32,21 +32,15 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(AddProduceSchema),
-    defaultValues: {
-      unit: unitOptions[0],
-    },
+    defaultValues: { unit: unitOptions[0] },
   });
 
   const router = useRouter();
-
-  // Track dropdown state
   const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
+  const [showScanner, setShowScanner] = useState(false);
 
-  // Reset form values every time modal closes or produce changes
   useEffect(() => {
-    if (!show) {
-      reset();
-    }
+    if (!show) reset();
   }, [show, reset]);
 
   const handleClose = () => {
@@ -54,17 +48,33 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     onHide();
   };
 
+  const fetchProductByBarcode = async (barcode: string) => {
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await res.json();
+
+      if (data.status === 1) {
+        const { product } = data;
+        setValue('name', product.product_name || '');
+        setValue('image', product.image_url || '');
+        setValue('type', product.categories_tags?.[0]?.replace('en:', '') || '');
+      } else {
+        swal('Not found', 'No product found for this barcode', 'warning');
+      }
+    } catch (err) {
+      swal('Error', 'Failed to fetch product info', 'error');
+    }
+  };
+
   const onSubmit = async (data: ProduceValues) => {
-    console.log('Submitting new produce item');
     await addProduce({
       ...data,
       expiration: data.expiration ?? null,
-      image: data.image ? data.image : null,
-    });
-    swal('Success', 'Your item has been added', 'success', {
-      timer: 2000,
+      image: data.image || null,
+      restockThreshold: Number(data.restockThreshold ?? 0),
     });
 
+    swal('Success', 'Your item has been added', 'success', { timer: 2000 });
     handleClose();
     router.refresh();
   };
@@ -72,12 +82,38 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header className="justify-content-center">
-        <Modal.Title>Add Produce Item</Modal.Title>
+        <Modal.Title>Add Pantry Item</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
+          {/* Barcode Scanner Button */}
           <Row className="mb-3">
-            <Col xs={4} className="text-center">
+            <Col xs={12} className="text-center">
+              <Button
+                type="button"
+                variant="info"
+                size="sm"
+                className="mb-2"
+                onClick={() => setShowScanner(true)}
+              >
+                Scan Barcode
+              </Button>
+
+              {showScanner && (
+                <BarcodeScanner
+                  onDetected={(code) => {
+                    fetchProductByBarcode(code);
+                    setShowScanner(false);
+                  }}
+                  onClose={() => setShowScanner(false)}
+                />
+              )}
+            </Col>
+          </Row>
+
+          {/* Name and Type */}
+          <Row className="mb-3">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Name</Form.Label>
                 <Form.Control
@@ -90,7 +126,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <div className="invalid-feedback">{errors.name?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Type</Form.Label>
                 <Form.Control
@@ -102,19 +138,37 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <div className="invalid-feedback">{errors.type?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={4} className="text-center">
+          </Row>
+
+          {/* Location and Storage */}
+          <Row>
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
                   className={`${errors.location ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Freezer"
+                  placeholder="e.g., House, Work"
                 />
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
+            <Col xs={6} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Control
+                  type="text"
+                  {...register('storage')}
+                  className={`${errors.storage ? 'is-invalid' : ''}`}
+                  placeholder="e.g., Freezer"
+                />
+                <div className="invalid-feedback">{errors.storage?.message}</div>
+              </Form.Group>
+            </Col>
           </Row>
+
+          {/* Quantity and Unit */}
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -122,8 +176,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Control
                   type="number"
                   {...register('quantity')}
-                  step={0.1}
-                  placeholder="eg., 1"
+                  step={0.5}
+                  placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
                 />
                 <div className="invalid-feedback">{errors.quantity?.message}</div>
@@ -138,17 +192,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                   onChange={(e) => {
                     const { value } = e.target;
                     setUnitChoice(value);
-                    if (value !== 'Other') {
-                      setValue('unit', value); // preset
-                    } else {
-                      setValue('unit', ''); // clear for custom typing
-                    }
+                    setValue('unit', value !== 'Other' ? value : '');
                   }}
                 >
                   {unitOptions.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
+                    <option key={u} value={u}>{u}</option>
                   ))}
                 </Form.Select>
 
@@ -164,6 +212,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Expiration and Image */}
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -189,18 +239,42 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Restock Threshold */}
+          <Row>
+            <Col xs={12} className="text-center">
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <div className="d-flex justify-content-center mb-2">
+                  <Form.Control
+                    type="number"
+                    step={0.5}
+                    {...register('restockThreshold')}
+                    placeholder="e.g., 0.5"
+                    className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
+                    style={{ width: '100px' }}
+                  />
+                </div>
+                <Form.Text
+                  className="text-muted d-block mx-auto"
+                  style={{ maxWidth: '320px', fontSize: '0.85rem', lineHeight: '1.3' }}
+                >
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+                <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
+              </Form.Group>
+            </Col>
+          </Row>
+
           <input type="hidden" {...register('owner')} value={produce.owner} />
+
           <Form.Group className="form-group">
             <Row className="pt-3">
               <Col>
-                <Button type="submit" className="btn-submit">
-                  Submit
-                </Button>
+                <Button type="submit" className="btn-submit">Submit</Button>
               </Col>
               <Col>
-                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">
-                  Reset
-                </Button>
+                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">Reset</Button>
               </Col>
             </Row>
           </Form.Group>

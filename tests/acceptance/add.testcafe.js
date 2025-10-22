@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
 fixture('Add Produce Modal')
-    .page('https://pantry-pal-gamma.vercel.app/auth/signin');
+    .page('http://localhost:3000/auth/signin');
 
 const testEmail = 'admin@foo.com';
 const testPassword = 'changeme';
@@ -17,14 +17,14 @@ test('Add Produce modal opens and form loads', async t => {
     await t.expect(t.eval(() => window.location.pathname)).notEql('/auth/signin', { timeout: 10000 });
 
     // Navigate to produce list page
-    await t.navigateTo('https://pantry-pal-gamma.vercel.app/view-pantry');
+    await t.navigateTo('http://localhost:3000/view-pantry');
 
     // Click the "Add Item" button to open the modal
     const addButton = Selector('button.btn-add');
     await t.click(addButton);
 
     // Check that the modal appeared and has a form
-    const addModal = Selector('.modal-dialog');
+    const addModal = Selector('.modal.show');
     await t.expect(addModal.exists).ok('Expected AddProduceModal to appear');
 
     const addForm = addModal.find('form');

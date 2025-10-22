@@ -71,12 +71,16 @@ model Produce {
   name              String
   type              String
   location          String
+  storage           String
   quantity          Float
   unit              String
   expiration        DateTime?
   owner             String
   image             String?
   ShoppingListItems ShoppingListItem[]
+  restockThreshold  Float?
+  restockTrigger    String   @default("empty")
+  customThreshold   Float?
 
   @@unique([name, owner])
 }
@@ -98,9 +102,30 @@ model ShoppingListItem {
   produceId      Int
   quantity       Int
   price          Decimal? @db.Decimal(10, 2)
+  restockTrigger String?
+  customThreshold Int? 
 
   shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id])
   produce      Produce      @relation(fields: [produceId], references: [id])
 
   @@unique([shoppingListId, produceId])
 }
+
+model Recipe {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  imageUrl    String?
+  cuisine     String
+  dietary     String[]          // e.g., ["Vegan","Gluten-Free"]
+  ingredients String[]          // e.g., ["onion","tomato","basil"]
+  owner       String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([title])
+  @@index([cuisine])
+  @@unique([title, owner], name: "title_owner")
+}
+
