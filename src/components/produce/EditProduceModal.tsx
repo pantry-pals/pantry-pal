@@ -83,7 +83,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
@@ -98,10 +98,11 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
 
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
+                  required
                   defaultValue={produce.type}
                   className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
@@ -113,10 +114,11 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Location</Form.Label>
+                <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('location')}
+                  required
                   defaultValue={produce.location}
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   placeholder="e.g., Freezer"
@@ -126,10 +128,11 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Storage</Form.Label>
+                <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('storage')}
+                  required
                   defaultValue={produce.storage || ''}
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   placeholder="e.g., Fridge, Pantry, Freezer"
@@ -142,10 +145,11 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   {...register('quantity')}
+                  required
                   defaultValue={produce.quantity}
                   step={0.5}
                   placeholder="eg., 1, 1.5"
@@ -156,9 +160,10 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   defaultValue={unitChoice}
+                  required
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
@@ -181,6 +186,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   <Form.Control
                     type="text"
                     {...register('unit')}
+                    required
                     defaultValue={!unitOptions.includes(produce.unit) ? produce.unit : ''}
                     placeholder="Enter custom unit"
                     className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}

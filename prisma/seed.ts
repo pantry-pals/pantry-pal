@@ -60,6 +60,7 @@ async function main() {
         unit: produce.unit,
         expiration: new Date(produce.expiration),
         owner: produce.owner,
+        image: produce.image ? produce.image : null,
       },
     });
   }
@@ -78,27 +79,19 @@ async function main() {
     });
 
     for (const item of shoppinglist.items) {
-      const produce = await prisma.produce.findFirst({
-        where: { name: item.produceName },
-      });
-
-      if (!produce) {
-        console.warn(`Produce "${item.produceName}" not found, skipping item.`);
-        continue;
-      }
-
       await prisma.shoppingListItem.upsert({
         where: {
-          shoppingListId_produceId: {
+          shoppingListId_name: {
             shoppingListId: createdList.id,
-            produceId: produce.id,
+            name: item.name,
           },
         },
         update: {},
         create: {
           shoppingListId: createdList.id,
-          produceId: produce.id,
+          name: item.name,
           quantity: item.quantity,
+          unit: item.unit,
           price: item.price,
         },
       });
@@ -149,3 +142,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+  

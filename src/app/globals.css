@@ -85,3 +85,8 @@ footer a {
     background-color: var(--brunswick-green);
   }
 }
+
+.required-field::after {
+    content: "*";
+    color: red;
+}

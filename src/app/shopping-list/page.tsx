@@ -16,11 +16,7 @@ const ViewShoppingListPage = async () => {
   const shoppingLists = await prisma.shoppingList.findMany({
     where: { owner },
     include: {
-      items: {
-        include: {
-          produce: true,
-        },
-      },
+      items: true, // ✅ matches your schema: ShoppingListItem[] relation only
     },
     orderBy: [{ createdAt: 'desc' }],
   });

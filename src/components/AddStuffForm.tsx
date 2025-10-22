@@ -36,6 +36,8 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expir
                 owner,
                 image,
                 restockThreshold: 1,
+                restockTrigger: 'empty',
+                customThreshold: null,
               }}
             />
           </Card>
@@ -43,6 +45,12 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expir
       </Row>
     </Container>
   );
+};
+
+AddStuffForm.defaultProps = {
+  restockTrigger: 'empty',
+  customThreshold: null,
+  restockThreshold: null,
 };
 
 export default AddStuffForm;

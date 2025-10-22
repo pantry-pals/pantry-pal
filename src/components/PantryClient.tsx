@@ -22,9 +22,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
   // Filter produce based on selected location
   const filteredProduce = useMemo(() => {
     if (activeLocation === 'all') return initialProduce;
-    return initialProduce.filter(
-      (p) => p.location?.trim().toLowerCase() === activeLocation,
-    );
+    return initialProduce.filter((p) => p.location?.trim().toLowerCase() === activeLocation);
   }, [initialProduce, activeLocation]);
 
   return (
@@ -99,6 +97,8 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           image: null,
           owner,
           restockThreshold: 0,
+          restockTrigger: 'empty',
+          customThreshold: null,
         }}
       />
     </main>

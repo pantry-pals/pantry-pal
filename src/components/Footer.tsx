@@ -37,8 +37,7 @@ const Footer = () => {
             <ul className="list-unstyled small footer-links">
               <li className="mb-1"><a href="/">Home</a></li>
               <li className="mb-1"><a href="/aboutus">About Us</a></li>
-              <li className="mb-1"><a href="/">Recipes</a></li>
-              <li className="mb-1"><a href="/">Contact</a></li>
+              <li className="mb-1"><a href="/dashboard">Dashboard</a></li>
             </ul>
           </Col>
 
@@ -46,10 +45,9 @@ const Footer = () => {
           <Col md={2} className="mb-4 mb-md-0">
             <h6 className="fw-bold">Features</h6>
             <ul className="list-unstyled small footer-links">
-              <li className="mb-1"><a href="/">My Pantry</a></li>
-              <li className="mb-1"><a href="/">Shopping List</a></li>
-              <li className="mb-1"><a href="/">Inventory</a></li>
-              <li className="mb-1"><a href="/">Meal Planner</a></li>
+              <li className="mb-1"><a href="/view-pantry">My Pantry</a></li>
+              <li className="mb-1"><a href="/shopping-list">Shopping List</a></li>
+              <li className="mb-1"><a href="/recipes">Recipes</a></li>
             </ul>
           </Col>
 

@@ -20,7 +20,8 @@
       "quantity": 20.00,
       "unit": "pieces",
       "expiration": "2025-12-31T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "john@foo.com",
+      "image": "/banana.png"
     },
     {
       "name": "Apple",
@@ -30,7 +31,8 @@
       "quantity": 15.00,
       "unit": "pieces",
       "expiration": "2025-11-30T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "owner": "admin@foo.com",
+      "image": "/apple.png"
     },
     {
       "name": "Carrot",
@@ -40,7 +42,8 @@
       "quantity": 10.00,
       "unit": "pieces",
       "expiration": "2025-10-15T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "owner": "admin@foo.com",
+      "image": "/carrot.png"
     },
     {
       "name": "Broccoli",
@@ -50,7 +53,8 @@
       "quantity": 8.00,
       "unit": "heads",
       "expiration": "2025-10-10T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "john@foo.com",
+      "image": "/broccoli.png"
     },
     {
       "name": "Chicken Breast",
@@ -60,7 +64,8 @@
       "quantity": 5.00,
       "unit": "pieces",
       "expiration": "2026-01-20T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "owner": "john@foo.com",
+      "image": "/chickenbreast.png"
     },
     {
       "name": "Salmon Fillet",
@@ -70,7 +75,8 @@
       "quantity": 4.00,
       "unit": "fillets",
       "expiration": "2026-02-15T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "owner": "admin@foo.com",
+      "image": "/salmonfillet.png"
     }
   ],
 
@@ -79,18 +85,18 @@
       "name": "Weekly Groceries",
       "owner": "john@foo.com",
       "items": [
-        { "produceName": "Banana", "quantity": 6, "price": 0.5 },
-        { "produceName": "Apple", "quantity": 4, "price": 0.75 },
-        { "produceName": "Carrot", "quantity": 3, "price": 0.3 }
+        { "name": "Banana", "quantity": 6, "unit": "pieces", "price": 0.5 },
+        { "name": "Apple", "quantity": 4, "unit": "pieces", "price": 0.75 },
+        { "name": "Carrot", "quantity": 3, "unit": "pieces", "price": 0.3 }
       ]
     },
     {
       "name": "Party Prep",
-      "owner": "admin@foo.com",
+      "owner": "john@foo.com",
       "items": [
-        { "produceName": "Broccoli", "quantity": 2, "price": 1.2 },
-        { "produceName": "Chicken Breast", "quantity": 2, "price": 5.0 },
-        { "produceName": "Salmon Fillet", "quantity": 1, "price": 7.5 }
+        { "name": "Broccoli", "quantity": 2, "unit": "heads", "price": 1.2 },
+        { "name": "Chicken Breast", "quantity": 2, "unit": "pieces", "price": 5.0 },
+        { "name": "Salmon Fillet", "quantity": 1, "unit": "fillets", "price": 7.5 }
       ]
     }
   ],
