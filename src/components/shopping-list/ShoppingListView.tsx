@@ -11,9 +11,9 @@ type ShoppingListViewProps = {
 export default function ShoppingListView({ initialShoppingLists }: ShoppingListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredLists = initialShoppingLists.filter((list) => (
-    list.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ));
+  const filteredLists = initialShoppingLists.filter((list) =>
+    list.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <>

@@ -79,6 +79,8 @@ model Produce {
   image             String?
   ShoppingListItems ShoppingListItem[]
   restockThreshold  Float?
+  restockTrigger    String   @default("empty")
+  customThreshold   Float?
 
   @@unique([name, owner])
 }
