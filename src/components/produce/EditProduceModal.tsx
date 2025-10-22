@@ -10,7 +10,7 @@ import { editProduce } from '@/lib/dbActions';
 import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import '../styles/buttons.css';
+import '../../styles/buttons.css';
 
 type ProduceValues = InferType<typeof EditProduceSchema>;
 
@@ -74,7 +74,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header className="justify-content-center">
-        <Modal.Title>Edit Produce Item</Modal.Title>
+        <Modal.Title>Edit Pantry Item</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
@@ -96,7 +96,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
               </Form.Group>
             </Col>
 
-            <Col xs={4} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Type</Form.Label>
                 <Form.Control
@@ -111,7 +111,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
           </Row>
           <Row className="mb-3">
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Location</Form.Label>
                 <Form.Control
@@ -124,7 +124,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Storage</Form.Label>
                 <Form.Control
@@ -140,15 +140,15 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           </Row>
 
           <Row className="mb-3">
-            <Col xs={5} className="text-center">
+            <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   {...register('quantity')}
                   defaultValue={produce.quantity}
-                  step={0.1}
-                  placeholder="eg., 1"
+                  step={0.5}
+                  placeholder="eg., 1, 1.5"
                   className={`${errors.quantity ? 'is-invalid' : ''}`}
                 />
                 <div className="invalid-feedback">{errors.quantity?.message}</div>
@@ -228,12 +228,12 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="d-flex justify-content-center mb-2">
                   <Form.Control
                     type="number"
-                    step={0.1}
+                    step={0.5}
                     {...register('restockThreshold')}
                     defaultValue={produce.restockThreshold ?? ''}
-                    placeholder="e.g., 2.5"
+                    placeholder="e.g., 0.5"
                     className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                    style={{ width: '100px', textAlign: 'center' }}
+                    style={{ width: '100px' }}
                   />
                 </div>
                 <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>

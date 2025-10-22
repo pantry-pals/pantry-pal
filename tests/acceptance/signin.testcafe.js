@@ -2,7 +2,7 @@ import SignInPage from './pages/SignInPage';
 import { t } from 'testcafe';
 
 fixture('SignIn Page')
-  .page('https://pantry-pal-gamma.vercel.app/auth/signin');
+  .page('http://localhost:3000/auth/signin');
 
 test('SignUp page loads', async t => {
   await SignInPage.isDisplayed();
@@ -14,7 +14,7 @@ test('Can sign in as admin', async t => {
 
   await SignInPage.signIn(email, password);
 
-  // Wait for redirect to /list (up to 10s)
+  // Wait for redirect to /dashboard (up to 10s)
   await t.expect(t.eval(() => window.location.pathname))
-         .eql('/view-pantry', { timeout: 10000 }, 'Expected redirect to /view-pantry after sign in');
+         .eql('/dashboard', { timeout: 10000 }, 'Expected redirect to /dashboard after sign in');
 });

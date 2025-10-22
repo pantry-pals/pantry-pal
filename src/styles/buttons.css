@@ -35,6 +35,16 @@
     transform: translateY(-2px);
 }
 
+.btn-danger.btn-submit {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.btn-danger.btn-submit:hover {
+  background-color: #bb2d3b !important;
+  border-color: #b02a37 !important;
+}
+
 .btn-reset {
     width: 100%;
     padding: 12px;
@@ -67,5 +77,23 @@
 
 .btn-add:hover {
     background-color: var(--sage);
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    width: 100%;
+    padding: 4px;
+    background-color: red;
+    color: white;
+    font-size: 1rem;
+    font-weight: 400;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background-color: darkred;
     transform: translateY(-2px);
 }

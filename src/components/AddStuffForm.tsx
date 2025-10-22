@@ -3,7 +3,7 @@
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { useState } from 'react';
 import { Produce } from '@prisma/client';
-import AddProduceModal from './AddProduceModal';
+import AddProduceModal from './produce/AddProduceModal';
 
 const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expiration, owner, image }: Produce) => {
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +36,8 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expir
                 owner,
                 image,
                 restockThreshold: 1,
+                restockTrigger: 'empty',
+                customThreshold: null,
               }}
             />
           </Card>
@@ -43,6 +45,12 @@ const AddStuffForm = ({ id, name, quantity, unit, type, location, storage, expir
       </Row>
     </Container>
   );
+};
+
+AddStuffForm.defaultProps = {
+  restockTrigger: 'empty',
+  customThreshold: null,
+  restockThreshold: null,
 };
 
 export default AddStuffForm;

@@ -78,6 +78,8 @@ model Produce {
   owner            String
   image            String?
   restockThreshold Float?
+  restockTrigger    String   @default("empty")
+  customThreshold   Float?
 
   @@unique([name, owner])
 }

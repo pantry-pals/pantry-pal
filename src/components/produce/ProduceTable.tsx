@@ -2,19 +2,20 @@
 
 import { Table } from 'react-bootstrap';
 import { Produce } from '@prisma/client';
-import ProduceItem from '../ProduceItem';
+import ProduceItem from './ProduceItem';
 
 const ProduceTable = ({ rows }: { rows: Produce[] }) => (
-  <Table striped bordered hover>
+  <Table striped bordered hover style={{ textAlign: 'center' }}>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Storage</th>
         <th>Quantity</th>
-        <th>Restock Threshold</th>
+        <th>Restock</th>
         <th>Expiration</th>
         <th>Edit</th>
+        <th>Delete</th>
       </tr>
     </thead>
     <tbody>

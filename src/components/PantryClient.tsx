@@ -2,7 +2,7 @@
 
 import { Button, Col, Container, Row, Nav } from 'react-bootstrap';
 import { useMemo, useState } from 'react';
-import AddProduceModal from './AddProduceModal';
+import AddProduceModal from './produce/AddProduceModal';
 import ProduceListWithGrouping from './produce/ProduceListWithGrouping';
 import '../styles/buttons.css';
 
@@ -22,9 +22,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
   // Filter produce based on selected location
   const filteredProduce = useMemo(() => {
     if (activeLocation === 'all') return initialProduce;
-    return initialProduce.filter(
-      (p) => p.location?.trim().toLowerCase() === activeLocation,
-    );
+    return initialProduce.filter((p) => p.location?.trim().toLowerCase() === activeLocation);
   }, [initialProduce, activeLocation]);
 
   return (
@@ -99,6 +97,8 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           image: null,
           owner,
           restockThreshold: 0,
+          restockTrigger: 'empty',
+          customThreshold: null,
         }}
       />
     </main>
