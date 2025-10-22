@@ -6,6 +6,7 @@ export async function checkAndAddToShoppingList(produceId: number, owner: string
 
   let shouldRestock = false;
 
+  // eslint-disable-next-line default-case
   switch (produce.restockTrigger) {
     case 'empty':
       shouldRestock = produce.quantity <= 0;
@@ -13,6 +14,7 @@ export async function checkAndAddToShoppingList(produceId: number, owner: string
 
     case 'half':
       // Use desiredQuantity if you store it; otherwise use current quantity as proxy
+      // eslint-disable-next-line no-case-declarations
       const fullQuantity = produce.restockThreshold ?? produce.quantity;
       shouldRestock = produce.quantity <= fullQuantity / 2;
       break;

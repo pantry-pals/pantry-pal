@@ -1,49 +1,48 @@
 import { prisma } from './prisma';
-import { isBelowThreshold } from './restockCheck';
 
-export async function checkAndAddToShoppingList(owner: string) {
-  const produces = await prisma.produce.findMany({
+export async function checkAndAddToShoppingList(produceId: number, owner: string) {
+  const produce = await prisma.produce.findUnique({ where: { id: produceId } });
+  if (!produce) return;
+
+  let shouldRestock = false;
+  // eslint-disable-next-line default-case
+  switch (produce.restockTrigger) {
+    case 'empty':
+      shouldRestock = produce.quantity <= 0;
+      break;
+    case 'half':
+      shouldRestock = produce.quantity <= (produce.restockThreshold ?? 50);
+      break;
+    case 'custom':
+      shouldRestock = produce.quantity <= (produce.customThreshold ?? 0);
+      break;
+  }
+
+  if (!shouldRestock) return;
+
+  let shoppingList = await prisma.shoppingList.findFirst({
     where: { owner },
+    orderBy: { createdAt: 'desc' },
   });
 
-  // Map each produce item to a Promise
-  const promises = produces.map(async (produce) => {
-    // Use the new isBelowThreshold with desiredQuantity
-    const below = isBelowThreshold(
-      produce.quantity,
-      produce.restockTrigger,
-      produce.customThreshold,
-      produce.quantity, // <-- optional: or use a maxQuantity field if you have it
-    );
-
-    if (!below) return;
-
-    // Check if produce is already in a shopping list
-    const existing = await prisma.shoppingListItem.findFirst({
-      where: {
-        produceId: produce.id,
-        shoppingList: { owner },
-      },
+  if (!shoppingList) {
+    shoppingList = await prisma.shoppingList.create({
+      data: { name: 'Auto Restock List', owner },
     });
-    if (existing) return;
+  }
 
-    // Get (or create) “Default Shopping List” for this owner
-    let shoppingList = await prisma.shoppingList.findFirst({ where: { owner, name: 'Default' } });
-    if (!shoppingList) {
-      shoppingList = await prisma.shoppingList.create({
-        data: { owner, name: 'Default' },
-      });
-    }
-
-    // Add item to shopping list
-    await prisma.shoppingListItem.create({
-      data: {
-        shoppingListId: shoppingList.id,
-        produceId: produce.id,
-        quantity: 1, // default quantity, adjust as needed
-      },
-    });
+  const existingItem = await prisma.shoppingListItem.findFirst({
+    where: { shoppingListId: shoppingList.id, produceId: produce.id },
   });
+  if (existingItem) return;
 
-  await Promise.all(promises);
+  await prisma.shoppingListItem.create({
+    data: {
+      shoppingListId: shoppingList.id,
+      produceId: produce.id,
+      quantity: 1,
+      restockTrigger: produce.restockTrigger,
+      customThreshold: produce.customThreshold ?? undefined,
+    },
+  });
 }

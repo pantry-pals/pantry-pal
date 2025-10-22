@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-one-expression-per-line */
 import { Produce } from '@prisma/client';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
@@ -28,10 +29,7 @@ const ProduceItem = ({
         <td>{name}</td>
         <td>{type}</td>
         <td>
-          {storage}
-          {' '}
-          at
-          {' '}
+          {storage} at
           {location}
         </td>
         <td>
@@ -63,6 +61,8 @@ const ProduceItem = ({
           owner,
           image,
           restockThreshold: safeRestock,
+          restockTrigger: 'empty',
+          customThreshold: null,
         }}
       />
     </>

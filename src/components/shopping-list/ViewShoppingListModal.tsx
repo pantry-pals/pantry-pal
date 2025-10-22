@@ -1,8 +1,27 @@
+/* eslint-disable react/jsx-one-expression-per-line */
+/* eslint-disable function-paren-newline */
+/* eslint-disable implicit-arrow-linebreak */
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Button, Col, Modal, Row, Table } from 'react-bootstrap';
 import '../../styles/buttons.css';
+
+interface Produce {
+  id: number;
+  name: string;
+  unit: string;
+}
+
+interface ShoppingListItem {
+  id: number;
+  quantity: number;
+  price?: number;
+  produce: Produce;
+  restockTrigger: string;
+  customThreshold: number | null;
+}
 
 interface ViewShoppingListModalProps {
   show: boolean;
@@ -11,7 +30,7 @@ interface ViewShoppingListModalProps {
 }
 
 const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListModalProps) => {
-  const [items, setItems] = useState(shoppingList?.items || []);
+  const [items, setItems] = useState<ShoppingListItem[]>(shoppingList?.items || []);
   useEffect(() => {
     if (shoppingList?.items) {
       setItems(shoppingList.items);
@@ -19,11 +38,11 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   }, [shoppingList]);
 
   const handleRestockChange = async (produceId: number, restockTrigger: string) => {
-    setItems((prev) =>
-      prev.map((item: any) =>
-        item.produce.id === produceId ? { ...item, produce: { ...item.produce, restockTrigger } } : item,
-      ),
+    // eslint-disable-next-line max-len
+    setItems((prev: ShoppingListItem[]) =>
+      prev.map((item) => (item.produce.id === produceId ? { ...item, restockTrigger } : item)),
     );
+
     await fetch(`/api/produce/${produceId}/restock`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -32,10 +51,8 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   };
   const handleThresholdChange = async (produceId: number, customThreshold: number) => {
     // eslint-disable-next-line max-len
-    setItems((prev: any[]) =>
-      prev.map((item: any) =>
-        item.produce.id === produceId ? { ...item, produce: { ...item.produce, customThreshold } } : item,
-      ),
+    setItems((prev: ShoppingListItem[]) =>
+      prev.map((item) => (item.produce.id === produceId ? { ...item, customThreshold } : item)),
     );
 
     await fetch(`/api/produce/${produceId}/restock`, {
@@ -75,14 +92,14 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 <tbody>
                   {items.map((item: any) => (
                     <tr key={item.id}>
-                      <td>{item.produce.name}</td>
+                      <td>{item.produce.name}</td>{' '}
                       <td>
                         {item.quantity} {item.produce.unit}
                       </td>
                       <td>{item.price ? `$${parseFloat(item.price.toString()).toFixed(2)}` : 'N/A'}</td>
                       <td>
                         <select
-                          value={item.produce.restockTrigger || 'empty'}
+                          value={item.restockTrigger}
                           onChange={(e) => handleRestockChange(item.produce.id, e.target.value)}
                           className="form-select form-select-sm"
                         >
@@ -91,12 +108,12 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                           <option value="custom">Custom % left</option>
                         </select>
 
-                        {item.produce.restockTrigger === 'custom' && (
+                        {item.restockTrigger === 'custom' && (
                           <input
                             type="number"
                             min="1"
                             max="100"
-                            value={item.produce.customThreshold || ''}
+                            value={item.customThreshold || ''}
                             onChange={(e) => handleThresholdChange(item.produce.id, parseFloat(e.target.value))}
                             className="form-control form-control-sm mt-1"
                             placeholder="% left"
