@@ -79,6 +79,8 @@ model Produce {
   image             String?
   ShoppingListItems ShoppingListItem[]
   restockThreshold  Float?
+  restockTrigger    String   @default("empty")
+  customThreshold   Float?
 
   @@unique([name, owner])
 }
@@ -100,6 +102,8 @@ model ShoppingListItem {
   produceId      Int
   quantity       Int
   price          Decimal? @db.Decimal(10, 2)
+  restockTrigger String?
+  customThreshold Int? 
 
   shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id])
   produce      Produce      @relation(fields: [produceId], references: [id])
