@@ -10,6 +10,7 @@ import { addProduce } from '@/lib/dbActions';
 import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import BarcodeScanner from './BarcodeScanner';
 import '../../styles/buttons.css';
 
 type ProduceValues = InferType<typeof AddProduceSchema>;
@@ -21,7 +22,6 @@ interface AddProduceModalProps {
 }
 
 const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
-  // Available unit options
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
   const {
@@ -38,15 +38,11 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
   });
 
   const router = useRouter();
-
-  // Track dropdown state
   const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
+  const [showScanner, setShowScanner] = useState(false);
 
-  // Reset form values every time modal closes or produce changes
   useEffect(() => {
-    if (!show) {
-      reset();
-    }
+    if (!show) reset();
   }, [show, reset]);
 
   const handleClose = () => {
@@ -54,17 +50,32 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     onHide();
   };
 
+  const fetchProductByBarcode = async (barcode: string) => {
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await res.json();
+
+      if (data.status === 1) {
+        const { product } = data;
+        setValue('name', product.product_name || '');
+        setValue('image', product.image_url || '');
+        setValue('type', product.categories_tags?.[0]?.replace('en:', '') || '');
+      } else {
+        swal('Not found', 'No product found for this barcode', 'warning');
+      }
+    } catch (err) {
+      swal('Error', 'Failed to fetch product info', 'error');
+    }
+  };
+
   const onSubmit = async (data: ProduceValues) => {
-    console.log('Submitting new produce item');
     await addProduce({
       ...data,
       expiration: data.expiration ?? null,
       image: data.image ? data.image : null,
       restockThreshold: Number(data.restockThreshold ?? 0),
     });
-    swal('Success', 'Your item has been added', 'success', {
-      timer: 2000,
-    });
+    swal('Success', 'Your item has been added', 'success', { timer: 2000 });
 
     handleClose();
     router.refresh();
@@ -77,6 +88,32 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
+          {/* Barcode Scanner Button */}
+          <Row className="mb-3">
+            <Col xs={12} className="text-center">
+              <Button
+                type="button"
+                variant="info"
+                size="sm"
+                className="mb-2"
+                onClick={() => setShowScanner(true)}
+              >
+                Scan Barcode
+              </Button>
+
+              {showScanner && (
+                <BarcodeScanner
+                  onDetected={(code) => {
+                    fetchProductByBarcode(code);
+                    setShowScanner(false);
+                  }}
+                  onClose={() => setShowScanner(false)}
+                />
+              )}
+            </Col>
+          </Row>
+
+          {/* Name and Type */}
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -104,6 +141,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Location and Storage */}
           <Row>
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -130,6 +169,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Quantity and Unit */}
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -153,17 +194,12 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                   onChange={(e) => {
                     const { value } = e.target;
                     setUnitChoice(value);
-                    if (value !== 'Other') {
-                      setValue('unit', value); // preset
-                    } else {
-                      setValue('unit', ''); // clear for custom typing
-                    }
+                    if (value !== 'Other') setValue('unit', value);
+                    else setValue('unit', '');
                   }}
                 >
                   {unitOptions.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
+                    <option key={u} value={u}>{u}</option>
                   ))}
                 </Form.Select>
 
@@ -179,6 +215,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Expiration and Image */}
           <Row className="mb-3">
             <Col xs={6} className="text-center">
               <Form.Group>
@@ -204,13 +242,12 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Restock Threshold */}
           <Row>
             <Col xs={12} className="text-center">
               <Form.Group>
-                <Form.Label className="mb-0">
-                  Restock Threshold
-                </Form.Label>
-
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
                 <div className="d-flex justify-content-center mb-2">
                   <Form.Control
                     type="number"
@@ -221,34 +258,26 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     style={{ width: '100px' }}
                   />
                 </div>
-
                 <Form.Text
                   className="text-muted d-block mx-auto"
-                  style={{
-                    maxWidth: '320px',
-                    fontSize: '0.85rem',
-                    lineHeight: '1.3',
-                  }}
+                  style={{ maxWidth: '320px', fontSize: '0.85rem', lineHeight: '1.3' }}
                 >
                   When quantity falls below this value, the item will be added to your shopping list.
                 </Form.Text>
-
                 <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
               </Form.Group>
             </Col>
           </Row>
+
           <input type="hidden" {...register('owner')} value={produce.owner} />
+
           <Form.Group className="form-group">
             <Row className="pt-3">
               <Col>
-                <Button type="submit" className="btn-submit">
-                  Submit
-                </Button>
+                <Button type="submit" className="btn-submit">Submit</Button>
               </Col>
               <Col>
-                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">
-                  Reset
-                </Button>
+                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">Reset</Button>
               </Col>
             </Row>
           </Form.Group>

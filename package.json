@@ -12,7 +12,6 @@
     "test-acceptance-ci": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --app 'npm run build && npm run start' --window-size 1920,1080 --app-init-delay 60000",
     "test-acceptance-local": "testcafe 'chrome' tests/acceptance/*.testcafe.js --app 'npm run build && npm run start' --window-size 1920,1080 --app-init-delay 20000",
     "test-acceptance-single": "testcafe 'chrome:headless' tests/acceptance/*.testcafe.js --window-size 1920,1080"
-
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -21,6 +20,8 @@
     "@hookform/resolvers": "^3.6.0",
     "@ngneat/falso": "^7.2.0",
     "@prisma/client": "^6.15.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
@@ -30,7 +31,7 @@
     "multiselect-react-dropdown": "^2.0.25",
     "next": "^14.2.24",
     "next-auth": "^4.24.11",
-    "nodemailer": "^6.10.1",
+    "nodemailer": "^7.0.9",
     "react": "^18",
     "react-bootstrap": "^2.10.4",
     "react-bootstrap-icons": "^1.11.4",
@@ -50,6 +51,7 @@
     "@types/nodemailer": "^7.0.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/parser": "^7.18.0",
     "dotenv-cli": "^10.0.0",
     "eslint": "^8",
     "eslint-config-airbnb": "^19.0.4",
@@ -59,7 +61,7 @@
     "prettier": "^3.3.1",
     "prettier-eslint": "^16.3.0",
     "prisma": "^6.16.2",
-    "testcafe": "^3.7.2",
+    "testcafe": "^0.16.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
