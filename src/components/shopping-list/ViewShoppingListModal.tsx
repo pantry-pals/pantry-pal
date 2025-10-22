@@ -37,25 +37,24 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
     }
   }, [shoppingList]);
 
-  const handleRestockChange = async (produceId: number, restockTrigger: string) => {
-    // eslint-disable-next-line max-len
-    setItems((prev: ShoppingListItem[]) =>
-      prev.map((item) => (item.produce.id === produceId ? { ...item, restockTrigger } : item)),
+  const handleRestockChange = async (itemId: number, restockTrigger: string) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, restockTrigger } : item)),
     );
 
-    await fetch(`/api/produce/${produceId}/restock`, {
+    await fetch(`/api/shopping-list-item/${itemId}/restock`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ restockTrigger }),
     });
   };
-  const handleThresholdChange = async (produceId: number, customThreshold: number) => {
-    // eslint-disable-next-line max-len
-    setItems((prev: ShoppingListItem[]) =>
-      prev.map((item) => (item.produce.id === produceId ? { ...item, customThreshold } : item)),
+
+  const handleThresholdChange = async (itemId: number, customThreshold: number) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, customThreshold } : item)),
     );
 
-    await fetch(`/api/produce/${produceId}/restock`, {
+    await fetch(`/api/shopping-list-item/${itemId}/restock`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customThreshold }),
@@ -92,15 +91,15 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 <tbody>
                   {items.map((item: any) => (
                     <tr key={item.id}>
-                      <td>{item.produce.name}</td>{' '}
+                      <td>{item.name}</td>{' '}
                       <td>
-                        {item.quantity} {item.produce.unit}
+                        {item.quantity} {item.unit}
                       </td>
                       <td>{item.price ? `$${parseFloat(item.price.toString()).toFixed(2)}` : 'N/A'}</td>
                       <td>
                         <select
                           value={item.restockTrigger}
-                          onChange={(e) => handleRestockChange(item.produce.id, e.target.value)}
+                          onChange={(e) => handleRestockChange(item.id, e.target.value)}
                           className="form-select form-select-sm"
                         >
                           <option value="empty">When empty</option>
