@@ -33,6 +33,9 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
 
   const router = useRouter();
 
+  const [locations, setLocations] = useState<string[]>([]);
+  const [storageOptions, setStorageOptions] = useState<string[]>([]);
+
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
   const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
@@ -47,6 +50,22 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       } as any);
       setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
     }
+
+    const fetchLocations = async () => {
+      const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setLocations(data);
+    };
+    fetchLocations();
+
+    const fetchStorage = async () => {
+      const res = await fetch(`/api/produce/${produce.id}/storage?owner=${produce.owner}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setStorageOptions(data);
+    };
+    fetchStorage();
   }, [show, produce, reset, unitOptions]);
 
   const handleClose = () => {
@@ -115,28 +134,38 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Location</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('location')}
-                  required
+                <Form.Select
+                  {...register('location', { required: true })}
                   defaultValue={produce.location}
                   className={`${errors.location ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Freezer"
-                />
+                >
+                  <option value="">Select location...</option>
+
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
+                </Form.Select>
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
             <Col xs={6} className="text-center">
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('storage')}
-                  required
-                  defaultValue={produce.storage || ''}
+                <Form.Select
+                  {...register('storage', { required: true })}
+                  defaultValue={produce.storage}
                   className={`${errors.storage ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Fridge, Pantry, Freezer"
-                />
+                >
+                  <option value="">Select storage...</option>
+
+                  {storageOptions.map((storage) => (
+                    <option key={storage} value={storage}>
+                      {storage}
+                    </option>
+                  ))}
+                </Form.Select>
                 <div className="invalid-feedback">{errors.storage?.message}</div>
               </Form.Group>
             </Col>
