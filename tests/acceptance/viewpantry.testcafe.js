@@ -45,10 +45,10 @@ test('View Pantry page loads and all key UI elements work', async t => {
   const title = Selector('h1').withText('Your Pantry at a Glance');
   await t.expect(title.exists).ok('Title missing');
 
-  // Check “All Houses” tab exists and is active
-  const allHousesTab = Selector('.nav-link').withText(/all houses/i);
-  await t.expect(allHousesTab.exists).ok('All Houses tab not visible');
-  await t.expect(allHousesTab.hasClass('active')).ok('All Houses tab not active');
+  // Check “All Locations” tab exists and is active
+  const allLocationsTab = Selector('.nav-link').withText(/all locations/i);
+  await t.expect(allLocationsTab.exists).ok('All Locations tab not visible');
+  await t.expect(allLocationsTab.hasClass('active')).ok('All Locations tab not active');
 
   // Click a location tab (if available)
   const locationTabs = Selector('.nav-link').filterVisible().nth(1);

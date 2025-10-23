@@ -2,9 +2,9 @@
 
 import { Button, Col, Container, Row, Nav } from 'react-bootstrap';
 import { useMemo, useState } from 'react';
-import AddProduceModal from './produce/AddProduceModal';
-import ProduceListWithGrouping from './produce/ProduceListWithGrouping';
-import '../styles/buttons.css';
+import AddProduceModal from './AddProduceModal';
+import ProduceListWithGrouping from './ProduceListWithGrouping';
+import '../../styles/buttons.css';
 
 function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner: string }) {
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +54,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
                     color: activeLocation === 'all' ? '#0d6efd' : '#555',
                   }}
                 >
-                  All Houses
+                  All Locations
                 </Nav.Link>
               </Nav.Item>
               {locations.map((loc) => (
