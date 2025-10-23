@@ -61,14 +61,14 @@ const SearchBarControls: React.FC<Props> = ({
 
     <ButtonGroup aria-label="View mode">
       <Button
-        variant={view === 'table' ? 'primary' : 'outline-primary'}
+        className={view === 'table' ? 'btn-view-active' : 'btn-view-inactive'}
         onClick={() => setView('table')}
         title="Table View"
       >
         <BsList size={20} />
       </Button>
       <Button
-        variant={view === 'cards' ? 'primary' : 'outline-primary'}
+        className={view === 'cards' ? 'btn-view-active' : 'btn-view-inactive'}
         onClick={() => setView('cards')}
         title="Card View"
       >
@@ -76,7 +76,7 @@ const SearchBarControls: React.FC<Props> = ({
       </Button>
     </ButtonGroup>
 
-    <Button variant="secondary" onClick={clear}>
+    <Button className="btn-clear" onClick={clear}>
       Clear
     </Button>
   </div>

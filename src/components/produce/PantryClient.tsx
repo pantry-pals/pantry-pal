@@ -44,15 +44,11 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
               variant="tabs"
               activeKey={activeLocation}
               onSelect={(selectedKey) => setActiveLocation(selectedKey || 'all')}
-              className="justify-content-center"
+              className="justify-content-center pantry-controls"
             >
               <Nav.Item>
                 <Nav.Link
                   eventKey="all"
-                  style={{
-                    fontWeight: activeLocation === 'all' ? '600' : '400',
-                    color: activeLocation === 'all' ? '#0d6efd' : '#555',
-                  }}
                 >
                   All Locations
                 </Nav.Link>

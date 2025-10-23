@@ -90,3 +90,26 @@ footer a {
     content: "*";
     color: red;
 }
+
+/* Default nav/link colors (use classes, not IDs) */
+.pantry-controls .nav-link,
+.pantry-controls .navbar-brand,
+.pantry-controls .dropdown-toggle {
+  color: var(--brunswick-green) !important;
+  font-weight: 700 !important;
+}
+
+/* Hover state */
+.pantry-controls .nav-link:hover,
+.pantry-controls .navbar-brand:hover {
+  color: #d4af37 !important;
+}
+
+/* Active state (links + brand on home) */
+.pantry-controls .nav-link.active,
+.pantry-controls .nav-item.show .nav-link,
+.pantry-controls .nav-link.show,
+.pantry-controls .navbar-brand.active {
+  color: #d4af37 !important;
+  background-color: var(--hunter-green) !important;
+}
