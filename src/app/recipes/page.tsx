@@ -1,10 +1,10 @@
 import { Container } from 'react-bootstrap';
-import RecipesClient from '@/components/RecipesClient';
 import { getRecipes } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { getUserProduceByEmail } from '@/lib/dbActions';
+import RecipesClient from '@/components/recipes/RecipesClient';
 
 export const dynamic = 'force-dynamic';
 

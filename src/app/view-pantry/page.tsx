@@ -4,7 +4,7 @@ import { Container } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
-import PantryClient from '@/components/PantryClient';
+import PantryClient from '@/components/produce/PantryClient';
 
 type SessionUser = { id: string; email: string; randomKey: string };
 

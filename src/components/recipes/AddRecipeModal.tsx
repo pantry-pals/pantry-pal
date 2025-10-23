@@ -4,7 +4,7 @@ import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal, Button, Form, Alert, Row, Col } from 'react-bootstrap';
 import { createRecipe } from '@/lib/recipes';
-import '../styles/buttons.css'; // same file Edit Produce uses
+import '../../styles/buttons.css'; // same file Edit Produce uses
 
 type Props = {
   show: boolean;
