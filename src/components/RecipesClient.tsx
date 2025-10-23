@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import RecipeCard from './RecipeCard';
-import AddRecipeCard from './AddRecipeCard';
+// REMOVED: import AddRecipeCard from './AddRecipeCard';
 
 type Props = {
   recipes: any[];
@@ -23,37 +24,52 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
   // Step 1: filter by what user can make
   const canMakeFiltered = useMemo(() => {
     if (!showCanMake) return recipes;
-    return recipes.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
+    return recipes.filter((r) =>
+      r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())),
+    );
   }, [recipes, showCanMake, pantryNames]);
 
   // Step 2: then filter by search query
   const filteredRecipes = useMemo(() => {
     const query = search.toLowerCase();
     if (!query) return canMakeFiltered;
-    return canMakeFiltered.filter((r) => r.title.toLowerCase().includes(query)
-      || r.cuisine.toLowerCase().includes(query)
-      || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
-      || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)));
+    return canMakeFiltered.filter(
+      (r) =>
+        r.title.toLowerCase().includes(query) ||
+        r.cuisine.toLowerCase().includes(query) ||
+        r.ingredients.some((ing: string) => ing.toLowerCase().includes(query)) ||
+        (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)),
+    );
   }, [canMakeFiltered, search]);
 
   return (
     <>
-      <div className="text-center mb-4 d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
-        <Button
-          variant={showCanMake ? 'success' : 'outline-dark'}
-          onClick={() => setShowCanMake((v) => !v)}
-        >
-          {showCanMake ? 'Show All Recipes' : 'Show Recipes I Can Make'}
-        </Button>
+      <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-stretch gap-3">
+        <div className="d-flex gap-3">
+          <Button
+            variant={showCanMake ? 'success' : 'outline-dark'}
+            onClick={() => setShowCanMake((v) => !v)}
+          >
+            {showCanMake ? 'Show All Recipes' : 'Show Recipes I Can Make'}
+          </Button>
 
-        <Form className="w-100 w-md-50" style={{ maxWidth: 400 }}>
-          <Form.Control
-            type="text"
-            placeholder="Search recipes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </Form>
+          <Form className="w-100" style={{ maxWidth: 400 }}>
+            <Form.Control
+              type="text"
+              placeholder="Search recipes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </Form>
+        </div>
+
+        {isAdmin && (
+          <div className="d-flex justify-content-end">
+            <Link href="/recipe/new" passHref>
+              <Button variant="primary">+ Add Recipe</Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <Row xs={1} md={2} lg={3} className="g-4">
@@ -75,11 +91,12 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
           <p className="text-center text-muted">No recipes found.</p>
         )}
 
-        {isAdmin && (
+        {/* REMOVED: AddRecipeCard at the end */}
+        {/* {isAdmin && (
           <Col>
             <AddRecipeCard />
           </Col>
-        )}
+        )} */}
       </Row>
     </>
   );
