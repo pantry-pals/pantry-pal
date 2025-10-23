@@ -2,7 +2,7 @@
 import { Produce } from '@prisma/client';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { Trash } from 'react-bootstrap-icons';
+import { PencilSquare, Trash } from 'react-bootstrap-icons';
 import EditProduceModal from './EditProduceModal';
 import '../../styles/buttons.css';
 import DeleteProduceModal from './DeleteProduceModal';
@@ -42,7 +42,7 @@ const ProduceItem = ({
         <td>{expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}</td>
         <td>
           <Button className="btn-edit" onClick={() => setShowEditModal(true)}>
-            Edit
+            <PencilSquare color="white" size={18} />
           </Button>
         </td>
         <td>

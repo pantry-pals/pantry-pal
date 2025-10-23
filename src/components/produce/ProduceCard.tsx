@@ -4,7 +4,7 @@ import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
 import Link from 'next/link';
 import type { Produce } from '@prisma/client';
 import { useState } from 'react';
-import { Trash } from 'react-bootstrap-icons';
+import { PencilSquare, Trash } from 'react-bootstrap-icons';
 import EditProduceModal from './EditProduceModal';
 import DeleteProduceModal from './DeleteProduceModal';
 
@@ -66,7 +66,7 @@ export default function ProduceCard({ produce }: Props) {
         </ListGroup>
         <Card.Footer className="d-flex">
           <Button className="me-2 btn-edit" onClick={() => setShowEditModal(true)}>
-            Edit
+            <PencilSquare color="white" size={18} />
           </Button>
           <Button
             variant="danger"
