@@ -34,7 +34,7 @@ export default function DashboardMenu() {
 
   return (
     <main>
-      <div className="container">
+      <div className="container" id="dashboard">
         <div className="row align-items-center text-center mt-5">
           <motion.div variants={parent} initial="hidden" animate="show">
             <motion.h1
