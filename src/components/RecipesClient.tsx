@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import RecipeCard from './RecipeCard';
-// REMOVED: import AddRecipeCard from './AddRecipeCard';
+import AddRecipeModal from '@/components/AddRecipeModal';
 
 type Props = {
   recipes: any[];
@@ -15,13 +14,14 @@ type Props = {
 export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
 
   const pantryNames = useMemo(
     () => new Set(produce.map((p) => p.name.toLowerCase())),
     [produce],
   );
 
-  // Step 1: filter by what user can make
+  // Filter by what user can make
   const canMakeFiltered = useMemo(() => {
     if (!showCanMake) return recipes;
     return recipes.filter((r) =>
@@ -29,7 +29,7 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
     );
   }, [recipes, showCanMake, pantryNames]);
 
-  // Step 2: then filter by search query
+  // Then filter by search query
   const filteredRecipes = useMemo(() => {
     const query = search.toLowerCase();
     if (!query) return canMakeFiltered;
@@ -44,16 +44,21 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
 
   return (
     <>
-      <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-stretch gap-3">
-        <div className="d-flex gap-3">
+      {/* Header bar: left toggle, centered search, right add button */}
+      <div className="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        {/* Left: toggle */}
+        <div>
           <Button
             variant={showCanMake ? 'success' : 'outline-dark'}
             onClick={() => setShowCanMake((v) => !v)}
           >
             {showCanMake ? 'Show All Recipes' : 'Show Recipes I Can Make'}
           </Button>
+        </div>
 
-          <Form className="w-100" style={{ maxWidth: 400 }}>
+        {/* Center: search */}
+        <div className="flex-grow-1 d-flex justify-content-center">
+          <Form style={{ width: '100%', maxWidth: 400 }}>
             <Form.Control
               type="text"
               placeholder="Search recipes..."
@@ -63,11 +68,12 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
           </Form>
         </div>
 
+        {/* Right: Add Recipe opens modal (no link) */}
         {isAdmin && (
-          <div className="d-flex justify-content-end">
-            <Link href="/recipe/new" passHref>
-              <Button variant="primary">+ Add Recipe</Button>
-            </Link>
+          <div>
+            <Button className="btn-add" onClick={() => setShowAdd(true)}>
+              + Add Recipe
+            </Button>
           </div>
         )}
       </div>
@@ -88,16 +94,14 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
             </Col>
           ))
         ) : (
-          <p className="text-center text-muted">No recipes found.</p>
+          <p className="text-center text-muted w-100">No recipes found.</p>
         )}
-
-        {/* REMOVED: AddRecipeCard at the end */}
-        {/* {isAdmin && (
-          <Col>
-            <AddRecipeCard />
-          </Col>
-        )} */}
       </Row>
+
+      {/* Modal */}
+      {isAdmin && (
+        <AddRecipeModal show={showAdd} onHide={() => setShowAdd(false)} />
+      )}
     </>
   );
 }

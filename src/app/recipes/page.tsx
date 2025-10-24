@@ -1,11 +1,10 @@
-import { Container, Button } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import RecipesClient from '@/components/RecipesClient';
 import { getRecipes } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { getUserProduceByEmail } from '@/lib/dbActions';
-import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,13 +29,7 @@ export default async function RecipeListPage() {
     <main>
       <Container id="list" fluid className="py-3">
         <Container>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="m-0">Recipes</h2>
-            <Link href="/recipe/new" passHref>
-              <Button variant="primary">+ Add Recipe</Button>
-            </Link>
-          </div>
-
+          <h2 className="text-center mb-4">Recipes</h2>
           <RecipesClient recipes={recipes} produce={pantry} isAdmin={isAdmin} />
         </Container>
       </Container>
