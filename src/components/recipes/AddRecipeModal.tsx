@@ -4,7 +4,7 @@ import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal, Button, Form, Alert, Row, Col } from 'react-bootstrap';
 import { createRecipe } from '@/lib/recipes';
-import '../../styles/buttons.css'; // same file Edit Produce uses
+import '../../styles/buttons.css';
 
 type Props = {
   show: boolean;
@@ -20,8 +20,8 @@ export default function AddRecipeModal({ show, onHide }: Props) {
   const [cuisine, setCuisine] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [dietary, setDietary] = useState(''); // comma-separated
-  const [ingredients, setIngredients] = useState(''); // comma-separated
+  const [dietary, setDietary] = useState('');
+  const [ingredients, setIngredients] = useState('');
 
   const handleReset = useCallback(() => {
     setTitle('');
@@ -31,32 +31,6 @@ export default function AddRecipeModal({ show, onHide }: Props) {
     setDietary('');
     setIngredients('');
   }, []);
-
-  // stable handlers to satisfy react/jsx-no-bind and no-shadow
-  const onTitleChange = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setTitle(evt.target.value),
-    [],
-  );
-  const onCuisineChange = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setCuisine(evt.target.value),
-    [],
-  );
-  const onDescriptionChange = useCallback(
-    (evt: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(evt.target.value),
-    [],
-  );
-  const onImageUrlChange = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setImageUrl(evt.target.value),
-    [],
-  );
-  const onDietaryChange = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setDietary(evt.target.value),
-    [],
-  );
-  const onIngredientsChange = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setIngredients(evt.target.value),
-    [],
-  );
 
   const onSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -82,7 +56,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
         setErr(error?.message ?? 'Failed to create recipe');
       }
     },
-    [title, cuisine, description, imageUrl, dietary, ingredients, router, handleReset, onHide, startTransition],
+    [title, cuisine, description, imageUrl, dietary, ingredients, router, handleReset, onHide],
   );
 
   return (
@@ -100,33 +74,33 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Title *</Form.Label>
-                <Form.Control value={title} onChange={onTitleChange} required />
+                <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} required />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Cuisine *</Form.Label>
-                <Form.Control value={cuisine} onChange={onCuisineChange} required />
+                <Form.Control value={cuisine} onChange={(e) => setCuisine(e.target.value)} required />
               </Form.Group>
             </Col>
           </Row>
 
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={3} value={description} onChange={onDescriptionChange} />
+            <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Form.Group>
 
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Image URL</Form.Label>
-                <Form.Control value={imageUrl} onChange={onImageUrlChange} />
+                <Form.Control value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
-                <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={onDietaryChange} />
+                <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
               </Form.Group>
             </Col>
           </Row>
@@ -136,17 +110,19 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Form.Control
               placeholder="onion, tomato, basil"
               value={ingredients}
-              onChange={onIngredientsChange}
+              onChange={(e) => setIngredients(e.target.value)}
             />
           </Form.Group>
 
           <div className="d-flex gap-2 mt-3">
-            {/* same classes as Edit Produce */}
             <Button type="submit" className="btn-submit" disabled={isPending}>
               {isPending ? 'Saving…' : 'Submit'}
             </Button>
             <Button type="button" variant="warning" className="btn-reset" onClick={handleReset}>
               Reset
+            </Button>
+            <Button type="button" variant="secondary" onClick={onHide}>
+              Cancel
             </Button>
           </div>
         </Form>
