@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
-import RecipeCard from './RecipeCard';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
+import RecipeCard from './RecipeCard';
 import '../../styles/buttons.css'; // adjust path if styles folder is elsewhere
 
 type Props = {
@@ -24,20 +24,17 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
 
   const canMakeFiltered = useMemo(() => {
     if (!showCanMake) return recipes;
-    return recipes.filter((r) =>
-      r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())),
-    );
+    return recipes.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
   }, [recipes, showCanMake, pantryNames]);
 
   const filteredRecipes = useMemo(() => {
     const query = search.toLowerCase();
     if (!query) return canMakeFiltered;
     return canMakeFiltered.filter(
-      (r) =>
-        r.title.toLowerCase().includes(query) ||
-        r.cuisine.toLowerCase().includes(query) ||
-        r.ingredients.some((ing: string) => ing.toLowerCase().includes(query)) ||
-        (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)),
+      (r) => r.title.toLowerCase().includes(query)
+        || r.cuisine.toLowerCase().includes(query)
+        || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
+        || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)),
     );
   }, [canMakeFiltered, search]);
 

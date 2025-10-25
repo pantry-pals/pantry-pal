@@ -100,6 +100,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
+                {/* eslint-disable-next-line max-len */}
                 <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
               </Form.Group>
             </Col>
