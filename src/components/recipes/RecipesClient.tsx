@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
 import RecipeCard from './RecipeCard';
-import '../../styles/buttons.css'; // adjust path if styles folder is elsewhere
+import '../../styles/buttons.css';
 
 type Props = {
   recipes: any[];
@@ -93,7 +93,7 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
       </Row>
 
       {isAdmin && (
-        <AddRecipeModal show={showAdd} onHide={() => setShowAdd(false)} />
+        <AddRecipeModal show={showAdd} onClose={() => setShowAdd(false)} />
       )}
     </>
   );
