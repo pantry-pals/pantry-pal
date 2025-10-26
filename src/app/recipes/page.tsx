@@ -1,26 +1,31 @@
 import { Container } from 'react-bootstrap';
 import RecipesClient from '@/components/recipes/RecipesClient';
 import { getRecipes } from '@/lib/recipes';
+
 import { getServerSession } from 'next-auth';
+import type { NextAuthOptions, Session } from 'next-auth'; // ⬅️ add types
 import authOptions from '@/lib/authOptions';
+
 import { prisma } from '@/lib/prisma';
 import { getUserProduceByEmail } from '@/lib/dbActions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function RecipeListPage() {
-  const session = await getServerSession(authOptions);
+  // @ts-ignore
+  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null;
 
   let isAdmin = false;
   let pantry: any[] = [];
 
-  if (session?.user?.email) {
+  const email = session?.user?.email ?? null;
+  if (email) {
     const u = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email },
       select: { role: true },
     });
     isAdmin = u?.role === 'ADMIN';
-    pantry = await getUserProduceByEmail(session.user.email);
+    pantry = await getUserProduceByEmail(email);
   }
 
   const recipes = await getRecipes();
