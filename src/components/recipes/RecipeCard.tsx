@@ -5,16 +5,24 @@ import { Card, Button, Image } from 'react-bootstrap';
 export type RecipeCardProps = {
   id: number;
   title: string;
+  // eslint-disable-next-line react/require-default-props
   description?: string | null;
+  // eslint-disable-next-line react/require-default-props
   imageUrl?: string | null;
   cuisine: string;
   dietary: string[];
   ingredients: string[];
 };
 
-export default function RecipeCard(props: RecipeCardProps) {
-  const { id, title, description, imageUrl, cuisine, dietary, ingredients } = props;
-
+export default function RecipeCard({
+  id,
+  title,
+  description = null,
+  imageUrl = null,
+  cuisine,
+  dietary,
+  ingredients,
+}: RecipeCardProps) {
   return (
     <Card className="h-100 shadow-sm d-flex flex-column">
       <div style={{ position: 'relative', height: 200, width: '100%' }}>
@@ -52,8 +60,3 @@ export default function RecipeCard(props: RecipeCardProps) {
     </Card>
   );
 }
-
-RecipeCard.defaultProps = {
-  description: null,
-  imageUrl: null,
-};

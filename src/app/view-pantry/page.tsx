@@ -9,6 +9,7 @@ import PantryClient from '@/components/produce/PantryClient';
 type SessionUser = { id: string; email: string; randomKey: string };
 
 const ViewPantryPage = async () => {
+  // @ts-ignore
   const session = (await getServerSession(authOptions)) as { user: SessionUser } | null;
   loggedInProtectedPage(session);
 
