@@ -28,9 +28,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
         {recipe.dietary?.length ? (
           <div className="d-flex flex-wrap gap-2 mb-3">
             {recipe.dietary.map((d) => (
-              <Badge bg="secondary" key={d}>
-                {d}
-              </Badge>
+              <Badge bg="secondary" key={d}>{d}</Badge>
             ))}
           </div>
         ) : null}
@@ -39,62 +37,14 @@ export default async function RecipeDetailPage({ params }: PageProps) {
           <Col lg={6} className="order-2 order-lg-1">
             {recipe.description && <p className="mb-4">{recipe.description}</p>}
 
-            <section className="mb-4">
+            <section>
               <h5 className="mb-2">Ingredients</h5>
-              <ul>
+              <ul className="mb-4">
                 {(recipe.ingredients ?? []).map((ing) => (
                   <li key={ing}>{ing}</li>
                 ))}
               </ul>
             </section>
-
-            {recipe.instructions && (
-              <section className="mb-4">
-                <h5 className="mb-2">Instructions</h5>
-                <p style={{ whiteSpace: 'pre-line' }}>{recipe.instructions}</p>
-              </section>
-            )}
-
-            <section className="mb-4">
-              {(recipe.servings || recipe.prepMinutes || recipe.cookMinutes) && (
-                <div className="text-muted">
-                  {recipe.servings && (
-                  <div>
-                    Servings:
-                    {recipe.servings}
-                  </div>
-                  )}
-                  {recipe.prepMinutes && (
-                  <div>
-                    Prep time:
-                    {recipe.prepMinutes}
-                    {' '}
-                    min
-                  </div>
-                  )}
-                  {recipe.cookMinutes && (
-                  <div>
-                    Cook time:
-                    {recipe.cookMinutes}
-                    {' '}
-                    min
-                  </div>
-                  )}
-                </div>
-              )}
-            </section>
-
-            {recipe.sourceUrl && (
-              <Button
-                as="a"
-                href={recipe.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="success"
-              >
-                View Original Recipe
-              </Button>
-            )}
           </Col>
 
           <Col lg={6} className="order-1 order-lg-2">

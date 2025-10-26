@@ -4,20 +4,19 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 
-/** Fetch all recipes (latest first). */
 export async function getRecipes() {
   return prisma.recipe.findMany({
     orderBy: { createdAt: 'desc' },
   });
 }
 
-/** Fetch a single recipe by numeric ID. */
 export async function getRecipeById(id: number) {
   if (!Number.isFinite(id)) return null;
-  return prisma.recipe.findUnique({ where: { id } });
+  return prisma.recipe.findUnique({
+    where: { id },
+  });
 }
 
-/** Type for creating new recipes. */
 type CreateInput = {
   title: string;
   cuisine: string;
@@ -25,25 +24,17 @@ type CreateInput = {
   imageUrl?: string;
   dietary?: string[];
   ingredients?: string[];
-
-  // Extended fields
-  instructions?: string;
-  servings?: number;
-  prepMinutes?: number;
-  cookMinutes?: number;
-  sourceUrl?: string;
 };
 
-/** Create a new recipe (admin only). */
 export async function createRecipe(input: CreateInput) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error('Unauthorized');
 
-  const user = await prisma.user.findUnique({
+  const u = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: { role: true },
   });
-  if (user?.role !== 'ADMIN') throw new Error('Forbidden');
+  if (u?.role !== 'ADMIN') throw new Error('Forbidden');
 
   const data = {
     title: input.title.trim(),
@@ -53,15 +44,7 @@ export async function createRecipe(input: CreateInput) {
     dietary: (input.dietary ?? []).map((s) => s.trim()).filter(Boolean),
     ingredients: (input.ingredients ?? []).map((s) => s.trim()).filter(Boolean),
     owner: session.user.email,
-
-    // New recipe fields
-    instructions: input.instructions?.trim() || null,
-    servings: input.servings ?? null,
-    prepMinutes: input.prepMinutes ?? null,
-    cookMinutes: input.cookMinutes ?? null,
-    sourceUrl: input.sourceUrl?.trim() || null,
   };
-
   if (!data.title) throw new Error('Title required');
   if (!data.cuisine) throw new Error('Cuisine required');
 
