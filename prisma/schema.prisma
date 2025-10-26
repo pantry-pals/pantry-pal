@@ -116,22 +116,14 @@ model Recipe {
   description String?
   imageUrl    String?
   cuisine     String
-  dietary     String[]
-  ingredients String[]
+  dietary     String[] // e.g., ["Vegan","Gluten-Free"]
+  ingredients String[] // e.g., ["onion","tomato","basil"]
   owner       String?
 
-  // NEW
-  instructions String?   @db.Text
-  servings     Int?
-  prepMinutes  Int?
-  cookMinutes  Int?
-  sourceUrl    String?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([title, owner], name: "title_owner")
   @@index([title])
   @@index([cuisine])
 }
-

@@ -8,10 +8,10 @@ import '../../styles/buttons.css';
 
 type Props = {
   show: boolean;
-  onClose: () => void;
+  onHide: () => void;
 };
 
-export default function AddRecipeModal({ show, onClose }: Props) {
+export default function AddRecipeModal({ show, onHide }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -23,13 +23,6 @@ export default function AddRecipeModal({ show, onClose }: Props) {
   const [dietary, setDietary] = useState('');
   const [ingredients, setIngredients] = useState('');
 
-  // NEW fields
-  const [instructions, setInstructions] = useState('');
-  const [servings, setServings] = useState<number | ''>('');
-  const [prepMinutes, setPrepMinutes] = useState<number | ''>('');
-  const [cookMinutes, setCookMinutes] = useState<number | ''>('');
-  const [sourceUrl, setSourceUrl] = useState('');
-
   const handleReset = useCallback(() => {
     setTitle('');
     setCuisine('');
@@ -37,14 +30,9 @@ export default function AddRecipeModal({ show, onClose }: Props) {
     setImageUrl('');
     setDietary('');
     setIngredients('');
-    setInstructions('');
-    setServings('');
-    setPrepMinutes('');
-    setCookMinutes('');
-    setSourceUrl('');
   }, []);
 
-  const handleSubmit = useCallback(
+  const onSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setErr(null);
@@ -57,103 +45,68 @@ export default function AddRecipeModal({ show, onClose }: Props) {
           imageUrl,
           dietary: dietary.split(',').map((s) => s.trim()).filter(Boolean),
           ingredients: ingredients.split(',').map((s) => s.trim()).filter(Boolean),
-
-          // NEW payload
-          instructions,
-          servings: servings === '' ? undefined : Number(servings),
-          prepMinutes: prepMinutes === '' ? undefined : Number(prepMinutes),
-          cookMinutes: cookMinutes === '' ? undefined : Number(cookMinutes),
-          sourceUrl,
         });
 
         startTransition(() => {
           router.refresh();
           handleReset();
-          onClose(); // close modal
+          onHide();
         });
       } catch (error: any) {
         setErr(error?.message ?? 'Failed to create recipe');
       }
     },
-    [
-      title, cuisine, description, imageUrl, dietary, ingredients,
-      instructions, servings, prepMinutes, cookMinutes, sourceUrl,
-      router, handleReset, onClose,
-    ],
+    [title, cuisine, description, imageUrl, dietary, ingredients, router, handleReset, onHide],
   );
 
   return (
-    <Modal
-      show={show}
-      onHide={onClose} // clicking X or backdrop will close
-      centered
-      size="lg"
-      keyboard // allow Esc to close
-    >
+    <Modal show={show} onHide={onHide} centered backdrop="static" size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Add a New Recipe</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
+        <p className="text-muted mb-3">Create and share your recipe.</p>
         {err && <Alert variant="danger">{err}</Alert>}
 
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={onSubmit}>
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Title *</Form.Label>
-                <Form.Control
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
+                <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} required />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Cuisine *</Form.Label>
-                <Form.Control
-                  value={cuisine}
-                  onChange={(e) => setCuisine(e.target.value)}
-                  required
-                />
+                <Form.Control value={cuisine} onChange={(e) => setCuisine(e.target.value)} required />
               </Form.Group>
             </Col>
           </Row>
 
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Form.Group>
 
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Image URL</Form.Label>
-                <Form.Control
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                />
+                <Form.Control value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
-                <Form.Control
-                  placeholder="Vegan, Gluten-Free"
-                  value={dietary}
-                  onChange={(e) => setDietary(e.target.value)}
-                />
+                {/* eslint-disable-next-line max-len */}
+                <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
               </Form.Group>
             </Col>
           </Row>
 
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-2">
             <Form.Label>Ingredients (comma-separated)</Form.Label>
             <Form.Control
               placeholder="onion, tomato, basil"
@@ -162,73 +115,14 @@ export default function AddRecipeModal({ show, onClose }: Props) {
             />
           </Form.Group>
 
-          {/* NEW: Recipe meta */}
-          <Row>
-            <Col md={3}>
-              <Form.Group className="mb-3">
-                <Form.Label>Servings</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={1}
-                  value={servings}
-                  onChange={(e) => setServings(e.target.value === '' ? '' : Number(e.target.value))}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group className="mb-3">
-                <Form.Label>Prep (min)</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
-                  value={prepMinutes}
-                  onChange={(e) => setPrepMinutes(e.target.value === '' ? '' : Number(e.target.value))}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group className="mb-3">
-                <Form.Label>Cook (min)</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
-                  value={cookMinutes}
-                  onChange={(e) => setCookMinutes(e.target.value === '' ? '' : Number(e.target.value))}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group className="mb-3">
-                <Form.Label>Source URL</Form.Label>
-                <Form.Control
-                  placeholder="https://example.com/recipe"
-                  value={sourceUrl}
-                  onChange={(e) => setSourceUrl(e.target.value)}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          {/* NEW: Instructions */}
-          <Form.Group className="mb-2">
-            <Form.Label>Instructions</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={8}
-              placeholder={'Step 1: ...\nStep 2: ...\nStep 3: ...'}
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-            />
-            <Form.Text className="text-muted">
-              Tip: Put each step on its own line.
-            </Form.Text>
-          </Form.Group>
-
-          <div className="d-flex justify-content-between mt-3">
-            <Button type="submit" className="btn-add" disabled={isPending}>
+          <div className="d-flex gap-2 mt-3">
+            <Button type="submit" className="btn-submit" disabled={isPending}>
               {isPending ? 'Saving…' : 'Submit'}
             </Button>
-            <Button variant="secondary" type="button" onClick={onClose}>
+            <Button type="button" variant="warning" className="btn-reset" onClick={handleReset}>
+              Reset
+            </Button>
+            <Button type="button" variant="secondary" onClick={onHide}>
               Cancel
             </Button>
           </div>
