@@ -93,7 +93,7 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
       </Row>
 
       {isAdmin && (
-        <AddRecipeModal show={showAdd} onClose={() => setShowAdd(false)} />
+        <AddRecipeModal show={showAdd} onHide={() => setShowAdd(false)} />
       )}
     </>
   );
