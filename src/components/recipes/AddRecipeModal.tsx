@@ -2,13 +2,23 @@
 
 import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Modal, Button, Form, Alert, Row, Col } from 'react-bootstrap';
+import {
+  Modal,
+  Button,
+  Form,
+  Alert,
+  Row,
+  Col,
+  InputGroup,
+  Image as RBImage,
+} from 'react-bootstrap';
 import { createRecipe } from '@/lib/recipes';
+import ImagePickerModal from '@/components/images/ImagePickerModal';
 import '@/styles/buttons.css';
 
 type Props = {
   show: boolean;
-  onHide: () => void; // ← standardize onHide
+  onHide: () => void;
 };
 
 export default function AddRecipeModal({ show, onHide }: Props) {
@@ -30,6 +40,10 @@ export default function AddRecipeModal({ show, onHide }: Props) {
   const [cookMinutes, setCookMinutes] = useState<number | ''>('');
   const [sourceUrl, setSourceUrl] = useState('');
 
+  // image picker modal
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageAlt, setImageAlt] = useState('');
+
   const handleReset = useCallback(() => {
     setTitle('');
     setCuisine('');
@@ -42,6 +56,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
     setPrepMinutes('');
     setCookMinutes('');
     setSourceUrl('');
+    setImageAlt('');
   }, []);
 
   const handleSubmit = useCallback(
@@ -67,14 +82,28 @@ export default function AddRecipeModal({ show, onHide }: Props) {
         startTransition(() => {
           router.refresh();
           handleReset();
-          onHide(); // close
+          onHide();
         });
       } catch (error: any) {
         setErr(error?.message ?? 'Failed to create recipe');
       }
     },
-    // eslint-disable-next-line max-len
-    [title, cuisine, description, imageUrl, dietary, ingredients, instructions, servings, prepMinutes, cookMinutes, sourceUrl, router, handleReset, onHide],
+    [
+      title,
+      cuisine,
+      description,
+      imageUrl,
+      dietary,
+      ingredients,
+      instructions,
+      servings,
+      prepMinutes,
+      cookMinutes,
+      sourceUrl,
+      router,
+      handleReset,
+      onHide,
+    ],
   );
 
   return (
@@ -111,22 +140,58 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Image URL</Form.Label>
-                <Form.Control value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+                <InputGroup>
+                  <Form.Control
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    type="button"
+                    onClick={() => setShowPicker(true)}
+                  >
+                    Pick image
+                  </Button>
+                </InputGroup>
+                {imageAlt && (
+                  <Form.Text className="text-muted">
+                    Alt:
+                    {imageAlt}
+                  </Form.Text>
+                )}
+                {imageUrl && (
+                  <div className="mt-2">
+                    <RBImage
+                      src={imageUrl}
+                      alt={imageAlt || 'Preview'}
+                      style={{ maxHeight: 140, borderRadius: 8, objectFit: 'cover' }}
+                      thumbnail
+                    />
+                  </div>
+                )}
               </Form.Group>
             </Col>
+
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
-                {/* eslint-disable-next-line max-len */}
-                <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
+                <Form.Control
+                  placeholder="Vegan, Gluten-Free"
+                  value={dietary}
+                  onChange={(e) => setDietary(e.target.value)}
+                />
               </Form.Group>
             </Col>
           </Row>
 
           <Form.Group className="mb-3">
             <Form.Label>Ingredients (comma-separated)</Form.Label>
-            {/* eslint-disable-next-line max-len */}
-            <Form.Control placeholder="onion, tomato, basil" value={ingredients} onChange={(e) => setIngredients(e.target.value)} />
+            <Form.Control
+              placeholder="onion, tomato, basil"
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -179,18 +244,32 @@ export default function AddRecipeModal({ show, onHide }: Props) {
 
           <Form.Group className="mb-3">
             <Form.Label>Source URL (optional)</Form.Label>
-            {/* eslint-disable-next-line max-len */}
-            <Form.Control type="url" placeholder="https://example.com/recipe" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} />
+            <Form.Control
+              type="url"
+              placeholder="https://example.com/recipe"
+              value={sourceUrl}
+              onChange={(e) => setSourceUrl(e.target.value)}
+            />
           </Form.Group>
 
           <div className="d-flex justify-content-between mt-3">
             <Button type="submit" className="btn-add" disabled={isPending}>
               {isPending ? 'Saving…' : 'Submit'}
             </Button>
-            <Button variant="secondary" onClick={onHide}>Cancel</Button>
+            <Button variant="secondary" type="button" onClick={onHide}>Cancel</Button>
           </div>
         </Form>
       </Modal.Body>
+
+      {/* Image picker modal */}
+      <ImagePickerModal
+        show={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={(url, meta) => {
+          setImageUrl(url);
+          if (meta?.alt) setImageAlt(meta.alt);
+        }}
+      />
     </Modal>
   );
 }
