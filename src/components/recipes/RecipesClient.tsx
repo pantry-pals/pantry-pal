@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
 import RecipeCard from './RecipeCard';
-import '../../styles/buttons.css';
+import '../../styles/buttons.css'; // adjust path if styles folder is elsewhere
 
 type Props = {
   recipes: any[];

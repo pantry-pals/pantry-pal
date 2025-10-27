@@ -20,7 +20,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
   const [cuisine, setCuisine] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [dietary, setDietary] = useState('');     // comma-separated
+  const [dietary, setDietary] = useState(''); // comma-separated
   const [ingredients, setIngredients] = useState(''); // comma-separated
 
   // new fields
@@ -73,6 +73,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
         setErr(error?.message ?? 'Failed to create recipe');
       }
     },
+    // eslint-disable-next-line max-len
     [title, cuisine, description, imageUrl, dietary, ingredients, instructions, servings, prepMinutes, cookMinutes, sourceUrl, router, handleReset, onHide],
   );
 
@@ -116,6 +117,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
+                {/* eslint-disable-next-line max-len */}
                 <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
               </Form.Group>
             </Col>
@@ -123,6 +125,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
 
           <Form.Group className="mb-3">
             <Form.Label>Ingredients (comma-separated)</Form.Label>
+            {/* eslint-disable-next-line max-len */}
             <Form.Control placeholder="onion, tomato, basil" value={ingredients} onChange={(e) => setIngredients(e.target.value)} />
           </Form.Group>
 
@@ -131,7 +134,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Form.Control
               as="textarea"
               rows={6}
-              placeholder={`1. Preheat oven...\n2. Mix the dry ingredients...\n3. ...`}
+              placeholder={'1. Preheat oven...\n2. Mix the dry ingredients...\n3. ...'}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
             />
@@ -176,6 +179,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
 
           <Form.Group className="mb-3">
             <Form.Label>Source URL (optional)</Form.Label>
+            {/* eslint-disable-next-line max-len */}
             <Form.Control type="url" placeholder="https://example.com/recipe" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} />
           </Form.Group>
 
