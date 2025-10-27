@@ -113,3 +113,39 @@ footer a {
   color: #d4af37 !important;
   background-color: var(--hunter-green) !important;
 }
+
+.recipe-card {
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.12);
+}
+
+.recipe-card-img {
+  height: 220px;
+  object-fit: cover;
+}
+
+.recipe-title {
+  margin-bottom: .35rem;
+  font-weight: 600;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
