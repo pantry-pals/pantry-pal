@@ -1,13 +1,14 @@
 'use client';
 
-import { Card, Button, Image } from 'react-bootstrap';
+/* eslint-disable react/require-default-props */
+
+import Link from 'next/link';
+import { Card, Image, Badge } from 'react-bootstrap';
 
 export type RecipeCardProps = {
   id: number;
   title: string;
-  // eslint-disable-next-line react/require-default-props
   description?: string | null;
-  // eslint-disable-next-line react/require-default-props
   imageUrl?: string | null;
   cuisine: string;
   dietary: string[];
@@ -23,39 +24,54 @@ export default function RecipeCard({
   dietary,
   ingredients,
 }: RecipeCardProps) {
+  const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
+
   return (
-    <Card className="h-100 shadow-sm d-flex flex-column">
-      <div style={{ position: 'relative', height: 200, width: '100%' }}>
+    <Card className="recipe-card h-100 d-flex flex-column shadow-sm">
+      <div className="position-relative">
         <Image
-          src={imageUrl || 'https://placehold.co/400x200?text=Recipe'}
+          src={imageUrl || 'https://placehold.co/800x450?text=Recipe'}
           alt={title}
+          className="w-100 recipe-card-img"
           fluid
-          style={{ objectFit: 'cover', height: '100%', width: '100%' }}
         />
       </div>
-      <Card.Body className="d-flex flex-column flex-grow-1">
+
+      <Card.Body className="d-flex flex-column">
         <div className="flex-grow-1">
-          <Card.Title>{title}</Card.Title>
-          {description && <Card.Text>{description}</Card.Text>}
+          <Card.Title className="recipe-title line-clamp-2">{title}</Card.Title>
+
+          {/* Cuisine + Dietary badges in white body */}
           <div className="mb-3">
-            <small className="text-muted">{cuisine}</small>
-            <br />
-            {dietary?.length ? (
-              <small className="text-muted">{dietary.join(', ')}</small>
-            ) : null}
-            <br />
-            {ingredients?.length ? (
-              <>
-                <small className="text-muted">Ingredients:</small>
-                <br />
-                <small className="text-muted">{ingredients.join(', ')}</small>
-              </>
-            ) : null}
+            <Badge bg="secondary" pill className="me-2 mb-2">
+              {cuisine}
+            </Badge>
+            {dietTags.map((tag) => (
+              <Badge key={tag} bg="secondary" pill className="me-2 mb-2">
+                {tag}
+              </Badge>
+            ))}
           </div>
+
+          {description && (
+            <Card.Text className="text-muted line-clamp-3 mb-2">
+              {description}
+            </Card.Text>
+          )}
+
+          {ingredients?.length > 0 && (
+            <Card.Text className="text-muted small line-clamp-2 mb-0">
+              <span className="fw-semibold">Ingredients:</span>
+              {' '}
+              {ingredients.join(', ')}
+            </Card.Text>
+          )}
         </div>
-        <Button href={`/recipes/${id}`} className="btn-dark mt-auto" type="button">
+
+        {/* Use Link styled as a button to avoid the as={Link} typing issue */}
+        <Link href={`/recipes/${id}`} className="btn btn-dark mt-3 w-100">
           View Recipe
-        </Button>
+        </Link>
       </Card.Body>
     </Card>
   );
