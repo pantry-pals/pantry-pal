@@ -35,15 +35,20 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(AddProduceSchema),
-    defaultValues: { unit: unitOptions[0] },
+    defaultValues: { location: '', storage: '', unit: unitOptions[0] },
   });
 
   const router = useRouter();
+  const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
+  const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
   const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
   const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     if (!show) reset();
+    setSelectedLocation('');
+    setSelectedStorage('');
+    setUnitChoice('');
 
     const fetchLocations = async () => {
       const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
@@ -64,6 +69,9 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
 
   const handleClose = () => {
     reset();
+    setSelectedLocation('');
+    setSelectedStorage('');
+    setUnitChoice('');
     onHide();
   };
 
@@ -167,17 +175,36 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Select
                   {...register('location', { required: true })}
-                  defaultValue={produce.location}
+                  value={selectedLocation}
+                  required
                   className={`${errors.location ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setValue('location', value === 'Add Location' ? '' : value);
+                    setSelectedLocation(value); // custom state, see below
+                  }}
                 >
-                  <option value="">Select location...</option>
+                  <option value="" disabled>Select location...</option>
 
                   {locations.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc}
                     </option>
                   ))}
+                  <option value="Add Location">Add Location</option>
                 </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedLocation === 'Add Location' && (
+                  <Form.Control
+                    type="text"
+                    {...register('location', { required: true })}
+                    placeholder="Enter new location"
+                    required
+                    className={`mt-2 ${errors.location ? 'is-invalid' : ''}`}
+                  />
+                )}
+
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
@@ -186,17 +213,36 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Select
                   {...register('storage', { required: true })}
-                  defaultValue={produce.storage}
+                  value={selectedStorage}
+                  required
                   className={`${errors.storage ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setValue('storage', value === 'Add Storage' ? '' : value);
+                    setSelectedStorage(value); // custom state, see below
+                  }}
                 >
-                  <option value="">Select storage...</option>
+                  <option value="" disabled>Select storage...</option>
 
                   {storageOptions.map((storage) => (
                     <option key={storage} value={storage}>
                       {storage}
                     </option>
                   ))}
+                  <option value="Add Storage">Add Storage</option>
                 </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedStorage === 'Add Storage' && (
+                  <Form.Control
+                    type="text"
+                    {...register('storage', { required: true })}
+                    placeholder="Enter new storage"
+                    required
+                    className={`mt-2 ${errors.storage ? 'is-invalid' : ''}`}
+                  />
+                )}
+
                 <div className="invalid-feedback">{errors.storage?.message}</div>
               </Form.Group>
             </Col>
@@ -222,7 +268,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
-                  defaultValue={unitOptions[0]}
+                  value={unitChoice}
                   required
                   className={`${errors.unit ? 'is-invalid' : ''}`}
                   onChange={(e) => {
@@ -231,6 +277,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     setValue('unit', value !== 'Other' ? value : '');
                   }}
                 >
+                  <option value="" disabled>Select unit...</option>
                   {unitOptions.map((u) => (
                     <option key={u} value={u}>{u}</option>
                   ))}

@@ -36,6 +36,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   const [locations, setLocations] = useState<string[]>([]);
   const [storageOptions, setStorageOptions] = useState<string[]>([]);
 
+  const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
+  const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
   const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
   const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
@@ -48,6 +50,8 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
           : '',
         image: produce.image ?? '',
       } as any);
+      setSelectedLocation(produce.location);
+      setSelectedStorage(produce.storage);
       setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
     }
 
@@ -138,15 +142,33 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('location', { required: true })}
                   defaultValue={produce.location}
                   className={`${errors.location ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setValue('location', value !== 'Add Location' ? value : '');
+                    setSelectedLocation(value); // custom state, see below
+                  }}
                 >
-                  <option value="">Select location...</option>
+                  <option value="" disabled>Select location...</option>
 
                   {locations.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc}
                     </option>
                   ))}
+                  <option value="Add Location">Add Location</option>
                 </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedLocation === 'Add Location' && (
+                  <Form.Control
+                    type="text"
+                    {...register('location', { required: true })}
+                    placeholder="Enter new location"
+                    required
+                    className={`mt-2 ${errors.location ? 'is-invalid' : ''}`}
+                  />
+                )}
+
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
@@ -157,15 +179,33 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                   {...register('storage', { required: true })}
                   defaultValue={produce.storage}
                   className={`${errors.storage ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setValue('storage', value !== 'Add Storage' ? value : '');
+                    setSelectedStorage(value); // custom state, see below
+                  }}
                 >
-                  <option value="">Select storage...</option>
+                  <option value="" disabled>Select storage...</option>
 
                   {storageOptions.map((storage) => (
                     <option key={storage} value={storage}>
                       {storage}
                     </option>
                   ))}
+                  <option value="Add Storage">Add Storage</option>
                 </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedStorage === 'Add Storage' && (
+                  <Form.Control
+                    type="text"
+                    {...register('storage', { required: true })}
+                    placeholder="Enter new storage"
+                    required
+                    className={`mt-2 ${errors.storage ? 'is-invalid' : ''}`}
+                  />
+                )}
+
                 <div className="invalid-feedback">{errors.storage?.message}</div>
               </Form.Group>
             </Col>
