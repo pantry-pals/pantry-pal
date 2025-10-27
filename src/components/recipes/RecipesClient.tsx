@@ -9,10 +9,10 @@ import '../../styles/buttons.css';
 type Props = {
   recipes: any[];
   produce: { name: string }[];
-  isAdmin: boolean;
+  canAdd: boolean;
 };
 
-export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
+export default function RecipesClient({ recipes, produce, canAdd }: Props) {
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
@@ -62,7 +62,7 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
           </Form>
         </div>
 
-        {isAdmin && (
+        {canAdd && (
           <div>
             <Button className="btn-add" onClick={() => setShowAdd(true)}>
               + Add Recipe
@@ -92,7 +92,7 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
         )}
       </Row>
 
-      {isAdmin && (
+      {canAdd && (
         <AddRecipeModal show={showAdd} onHide={() => setShowAdd(false)} />
       )}
     </>
