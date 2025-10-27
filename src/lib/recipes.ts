@@ -5,7 +5,16 @@ import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 
 export async function getRecipes() {
-  return prisma.recipe.findMany({ orderBy: { createdAt: 'desc' } });
+  return prisma.recipe.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getRecipeById(id: number) {
+  if (!Number.isFinite(id)) return null;
+  return prisma.recipe.findUnique({
+    where: { id },
+  });
 }
 
 type CreateInput = {
@@ -18,7 +27,6 @@ type CreateInput = {
 };
 
 export async function createRecipe(input: CreateInput) {
-  // admin gate
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error('Unauthorized');
 
@@ -33,8 +41,8 @@ export async function createRecipe(input: CreateInput) {
     cuisine: input.cuisine.trim(),
     description: input.description?.trim() || null,
     imageUrl: input.imageUrl?.trim() || null,
-    dietary: (input.dietary ?? []).map(s => s.trim()).filter(Boolean),
-    ingredients: (input.ingredients ?? []).map(s => s.trim()).filter(Boolean),
+    dietary: (input.dietary ?? []).map((s) => s.trim()).filter(Boolean),
+    ingredients: (input.ingredients ?? []).map((s) => s.trim()).filter(Boolean),
     owner: session.user.email,
   };
   if (!data.title) throw new Error('Title required');

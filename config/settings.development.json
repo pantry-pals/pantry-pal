@@ -92,7 +92,7 @@
     },
     {
       "name": "Party Prep",
-      "owner": "john@foo.com",
+      "owner": "admin@foo.com",
       "items": [
         { "name": "Broccoli", "quantity": 2, "unit": "heads", "price": 1.2 },
         { "name": "Chicken Breast", "quantity": 2, "unit": "pieces", "price": 5.0 },
