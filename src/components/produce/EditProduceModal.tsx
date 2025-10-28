@@ -20,8 +20,10 @@ import { useRouter } from 'next/navigation';
 import ImagePickerModal from '@/components/images/ImagePickerModal';
 import '../../styles/buttons.css';
 
-// Infer the correct type from schema
-type ProduceValues = InferType<typeof EditProduceSchema>;
+type ProduceValues =
+  Omit<InferType<typeof EditProduceSchema>, 'expiration'> & {
+    expiration: string | null;
+  };
 
 interface EditProduceModalProps {
   show: boolean;
@@ -71,7 +73,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
       ...produce,
       expiration: produce.expiration
         ? produce.expiration.toISOString().split('T')[0]
-        : '',
+        : null,
       image: produce.image ?? '',
       restockThreshold: produce.restockThreshold ?? null,
     },
@@ -102,7 +104,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
     try {
       await editProduce({
         ...data,
-        expiration: data.expiration ?? null,
+        expiration: data.expiration ? new Date(data.expiration) : null,
         image: data.image === '' ? null : data.image,
         restockThreshold: data.restockThreshold
           ? Number(data.restockThreshold)

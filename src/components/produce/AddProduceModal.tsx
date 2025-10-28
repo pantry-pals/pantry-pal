@@ -10,24 +10,49 @@ import {
   InputGroup,
   Image as RBImage,
 } from 'react-bootstrap';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler, type Resolver } from 'react-hook-form';
 import swal from 'sweetalert';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { AddProduceSchema } from '@/lib/validationSchemas';
 import { addProduce } from '@/lib/dbActions';
-import type { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
 import ImagePickerModal from '@/components/images/ImagePickerModal';
 import BarcodeScanner from './BarcodeScanner';
 import '../../styles/buttons.css';
 
-// Infer TypeScript types from the Yup schema
-type ProduceValues = InferType<typeof AddProduceSchema>;
+/** Form value shape used by RHF (kept independent from Prisma model). */
+type ProduceValues = {
+  name: string;
+  type: string;
+  location: string;
+  storage: string;
+  quantity: number;
+  unit: string;
+  /** HTML date input gives a string (yyyy-mm-dd) or '' -> we store string|null in the form. */
+  expiration: string | null;
+  owner: string;
+  image: string; // keep as string in the form; convert to null on submit if empty
+  restockThreshold: number | null;
+};
 
+/** Props */
 interface AddProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce?: { owner?: string };
+  // eslint-disable-next-line react/require-default-props
+  produce?: {
+    id?: number;
+    name?: string;
+    type?: string;
+    location?: string;
+    storage?: string;
+    quantity?: number;
+    unit?: string;
+    expiration?: Date | string | null;
+    owner?: string;
+    image?: string | null;
+    restockThreshold?: number | null;
+  };
 }
 
 export default function AddProduceModal({ show, onHide, produce }: AddProduceModalProps) {
@@ -46,13 +71,15 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
     watch,
     formState: { errors },
   } = useForm<ProduceValues>({
-    resolver: yupResolver(AddProduceSchema) as any, // Type alignment workaround for Yup+RHForm
+    // Ensure resolver is typed for ProduceValues to avoid generic inference errors.
+    resolver: yupResolver(AddProduceSchema) as unknown as Resolver<ProduceValues>,
+    // defaultValues is DeepPartial<ProduceValues>; everything here aligns with the field types above.
     defaultValues: {
       name: '',
       type: '',
       location: '',
       storage: '',
-      quantity: undefined,
+      quantity: 0,
       unit: unitOptions[0],
       expiration: null,
       owner: produce?.owner ?? '',
@@ -68,8 +95,17 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
   const [imageAlt, setImageAlt] = useState('');
 
   useEffect(() => {
-    if (!show) reset();
-  }, [show, reset]);
+    if (!show) {
+      reset();
+    } else {
+      // If an existing item is passed in, seed the form.
+      // eslint-disable-next-line no-lonely-if
+      if (produce) {
+        setValue('owner', produce.owner ?? '');
+        if (produce.unit) setUnitChoice(produce.unit);
+      }
+    }
+  }, [show, reset, produce, setValue]);
 
   const handleClose = () => {
     reset();
@@ -85,29 +121,35 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
         const { product } = data;
         setValue('name', product.product_name || '');
         setValue('image', product.image_url || '');
-        setValue('type', product.categories_tags?.[0]?.replace('en:', '') || '');
+        setValue('type', (product.categories_tags?.[0]?.replace('en:', '') || '') as string);
       } else {
-        swal('Not found', 'No product found for this barcode', 'warning');
+        await swal('Not found', 'No product found for this barcode', 'warning');
       }
     } catch {
-      swal('Error', 'Failed to fetch product info', 'error');
+      await swal('Error', 'Failed to fetch product info', 'error');
     }
   };
 
   const onSubmit: SubmitHandler<ProduceValues> = async (data) => {
     try {
-      await addProduce({
+      // Normalize payload for your DB action.
+      const payload = {
         ...data,
-        expiration: data.expiration ?? null,
-        image: data.image || null,
-        restockThreshold: Number(data.restockThreshold ?? 0),
-      });
+        quantity: Number(data.quantity), // ensure number
+        expiration: data.expiration ? new Date(data.expiration) : null,
+        image: data.image.trim() === '' ? null : data.image.trim(),
+        restockThreshold:
+          data.restockThreshold == null || Number.isNaN(Number(data.restockThreshold))
+            ? 0
+            : Number(data.restockThreshold),
+      };
+      await addProduce(payload);
 
-      swal('Success', 'Your item has been added', 'success', { timer: 2000 });
+      await swal('Success', 'Your item has been added', 'success', { timer: 2000 });
       handleClose();
       router.refresh();
     } catch {
-      swal('Error', 'Failed to add item', 'error');
+      await swal('Error', 'Failed to add item', 'error');
     }
   };
 
@@ -134,8 +176,8 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
 
               {showScanner && (
                 <BarcodeScanner
-                  onDetected={(code) => {
-                    fetchProductByBarcode(code);
+                  onDetected={async (code) => {
+                    await fetchProductByBarcode(code);
                     setShowScanner(false);
                   }}
                   onClose={() => setShowScanner(false)}
@@ -151,13 +193,13 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Label className="required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
-                  {...register('name')}
-                  required
                   placeholder="e.g., Chicken"
                   isInvalid={!!errors.name}
+                  {...register('name')}
+                  required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.name?.message}
+                  {errors.name?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -166,13 +208,13 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Label className="required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
-                  {...register('type')}
-                  required
                   placeholder="e.g., Meat"
                   isInvalid={!!errors.type}
+                  {...register('type')}
+                  required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.type?.message}
+                  {errors.type?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -185,13 +227,13 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Label className="required-field">Location</Form.Label>
                 <Form.Control
                   type="text"
-                  {...register('location')}
-                  required
                   placeholder="e.g., Pantry"
                   isInvalid={!!errors.location}
+                  {...register('location')}
+                  required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.location?.message}
+                  {errors.location?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -200,13 +242,13 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Label className="required-field">Storage</Form.Label>
                 <Form.Control
                   type="text"
-                  {...register('storage')}
-                  required
                   placeholder="e.g., Freezer"
                   isInvalid={!!errors.storage}
+                  {...register('storage')}
+                  required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.storage?.message}
+                  {errors.storage?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -220,13 +262,13 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Control
                   type="number"
                   step={0.5}
-                  {...register('quantity')}
-                  required
                   placeholder="e.g., 1, 1.5"
                   isInvalid={!!errors.quantity}
+                  {...register('quantity', { valueAsNumber: true })}
+                  required
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.quantity?.message}
+                  {errors.quantity?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -249,15 +291,15 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 {unitChoice === 'Other' && (
                   <Form.Control
                     type="text"
-                    {...register('unit')}
                     placeholder="Enter custom unit"
-                    required
                     className="mt-2"
                     isInvalid={!!errors.unit}
+                    {...register('unit')}
+                    required
                   />
                 )}
                 <Form.Control.Feedback type="invalid">
-                  {errors.unit?.message}
+                  {errors.unit?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -270,11 +312,11 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Label>Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
-                  {...register('expiration')}
                   isInvalid={!!errors.expiration}
+                  {...register('expiration')}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.expiration?.message}
+                  {errors.expiration?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -285,9 +327,9 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <InputGroup>
                   <Form.Control
                     type="text"
-                    {...register('image')}
                     placeholder="Image URL"
                     isInvalid={!!errors.image}
+                    {...register('image')}
                   />
                   <Button
                     variant="outline-secondary"
@@ -299,7 +341,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   </Button>
                 </InputGroup>
                 <Form.Control.Feedback type="invalid">
-                  {errors.image?.message}
+                  {errors.image?.message as string}
                 </Form.Control.Feedback>
 
                 {imageVal && (
@@ -307,11 +349,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                     <RBImage
                       src={imageVal}
                       alt={imageAlt || 'Preview'}
-                      style={{
-                        maxHeight: 120,
-                        borderRadius: 8,
-                        objectFit: 'cover',
-                      }}
+                      style={{ maxHeight: 120, borderRadius: 8, objectFit: 'cover' }}
                       thumbnail
                     />
                   </div>
@@ -319,6 +357,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
               </Form.Group>
             </Col>
           </Row>
+
           {/* Restock Threshold */}
           <Row className="mb-3">
             <Col xs={12}>
@@ -327,12 +366,18 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                 <Form.Control
                   type="number"
                   step={0.1}
-                  {...register('restockThreshold')}
                   placeholder="e.g., 0.5"
                   isInvalid={!!errors.restockThreshold}
+                  {...register('restockThreshold', {
+                    setValueAs: (v) => {
+                      if (v === '' || v === null || typeof v === 'undefined') return null;
+                      const n = Number(v);
+                      return Number.isNaN(n) ? null : n;
+                    },
+                  })}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.restockThreshold?.message}
+                  {errors.restockThreshold?.message as string}
                 </Form.Control.Feedback>
                 <Form.Text className="text-muted">
                   When quantity falls below this value, the item will be added to your shopping list.
@@ -341,6 +386,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
             </Col>
           </Row>
 
+          {/* owner hidden (kept in form for your add action) */}
           <input type="hidden" {...register('owner')} value={produce?.owner ?? ''} />
 
           <div className="d-flex justify-content-between mt-4">
