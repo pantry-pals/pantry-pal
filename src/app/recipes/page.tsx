@@ -14,7 +14,6 @@ export default async function RecipeListPage() {
   const email = session?.user?.email ?? null;
   const canAdd = !!email; // anyone logged-in can add
   let pantry: any[] = [];
-
   if (email) pantry = await getUserProduceByEmail(email);
 
   const recipes = await getRecipes();
