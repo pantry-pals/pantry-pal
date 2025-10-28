@@ -52,7 +52,7 @@ const ProduceItem = ({
         </td>
       </tr>
 
-      {/* Modal component for editing produce item */}
+      {/* Edit modal */}
       <EditProduceModal
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
@@ -68,12 +68,10 @@ const ProduceItem = ({
           owner,
           image,
           restockThreshold: safeRestock,
-          restockTrigger: 'empty',
-          customThreshold: null,
         }}
       />
 
-      {/* Modal component for deleting produce item */}
+      {/* Delete modal */}
       <DeleteProduceModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
@@ -89,8 +87,6 @@ const ProduceItem = ({
           owner,
           image,
           restockThreshold: safeRestock,
-          restockTrigger: 'empty',
-          customThreshold: null,
         }}
       />
     </>

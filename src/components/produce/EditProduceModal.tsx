@@ -1,36 +1,49 @@
 'use client';
 
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Button,
+  Col,
+  Form,
+  Modal,
+  Row,
+  InputGroup,
+  Image as RBImage,
+} from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import swal from 'sweetalert';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Produce } from '@prisma/client';
 import { EditProduceSchema } from '@/lib/validationSchemas';
 import { editProduce } from '@/lib/dbActions';
-import { InferType } from 'yup';
+import type { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import ImagePickerModal from '@/components/images/ImagePickerModal';
 import '../../styles/buttons.css';
 
-type ProduceValues = InferType<typeof EditProduceSchema>;
+type ProduceValues =
+  Omit<InferType<typeof EditProduceSchema>, 'expiration'> & {
+    expiration: string | null;
+  };
 
 interface EditProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce: Produce & { restockThreshold?: number | null };
+  produce: {
+    id: number;
+    name: string;
+    type: string;
+    location: string;
+    storage: string;
+    quantity: number;
+    unit: string;
+    expiration: Date | null;
+    owner: string;
+    image?: string | null;
+    restockThreshold?: number | null;
+  };
 }
 
-const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<ProduceValues>({
-    resolver: yupResolver(EditProduceSchema),
-  });
-
+export default function EditProduceModal({ show, onHide, produce }: EditProduceModalProps) {
   const router = useRouter();
 
   const [locations, setLocations] = useState<string[]>([]);
@@ -38,18 +51,52 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
 
   const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
   const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
-  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
-  const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
+
+  const unitOptions = useMemo(
+    () => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'],
+    [],
+  );
+
+  const [unitChoice, setUnitChoice] = useState(
+    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
+  );
+
+  // Image picker modal state
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageAlt, setImageAlt] = useState('');
+
+  // RHF setup
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ProduceValues>({
+    resolver: yupResolver(EditProduceSchema) as any,
+    defaultValues: {
+      ...produce,
+      expiration: produce.expiration
+        ? produce.expiration.toISOString().split('T')[0]
+        : null,
+      image: produce.image ?? '',
+      restockThreshold: produce.restockThreshold ?? null,
+    },
+  });
+
+  const imageVal = watch('image') || '';
 
   useEffect(() => {
-    if (!show) {
+    if (show) {
       reset({
         ...produce,
         expiration: produce.expiration
           ? produce.expiration.toISOString().split('T')[0]
           : '',
         image: produce.image ?? '',
-      } as any);
+        restockThreshold: produce.restockThreshold ?? null,
+      });
       setSelectedLocation(produce.location);
       setSelectedStorage(produce.storage);
       setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
@@ -73,25 +120,26 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
   }, [show, produce, reset, unitOptions]);
 
   const handleClose = () => {
-    reset({
-      ...produce,
-      expiration: produce.expiration ? produce.expiration.toISOString().split('T')[0] : '',
-      image: produce.image ?? '',
-    } as any);
-    setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
+    reset();
     onHide();
   };
 
   const onSubmit = async (data: ProduceValues) => {
-    await editProduce({
-      ...data,
-      expiration: data.expiration ?? null,
-      image: data.image === '' ? null : data.image,
-      restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
-    });
-    swal('Success', 'Your item has been updated', 'success', { timer: 2000 });
-    handleClose();
-    router.refresh();
+    try {
+      await editProduce({
+        ...data,
+        expiration: data.expiration ? new Date(data.expiration) : null,
+        image: data.image === '' ? null : data.image,
+        restockThreshold: data.restockThreshold
+          ? Number(data.restockThreshold)
+          : 0,
+      });
+      swal('Success', 'Your item has been updated', 'success', { timer: 2000 });
+      handleClose();
+      router.refresh();
+    } catch (err) {
+      swal('Error', 'Failed to update item', 'error');
+    }
   };
 
   return (
@@ -99,43 +147,46 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
       <Modal.Header className="justify-content-center">
         <Modal.Title>Edit Pantry Item</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...register('id')} value={produce.id} />
 
+          {/* Name + Type */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Name</Form.Label>
+                <Form.Label className="required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
-                  defaultValue={produce.name}
-                  required
-                  className={`${errors.name ? 'is-invalid' : ''}`}
                   placeholder="e.g., Chicken"
+                  isInvalid={!!errors.name}
                 />
-                <div className="invalid-feedback">{errors.name?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.name?.message}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Type</Form.Label>
+                <Form.Label className="required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
-                  required
-                  defaultValue={produce.type}
-                  className={`${errors.type ? 'is-invalid' : ''}`}
                   placeholder="e.g., Meat"
+                  isInvalid={!!errors.type}
                 />
-                <div className="invalid-feedback">{errors.type?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.type?.message}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Location + Storage */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Select
@@ -172,7 +223,7 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Select
@@ -211,131 +262,163 @@ const EditProduceModal = ({ show, onHide, produce }: EditProduceModalProps) => {
             </Col>
           </Row>
 
+          {/* Quantity + Unit */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
+                <Form.Label className="required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
-                  {...register('quantity')}
-                  required
-                  defaultValue={produce.quantity}
                   step={0.5}
-                  placeholder="eg., 1, 1.5"
-                  className={`${errors.quantity ? 'is-invalid' : ''}`}
+                  {...register('quantity')}
+                  placeholder="e.g., 1, 1.5"
+                  isInvalid={!!errors.quantity}
                 />
-                <div className="invalid-feedback">{errors.quantity?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.quantity?.message}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Unit</Form.Label>
+                <Form.Label className="required-field">Unit</Form.Label>
                 <Form.Select
-                  defaultValue={unitChoice}
-                  required
-                  className={`${errors.unit ? 'is-invalid' : ''}`}
+                  value={unitChoice}
                   onChange={(e) => {
                     const { value } = e.target;
                     setUnitChoice(value);
-                    if (value !== 'Other') {
-                      setValue('unit', value);
-                    } else {
-                      setValue('unit', '');
-                    }
+                    setValue('unit', value !== 'Other' ? value : '');
                   }}
+                  isInvalid={!!errors.unit}
                 >
                   {unitOptions.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
+                    <option key={u}>{u}</option>
                   ))}
                 </Form.Select>
-
                 {unitChoice === 'Other' && (
                   <Form.Control
                     type="text"
                     {...register('unit')}
-                    required
-                    defaultValue={!unitOptions.includes(produce.unit) ? produce.unit : ''}
                     placeholder="Enter custom unit"
-                    className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}
+                    required
+                    className="mt-2"
+                    isInvalid={!!errors.unit}
                   />
                 )}
-                <div className="invalid-feedback">{errors.unit?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.unit?.message}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Expiration + Image (with picker) */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0">Expiration Date</Form.Label>
+                <Form.Label>Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
                   {...register('expiration')}
-                  defaultValue={produce.expiration ? produce.expiration.toISOString().split('T')[0] : ''}
-                  className={`${errors.expiration ? 'is-invalid' : ''}`}
+                  isInvalid={!!errors.expiration}
                 />
-                <div className="invalid-feedback">{errors.expiration?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.expiration?.message}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0">Image</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('image')}
-                  defaultValue={produce.image ?? ''}
-                  className={`${errors.image ? 'is-invalid' : ''}`}
-                  placeholder="Image URL"
-                />
-                <div className="invalid-feedback">{errors.image?.message}</div>
+                <Form.Label>Image</Form.Label>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    {...register('image')}
+                    placeholder="Image URL"
+                    isInvalid={!!errors.image}
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    type="button"
+                    style={{ display: 'inline-block', zIndex: 99 }}
+                    onClick={() => setShowPicker(true)}
+                  >
+                    Pick
+                  </Button>
+                </InputGroup>
+                <Form.Control.Feedback type="invalid">
+                  {errors.image?.message}
+                </Form.Control.Feedback>
+
+                {imageVal && (
+                  <div className="mt-2">
+                    <RBImage
+                      src={imageVal}
+                      alt={imageAlt || 'Preview'}
+                      style={{
+                        maxHeight: 120,
+                        borderRadius: 8,
+                        objectFit: 'cover',
+                      }}
+                      thumbnail
+                    />
+                  </div>
+                )}
               </Form.Group>
             </Col>
           </Row>
-          <Row className="mb-3">
-            <Col xs={12} className="text-center">
-              <Form.Group>
-                <Form.Label className="mb-1" style={{ fontWeight: '500' }}>
-                  Restock Threshold
-                </Form.Label>
 
-                <div className="d-flex justify-content-center mb-2">
-                  <Form.Control
-                    type="number"
-                    step={0.5}
-                    {...register('restockThreshold')}
-                    defaultValue={produce.restockThreshold ?? ''}
-                    placeholder="e.g., 0.5"
-                    className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                    style={{ width: '100px' }}
-                  />
-                </div>
-                <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
+          {/* Restock Threshold */}
+          <Row className="mb-3">
+            <Col xs={12}>
+              <Form.Group>
+                <Form.Label>Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.1}
+                  {...register('restockThreshold')}
+                  placeholder="e.g., 0.5"
+                  isInvalid={!!errors.restockThreshold}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.restockThreshold?.message}
+                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
               </Form.Group>
             </Col>
           </Row>
 
           <input type="hidden" {...register('owner')} value={produce.owner} />
 
-          <Form.Group className="form-group">
-            <Row className="pt-3">
-              <Col>
-                <Button type="submit" className="btn-submit">
-                  Submit
-                </Button>
-              </Col>
-              <Col>
-                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">
-                  Reset
-                </Button>
-              </Col>
-            </Row>
-          </Form.Group>
+          {/* Buttons */}
+          <div className="d-flex justify-content-between mt-4">
+            <Button type="submit" className="btn-submit">
+              Save Changes
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              onClick={() => reset()}
+              className="btn-reset"
+            >
+              Reset
+            </Button>
+          </div>
         </Form>
       </Modal.Body>
+
+      {/* Image Picker Modal */}
+      <ImagePickerModal
+        show={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={(url, meta) => {
+          setValue('image', url, { shouldValidate: true, shouldDirty: true });
+          if (meta?.alt) setImageAlt(meta.alt);
+        }}
+      />
     </Modal>
   );
-};
-
-export default EditProduceModal;
+}

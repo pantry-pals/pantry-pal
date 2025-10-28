@@ -2,9 +2,19 @@
 
 import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Modal, Button, Form, Alert, Row, Col } from 'react-bootstrap';
+import {
+  Modal,
+  Button,
+  Form,
+  Alert,
+  Row,
+  Col,
+  InputGroup,
+  Image as RBImage,
+} from 'react-bootstrap';
 import { createRecipe } from '@/lib/recipes';
-import '../../styles/buttons.css';
+import ImagePickerModal from '@/components/images/ImagePickerModal';
+import '@/styles/buttons.css';
 
 type Props = {
   show: boolean;
@@ -20,8 +30,19 @@ export default function AddRecipeModal({ show, onHide }: Props) {
   const [cuisine, setCuisine] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [dietary, setDietary] = useState('');
-  const [ingredients, setIngredients] = useState('');
+  const [dietary, setDietary] = useState(''); // comma-separated
+  const [ingredients, setIngredients] = useState(''); // comma-separated
+
+  // new fields
+  const [instructions, setInstructions] = useState('');
+  const [servings, setServings] = useState<number | ''>('');
+  const [prepMinutes, setPrepMinutes] = useState<number | ''>('');
+  const [cookMinutes, setCookMinutes] = useState<number | ''>('');
+  const [sourceUrl, setSourceUrl] = useState('');
+
+  // image picker modal
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageAlt, setImageAlt] = useState('');
 
   const handleReset = useCallback(() => {
     setTitle('');
@@ -30,11 +51,17 @@ export default function AddRecipeModal({ show, onHide }: Props) {
     setImageUrl('');
     setDietary('');
     setIngredients('');
+    setInstructions('');
+    setServings('');
+    setPrepMinutes('');
+    setCookMinutes('');
+    setSourceUrl('');
+    setImageAlt('');
   }, []);
 
-  const onSubmit = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
       setErr(null);
 
       try {
@@ -43,8 +70,13 @@ export default function AddRecipeModal({ show, onHide }: Props) {
           cuisine,
           description,
           imageUrl,
-          dietary: dietary.split(',').map((s) => s.trim()).filter(Boolean),
-          ingredients: ingredients.split(',').map((s) => s.trim()).filter(Boolean),
+          dietary: dietary.split(',').map(s => s.trim()).filter(Boolean),
+          ingredients: ingredients.split(',').map(s => s.trim()).filter(Boolean),
+          instructions,
+          servings: servings === '' ? undefined : Number(servings),
+          prepMinutes: prepMinutes === '' ? undefined : Number(prepMinutes),
+          cookMinutes: cookMinutes === '' ? undefined : Number(cookMinutes),
+          sourceUrl: sourceUrl || undefined,
         });
 
         startTransition(() => {
@@ -56,7 +88,22 @@ export default function AddRecipeModal({ show, onHide }: Props) {
         setErr(error?.message ?? 'Failed to create recipe');
       }
     },
-    [title, cuisine, description, imageUrl, dietary, ingredients, router, handleReset, onHide],
+    [
+      title,
+      cuisine,
+      description,
+      imageUrl,
+      dietary,
+      ingredients,
+      instructions,
+      servings,
+      prepMinutes,
+      cookMinutes,
+      sourceUrl,
+      router,
+      handleReset,
+      onHide,
+    ],
   );
 
   return (
@@ -66,10 +113,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
       </Modal.Header>
 
       <Modal.Body>
-        <p className="text-muted mb-3">Create and share your recipe.</p>
         {err && <Alert variant="danger">{err}</Alert>}
 
-        <Form onSubmit={onSubmit}>
+        <Form onSubmit={handleSubmit}>
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
@@ -87,26 +133,59 @@ export default function AddRecipeModal({ show, onHide }: Props) {
 
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Form.Control as="textarea" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Form.Group>
 
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Image URL</Form.Label>
-                <Form.Control value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+                <InputGroup>
+                  <Form.Control
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    type="button"
+                    onClick={() => setShowPicker(true)}
+                  >
+                    Pick image
+                  </Button>
+                </InputGroup>
+                {imageAlt && (
+                  <Form.Text className="text-muted">
+                    Alt:
+                    {imageAlt}
+                  </Form.Text>
+                )}
+                {imageUrl && (
+                  <div className="mt-2">
+                    <RBImage
+                      src={imageUrl}
+                      alt={imageAlt || 'Preview'}
+                      style={{ maxHeight: 140, borderRadius: 8, objectFit: 'cover' }}
+                      thumbnail
+                    />
+                  </div>
+                )}
               </Form.Group>
             </Col>
+
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Dietary (comma-separated)</Form.Label>
-                {/* eslint-disable-next-line max-len */}
-                <Form.Control placeholder="Vegan, Gluten-Free" value={dietary} onChange={(e) => setDietary(e.target.value)} />
+                <Form.Control
+                  placeholder="Vegan, Gluten-Free"
+                  value={dietary}
+                  onChange={(e) => setDietary(e.target.value)}
+                />
               </Form.Group>
             </Col>
           </Row>
 
-          <Form.Group className="mb-2">
+          <Form.Group className="mb-3">
             <Form.Label>Ingredients (comma-separated)</Form.Label>
             <Form.Control
               placeholder="onion, tomato, basil"
@@ -115,19 +194,82 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             />
           </Form.Group>
 
-          <div className="d-flex gap-2 mt-3">
-            <Button type="submit" className="btn-submit" disabled={isPending}>
+          <Form.Group className="mb-3">
+            <Form.Label>Instructions (one step per line)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={6}
+              placeholder={'1. Preheat oven...\n2. Mix the dry ingredients...\n3. ...'}
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+            />
+            <Form.Text className="text-muted">Line breaks will be preserved on the recipe page.</Form.Text>
+          </Form.Group>
+
+          <Row>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Servings</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={servings}
+                  onChange={(e) => setServings(e.target.value === '' ? '' : Number(e.target.value))}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Prep (minutes)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  value={prepMinutes}
+                  onChange={(e) => setPrepMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Cook (minutes)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  value={cookMinutes}
+                  onChange={(e) => setCookMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Source URL (optional)</Form.Label>
+            <Form.Control
+              type="url"
+              placeholder="https://example.com/recipe"
+              value={sourceUrl}
+              onChange={(e) => setSourceUrl(e.target.value)}
+            />
+          </Form.Group>
+
+          <div className="d-flex justify-content-between mt-3">
+            <Button type="submit" className="btn-add" disabled={isPending}>
               {isPending ? 'Saving…' : 'Submit'}
             </Button>
-            <Button type="button" variant="warning" className="btn-reset" onClick={handleReset}>
-              Reset
-            </Button>
-            <Button type="button" variant="secondary" onClick={onHide}>
-              Cancel
-            </Button>
+            <Button variant="secondary" type="button" onClick={onHide}>Cancel</Button>
           </div>
         </Form>
       </Modal.Body>
+
+      {/* Image picker modal */}
+      <ImagePickerModal
+        show={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={(url, meta) => {
+          setImageUrl(url);
+          if (meta?.alt) setImageAlt(meta.alt);
+        }}
+      />
     </Modal>
   );
 }

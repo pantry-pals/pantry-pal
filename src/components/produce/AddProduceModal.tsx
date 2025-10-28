@@ -1,56 +1,122 @@
 'use client';
 
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Button,
+  Col,
+  Form,
+  Modal,
+  Row,
+  InputGroup,
+  Image as RBImage,
+} from 'react-bootstrap';
+import { useForm, type SubmitHandler, type Resolver } from 'react-hook-form';
 import swal from 'sweetalert';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Produce } from '@prisma/client';
 import { AddProduceSchema } from '@/lib/validationSchemas';
 import { addProduce } from '@/lib/dbActions';
-import { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import ImagePickerModal from '@/components/images/ImagePickerModal';
 import BarcodeScanner from './BarcodeScanner';
 import '../../styles/buttons.css';
 
-type ProduceValues = InferType<typeof AddProduceSchema>;
+/** Form value shape used by RHF (kept independent from Prisma model). */
+type ProduceValues = {
+  id: number
+  name: string;
+  type: string;
+  location: string;
+  storage: string;
+  quantity: number;
+  unit: string;
+  /** HTML date input gives a string (yyyy-mm-dd) or '' -> we store string|null in the form. */
+  expiration: string | null;
+  owner: string;
+  image: string; // keep as string in the form; convert to null on submit if empty
+  restockThreshold: number | null;
+};
 
+/** Props */
 interface AddProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce: Produce;
+  // eslint-disable-next-line react/require-default-props
+  produce?: {
+    id?: number;
+    name?: string;
+    type?: string;
+    location?: string;
+    storage?: string;
+    quantity?: number;
+    unit?: string;
+    expiration?: Date | string | null;
+    owner?: string;
+    image?: string | null;
+    restockThreshold?: number | null;
+  };
 }
 
-const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
+export default function AddProduceModal({ show, onHide, produce }: AddProduceModalProps) {
   const [locations, setLocations] = useState<string[]>([]);
   const [storageOptions, setStorageOptions] = useState<string[]>([]);
 
-  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
+  const unitOptions = useMemo(
+    () => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'],
+    [],
+  );
+
+  const router = useRouter();
 
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ProduceValues>({
-    resolver: yupResolver(AddProduceSchema),
-    defaultValues: { location: '', storage: '', unit: unitOptions[0] },
+    // Ensure resolver is typed for ProduceValues to avoid generic inference errors.
+    resolver: yupResolver(AddProduceSchema) as unknown as Resolver<ProduceValues>,
+    // defaultValues is DeepPartial<ProduceValues>; everything here aligns with the field types above.
+    defaultValues: {
+      name: '',
+      type: '',
+      location: '',
+      storage: '',
+      quantity: 0,
+      unit: unitOptions[0],
+      expiration: null,
+      owner: produce?.owner ?? '',
+      image: '',
+      restockThreshold: null,
+    },
   });
 
-  const router = useRouter();
-  const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
-  const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
+  const imageVal = watch('image') || '';
+  const [selectedLocation, setSelectedLocation] = useState(produce?.location || '');
+  const [selectedStorage, setSelectedStorage] = useState(produce?.storage || '');
   const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
   const [showScanner, setShowScanner] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageAlt, setImageAlt] = useState('');
 
   useEffect(() => {
-    if (!show) reset();
-    setSelectedLocation('');
-    setSelectedStorage('');
-    setUnitChoice('');
+    if (!show) {
+      reset();
+      setSelectedLocation('');
+      setSelectedStorage('');
+      setUnitChoice('');
+    } else {
+      // If an existing item is passed in, seed the form.
+      // eslint-disable-next-line no-lonely-if
+      if (produce) {
+        setValue('owner', produce.owner ?? '');
+        if (produce.unit) setUnitChoice(produce.unit);
+      }
+    }
 
     const fetchLocations = async () => {
+      if (!produce) return;
       const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -59,13 +125,14 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
     fetchLocations();
 
     const fetchStorage = async () => {
+      if (!produce) return;
       const res = await fetch(`/api/produce/${produce.id}/storage?owner=${produce.owner}`);
       if (!res.ok) return;
       const data = await res.json();
       setStorageOptions(data);
     };
     fetchStorage();
-  }, [show, reset, produce.id, produce.owner]);
+  }, [show, reset, produce, setValue]);
 
   const handleClose = () => {
     reset();
@@ -84,26 +151,36 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
         const { product } = data;
         setValue('name', product.product_name || '');
         setValue('image', product.image_url || '');
-        setValue('type', product.categories_tags?.[0]?.replace('en:', '') || '');
+        setValue('type', (product.categories_tags?.[0]?.replace('en:', '') || '') as string);
       } else {
-        swal('Not found', 'No product found for this barcode', 'warning');
+        await swal('Not found', 'No product found for this barcode', 'warning');
       }
-    } catch (err) {
-      swal('Error', 'Failed to fetch product info', 'error');
+    } catch {
+      await swal('Error', 'Failed to fetch product info', 'error');
     }
   };
 
-  const onSubmit = async (data: ProduceValues) => {
-    await addProduce({
-      ...data,
-      expiration: data.expiration ?? null,
-      image: data.image || null,
-      restockThreshold: Number(data.restockThreshold ?? 0),
-    });
+  const onSubmit: SubmitHandler<ProduceValues> = async (data) => {
+    try {
+      // Normalize payload for your DB action.
+      const payload = {
+        ...data,
+        quantity: Number(data.quantity), // ensure number
+        expiration: data.expiration ? new Date(data.expiration) : null,
+        image: data.image.trim() === '' ? null : data.image.trim(),
+        restockThreshold:
+          data.restockThreshold == null || Number.isNaN(Number(data.restockThreshold))
+            ? 0
+            : Number(data.restockThreshold),
+      };
+      await addProduce(payload);
 
-    swal('Success', 'Your item has been added', 'success', { timer: 2000 });
-    handleClose();
-    router.refresh();
+      await swal('Success', 'Your item has been added', 'success', { timer: 2000 });
+      handleClose();
+      router.refresh();
+    } catch {
+      await swal('Error', 'Failed to add item', 'error');
+    }
   };
 
   return (
@@ -111,9 +188,10 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
       <Modal.Header className="justify-content-center">
         <Modal.Title>Add Pantry Item</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          {/* Barcode Scanner Button */}
+          {/* Barcode Scanner */}
           <Row className="mb-3">
             <Col xs={12} className="text-center">
               <Button
@@ -128,8 +206,8 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
 
               {showScanner && (
                 <BarcodeScanner
-                  onDetected={(code) => {
-                    fetchProductByBarcode(code);
+                  onDetected={async (code) => {
+                    await fetchProductByBarcode(code);
                     setShowScanner(false);
                   }}
                   onClose={() => setShowScanner(false)}
@@ -140,30 +218,34 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
 
           {/* Name and Type */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Name</Form.Label>
+                <Form.Label className="required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
+                  placeholder="e.g., Chicken"
+                  isInvalid={!!errors.name}
                   {...register('name')}
                   required
-                  className={`${errors.name ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Chicken"
                 />
-                <div className="invalid-feedback">{errors.name?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.name?.message as string}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Type</Form.Label>
+                <Form.Label className="required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
+                  placeholder="e.g., Meat"
+                  isInvalid={!!errors.type}
                   {...register('type')}
                   required
-                  className={`${errors.type ? 'is-invalid' : ''}`}
-                  placeholder="e.g., Meat"
                 />
-                <div className="invalid-feedback">{errors.type?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.type?.message as string}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -208,7 +290,7 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                 <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Select
@@ -249,24 +331,26 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
           </Row>
 
           {/* Quantity and Unit */}
-          <Row className="mb-3">
-            <Col xs={6} className="text-center">
+          <Row className="mb-3 mt-2">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
+                <Form.Label className="required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
-                  {...register('quantity')}
-                  required
                   step={0.5}
-                  placeholder="eg., 1, 1.5"
-                  className={`${errors.quantity ? 'is-invalid' : ''}`}
+                  placeholder="e.g., 1, 1.5"
+                  isInvalid={!!errors.quantity}
+                  {...register('quantity', { valueAsNumber: true })}
+                  required
                 />
-                <div className="invalid-feedback">{errors.quantity?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.quantity?.message as string}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0 required-field">Unit</Form.Label>
+                <Form.Label className="required-field">Unit</Form.Label>
                 <Form.Select
                   value={unitChoice}
                   required
@@ -276,96 +360,138 @@ const AddProduceModal = ({ show, onHide, produce }: AddProduceModalProps) => {
                     setUnitChoice(value);
                     setValue('unit', value !== 'Other' ? value : '');
                   }}
+                  isInvalid={!!errors.unit}
                 >
                   <option value="" disabled>Select unit...</option>
                   {unitOptions.map((u) => (
-                    <option key={u} value={u}>{u}</option>
+                    <option key={u}>{u}</option>
                   ))}
                 </Form.Select>
-
                 {unitChoice === 'Other' && (
                   <Form.Control
                     type="text"
-                    {...register('unit')}
                     placeholder="Enter custom unit"
+                    className="mt-2"
+                    isInvalid={!!errors.unit}
+                    {...register('unit')}
                     required
-                    className={`mt-2 ${errors.unit ? 'is-invalid' : ''}`}
                   />
                 )}
-                <div className="invalid-feedback">{errors.unit?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.unit?.message as string}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
 
           {/* Expiration and Image */}
           <Row className="mb-3">
-            <Col xs={6} className="text-center">
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0">Expiration Date</Form.Label>
+                <Form.Label>Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
+                  isInvalid={!!errors.expiration}
                   {...register('expiration')}
-                  className={`${errors.expiration ? 'is-invalid' : ''}`}
                 />
-                <div className="invalid-feedback">{errors.expiration?.message}</div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.expiration?.message as string}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col xs={6} className="text-center">
+
+            <Col xs={6}>
               <Form.Group>
-                <Form.Label className="mb-0">Image</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('image')}
-                  className={`${errors.image ? 'is-invalid' : ''}`}
-                  placeholder="Image URL"
-                />
-                <div className="invalid-feedback">{errors.image?.message}</div>
+                <Form.Label>Image</Form.Label>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Image URL"
+                    isInvalid={!!errors.image}
+                    {...register('image')}
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    type="button"
+                    style={{ display: 'inline-block', zIndex: 99 }}
+                    onClick={() => setShowPicker(true)}
+                  >
+                    Pick
+                  </Button>
+                </InputGroup>
+                <Form.Control.Feedback type="invalid">
+                  {errors.image?.message as string}
+                </Form.Control.Feedback>
+
+                {imageVal && (
+                  <div className="mt-2">
+                    <RBImage
+                      src={imageVal}
+                      alt={imageAlt || 'Preview'}
+                      style={{ maxHeight: 120, borderRadius: 8, objectFit: 'cover' }}
+                      thumbnail
+                    />
+                  </div>
+                )}
               </Form.Group>
             </Col>
           </Row>
 
           {/* Restock Threshold */}
-          <Row>
-            <Col xs={12} className="text-center">
+          <Row className="mb-3">
+            <Col xs={12}>
               <Form.Group>
-                <Form.Label className="mb-0">Restock Threshold</Form.Label>
-                <div className="d-flex justify-content-center mb-2">
-                  <Form.Control
-                    type="number"
-                    step={0.5}
-                    {...register('restockThreshold')}
-                    placeholder="e.g., 0.5"
-                    className={`${errors.restockThreshold ? 'is-invalid' : ''}`}
-                    style={{ width: '100px' }}
-                  />
-                </div>
-                <Form.Text
-                  className="text-muted d-block mx-auto"
-                  style={{ maxWidth: '320px', fontSize: '0.85rem', lineHeight: '1.3' }}
-                >
+                <Form.Label>Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.1}
+                  placeholder="e.g., 0.5"
+                  isInvalid={!!errors.restockThreshold}
+                  {...register('restockThreshold', {
+                    setValueAs: (v) => {
+                      if (v === '' || v === null || typeof v === 'undefined') return null;
+                      const n = Number(v);
+                      return Number.isNaN(n) ? null : n;
+                    },
+                  })}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.restockThreshold?.message as string}
+                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
                   When quantity falls below this value, the item will be added to your shopping list.
                 </Form.Text>
-                <div className="invalid-feedback d-block">{errors.restockThreshold?.message}</div>
               </Form.Group>
             </Col>
           </Row>
 
-          <input type="hidden" {...register('owner')} value={produce.owner} />
+          {/* owner hidden (kept in form for your add action) */}
+          <input type="hidden" {...register('owner')} value={produce?.owner ?? ''} />
 
-          <Form.Group className="form-group">
-            <Row className="pt-3">
-              <Col>
-                <Button type="submit" className="btn-submit">Submit</Button>
-              </Col>
-              <Col>
-                <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">Reset</Button>
-              </Col>
-            </Row>
-          </Form.Group>
+          <div className="d-flex justify-content-between mt-4">
+            <Button type="submit" className="btn-submit">
+              Submit
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              onClick={() => reset()}
+              className="btn-reset"
+            >
+              Reset
+            </Button>
+          </div>
         </Form>
       </Modal.Body>
+
+      <ImagePickerModal
+        show={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={(url, meta) => {
+          setValue('image', url, { shouldValidate: true, shouldDirty: true });
+          if (meta?.alt) setImageAlt(meta.alt);
+        }}
+      />
     </Modal>
   );
-};
-
-export default AddProduceModal;
+}

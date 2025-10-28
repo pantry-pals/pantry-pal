@@ -47,19 +47,13 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
               className="justify-content-center pantry-controls"
             >
               <Nav.Item>
-                <Nav.Link
-                  eventKey="all"
-                >
-                  All Locations
-                </Nav.Link>
+                <Nav.Link eventKey="all">All Locations</Nav.Link>
               </Nav.Item>
               {locations.map((loc) => (
                 <Nav.Item key={loc}>
                   <Nav.Link
                     eventKey={loc}
-                    style={{
-                      textTransform: 'capitalize',
-                    }}
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {loc}
                   </Nav.Link>
@@ -93,8 +87,6 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           image: null,
           owner,
           restockThreshold: 0,
-          restockTrigger: 'empty',
-          customThreshold: null,
         }}
       />
     </main>

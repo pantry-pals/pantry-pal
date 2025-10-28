@@ -111,17 +111,24 @@ model ShoppingListItem {
 }
 
 model Recipe {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  imageUrl    String?
-  cuisine     String
-  dietary     String[] // e.g., ["Vegan","Gluten-Free"]
-  ingredients String[] // e.g., ["onion","tomato","basil"]
-  owner       String?
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String?
+  imageUrl     String?
+  cuisine      String
+  dietary      String[]   // e.g., ["Vegan","Gluten-Free"]
+  ingredients  String[]   // e.g., ["onion","tomato","basil"]
+  owner        String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Add these fields (nullable to match existing rows)
+  instructions String?    @db.Text
+  servings     Int?
+  prepMinutes  Int?
+  cookMinutes  Int?
+  sourceUrl    String?
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@unique([title, owner], name: "title_owner")
   @@index([title])
