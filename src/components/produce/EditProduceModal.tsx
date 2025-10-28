@@ -190,16 +190,23 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Select
-                  {...register('location', { required: true })}
-                  defaultValue={produce.location}
+                  value={selectedLocation}
+                  required
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
-                    setValue('location', value !== 'Add Location' ? value : '');
-                    setSelectedLocation(value); // custom state, see below
+                    setSelectedLocation(value);
+                    if (value === 'Add Location') {
+                      // Clear the field so input starts empty
+                      setValue('location', '');
+                    } else {
+                      setValue('location', value);
+                    }
                   }}
                 >
-                  <option value="" disabled>Select location...</option>
+                  <option value="" disabled>
+                    Select location...
+                  </option>
 
                   {locations.map((loc) => (
                     <option key={loc} value={loc}>
@@ -213,10 +220,11 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                 {selectedLocation === 'Add Location' && (
                   <Form.Control
                     type="text"
-                    {...register('location', { required: true })}
                     placeholder="Enter new location"
-                    required
                     className={`mt-2 ${errors.location ? 'is-invalid' : ''}`}
+                    {...register('location', { required: true })}
+                    onChange={(e) => setValue('location', e.target.value)}
+                    required
                   />
                 )}
 
@@ -227,16 +235,23 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Select
-                  {...register('storage', { required: true })}
-                  defaultValue={produce.storage}
+                  value={selectedStorage}
+                  required
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
-                    setValue('storage', value !== 'Add Storage' ? value : '');
-                    setSelectedStorage(value); // custom state, see below
+                    setSelectedStorage(value);
+                    if (value === 'Add Storage') {
+                      // Clear the field so input starts empty
+                      setValue('storage', '');
+                    } else {
+                      setValue('storage', value);
+                    }
                   }}
                 >
-                  <option value="" disabled>Select storage...</option>
+                  <option value="" disabled>
+                    Select storage...
+                  </option>
 
                   {storageOptions.map((storage) => (
                     <option key={storage} value={storage}>
@@ -250,10 +265,11 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                 {selectedStorage === 'Add Storage' && (
                   <Form.Control
                     type="text"
-                    {...register('storage', { required: true })}
                     placeholder="Enter new storage"
-                    required
                     className={`mt-2 ${errors.storage ? 'is-invalid' : ''}`}
+                    {...register('storage', { required: true })}
+                    onChange={(e) => setValue('storage', e.target.value)}
+                    required
                   />
                 )}
 
@@ -295,6 +311,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                     <option key={u}>{u}</option>
                   ))}
                 </Form.Select>
+
                 {unitChoice === 'Other' && (
                   <Form.Control
                     type="text"

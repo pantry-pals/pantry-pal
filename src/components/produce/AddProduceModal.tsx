@@ -249,18 +249,21 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Location</Form.Label>
                 <Form.Select
-                  {...register('location', { required: true })}
                   value={selectedLocation}
                   required
                   className={`${errors.location ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
-                    setValue('location', value === 'Add Location' ? '' : value);
-                    setSelectedLocation(value); // custom state, see below
+                    setSelectedLocation(value);
+                    if (value === 'Add Location') {
+                      // Clear the field so input starts empty
+                      setValue('location', '');
+                    } else {
+                      setValue('location', value);
+                    }
                   }}
                 >
                   <option value="" disabled>Select location...</option>
-
                   {locations.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc}
@@ -269,14 +272,14 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   <option value="Add Location">Add Location</option>
                 </Form.Select>
 
-                {/* Conditionally render the custom input */}
                 {selectedLocation === 'Add Location' && (
                   <Form.Control
                     type="text"
-                    {...register('location', { required: true })}
                     placeholder="Enter new location"
-                    required
                     className={`mt-2 ${errors.location ? 'is-invalid' : ''}`}
+                    {...register('location', { required: true })}
+                    onChange={(e) => setValue('location', e.target.value)}
+                    required
                   />
                 )}
 
@@ -287,34 +290,37 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Storage</Form.Label>
                 <Form.Select
-                  {...register('storage', { required: true })}
                   value={selectedStorage}
                   required
                   className={`${errors.storage ? 'is-invalid' : ''}`}
                   onChange={(e) => {
                     const { value } = e.target;
-                    setValue('storage', value === 'Add Storage' ? '' : value);
-                    setSelectedStorage(value); // custom state, see below
+                    setSelectedStorage(value);
+                    if (value === 'Add Storage') {
+                      // Clear the field so input starts empty
+                      setValue('storage', '');
+                    } else {
+                      setValue('storage', value);
+                    }
                   }}
                 >
                   <option value="" disabled>Select storage...</option>
-
-                  {storageOptions.map((storage) => (
-                    <option key={storage} value={storage}>
-                      {storage}
+                  {storageOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                   <option value="Add Storage">Add Storage</option>
                 </Form.Select>
 
-                {/* Conditionally render the custom input */}
                 {selectedStorage === 'Add Storage' && (
                   <Form.Control
                     type="text"
-                    {...register('storage', { required: true })}
                     placeholder="Enter new storage"
-                    required
                     className={`mt-2 ${errors.storage ? 'is-invalid' : ''}`}
+                    {...register('storage', { required: true })}
+                    onChange={(e) => setValue('storage', e.target.value)}
+                    required
                   />
                 )}
 
