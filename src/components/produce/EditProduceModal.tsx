@@ -148,7 +148,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
         <Modal.Title>Edit Pantry Item</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className="text-center">
         <Form onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...register('id')} value={produce.id} />
 
@@ -156,7 +156,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
@@ -170,7 +170,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
@@ -266,7 +266,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   step={0.5}
@@ -281,7 +281,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   value={unitChoice}
                   onChange={(e) => {
@@ -312,11 +312,33 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
           </Row>
 
+          {/* Restock Threshold */}
+          <Row className="mb-3">
+            <Col xs={12}>
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.5}
+                  {...register('restockThreshold')}
+                  placeholder="e.g., 0.5"
+                  isInvalid={!!errors.restockThreshold}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.restockThreshold?.message}
+                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+
           {/* Expiration + Image (with picker) */}
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Expiration Date</Form.Label>
+                <Form.Label className="mb-0">Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
                   {...register('expiration')}
@@ -330,7 +352,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
 
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Image</Form.Label>
+                <Form.Label className="mb-0">Image</Form.Label>
                 <InputGroup>
                   <Form.Control
                     type="text"
@@ -369,44 +391,26 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
           </Row>
 
-          {/* Restock Threshold */}
-          <Row className="mb-3">
-            <Col xs={12}>
-              <Form.Group>
-                <Form.Label>Restock Threshold</Form.Label>
-                <Form.Control
-                  type="number"
-                  step={0.1}
-                  {...register('restockThreshold')}
-                  placeholder="e.g., 0.5"
-                  isInvalid={!!errors.restockThreshold}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.restockThreshold?.message}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  When quantity falls below this value, the item will be added to your shopping list.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-
           <input type="hidden" {...register('owner')} value={produce.owner} />
 
           {/* Buttons */}
-          <div className="d-flex justify-content-between mt-4">
-            <Button type="submit" className="btn-submit">
-              Save Changes
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              onClick={() => reset()}
-              className="btn-reset"
-            >
-              Reset
-            </Button>
-          </div>
+          <Row className="d-flex justify-content-between mt-4">
+            <Col xs={6}>
+              <Button type="submit" className="btn-submit">
+                Save Changes
+              </Button>
+            </Col>
+            <Col xs={6}>
+              <Button
+                type="button"
+                variant="warning"
+                onClick={() => reset()}
+                className="btn-reset"
+              >
+                Reset
+              </Button>
+            </Col>
+          </Row>
         </Form>
       </Modal.Body>
 

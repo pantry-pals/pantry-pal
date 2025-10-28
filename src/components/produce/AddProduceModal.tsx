@@ -84,7 +84,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
       location: '',
       storage: '',
       quantity: 0,
-      unit: unitOptions[0],
+      unit: '',
       expiration: null,
       owner: produce?.owner ?? '',
       image: '',
@@ -93,26 +93,19 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
   });
 
   const imageVal = watch('image') || '';
-  const [selectedLocation, setSelectedLocation] = useState(produce?.location || '');
-  const [selectedStorage, setSelectedStorage] = useState(produce?.storage || '');
-  const [unitChoice, setUnitChoice] = useState(unitOptions[0]);
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedStorage, setSelectedStorage] = useState('');
+  const [unitChoice, setUnitChoice] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [imageAlt, setImageAlt] = useState('');
 
   useEffect(() => {
-    if (!show) {
+    if (show) {
       reset();
       setSelectedLocation('');
       setSelectedStorage('');
       setUnitChoice('');
-    } else {
-      // If an existing item is passed in, seed the form.
-      // eslint-disable-next-line no-lonely-if
-      if (produce) {
-        setValue('owner', produce.owner ?? '');
-        if (produce.unit) setUnitChoice(produce.unit);
-      }
     }
 
     const fetchLocations = async () => {
@@ -189,7 +182,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
         <Modal.Title>Add Pantry Item</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className="text-center">
         <Form onSubmit={handleSubmit(onSubmit)}>
           {/* Barcode Scanner */}
           <Row className="mb-3">
@@ -220,7 +213,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="e.g., Chicken"
@@ -235,7 +228,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="e.g., Meat"
@@ -334,7 +327,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
           <Row className="mb-3 mt-2">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   step={0.5}
@@ -350,7 +343,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   value={unitChoice}
                   required
@@ -358,7 +351,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   onChange={(e) => {
                     const { value } = e.target;
                     setUnitChoice(value);
-                    setValue('unit', value !== 'Other' ? value : '');
+                    setValue('unit', value === 'Other' ? '' : value);
                   }}
                   isInvalid={!!errors.unit}
                 >
@@ -384,11 +377,39 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
             </Col>
           </Row>
 
+          {/* Restock Threshold */}
+          <Row className="mb-3">
+            <Col xs={12}>
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.5}
+                  placeholder="e.g., 0.5"
+                  isInvalid={!!errors.restockThreshold}
+                  {...register('restockThreshold', {
+                    setValueAs: (v) => {
+                      if (v === '' || v === null || typeof v === 'undefined') return null;
+                      const n = Number(v);
+                      return Number.isNaN(n) ? null : n;
+                    },
+                  })}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.restockThreshold?.message as string}
+                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+
           {/* Expiration and Image */}
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Expiration Date</Form.Label>
+                <Form.Label className="mb-0">Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
                   isInvalid={!!errors.expiration}
@@ -402,11 +423,11 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
 
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Image</Form.Label>
+                <Form.Label className="mb-0">Image</Form.Label>
                 <InputGroup>
                   <Form.Control
                     type="text"
-                    placeholder="Image URL"
+                    placeholder="Pick an Image"
                     isInvalid={!!errors.image}
                     {...register('image')}
                   />
@@ -437,50 +458,26 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
             </Col>
           </Row>
 
-          {/* Restock Threshold */}
-          <Row className="mb-3">
-            <Col xs={12}>
-              <Form.Group>
-                <Form.Label>Restock Threshold</Form.Label>
-                <Form.Control
-                  type="number"
-                  step={0.1}
-                  placeholder="e.g., 0.5"
-                  isInvalid={!!errors.restockThreshold}
-                  {...register('restockThreshold', {
-                    setValueAs: (v) => {
-                      if (v === '' || v === null || typeof v === 'undefined') return null;
-                      const n = Number(v);
-                      return Number.isNaN(n) ? null : n;
-                    },
-                  })}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.restockThreshold?.message as string}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  When quantity falls below this value, the item will be added to your shopping list.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-
           {/* owner hidden (kept in form for your add action) */}
           <input type="hidden" {...register('owner')} value={produce?.owner ?? ''} />
 
-          <div className="d-flex justify-content-between mt-4">
-            <Button type="submit" className="btn-submit">
-              Submit
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              onClick={() => reset()}
-              className="btn-reset"
-            >
-              Reset
-            </Button>
-          </div>
+          <Row className="d-flex justify-content-between mt-4">
+            <Col xs={6}>
+              <Button type="submit" className="btn-submit">
+                Submit
+              </Button>
+            </Col>
+            <Col xs={6}>
+              <Button
+                type="button"
+                variant="warning"
+                onClick={() => reset()}
+                className="btn-reset"
+              >
+                Reset
+              </Button>
+            </Col>
+          </Row>
         </Form>
       </Modal.Body>
 
