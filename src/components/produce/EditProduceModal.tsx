@@ -46,6 +46,12 @@ interface EditProduceModalProps {
 export default function EditProduceModal({ show, onHide, produce }: EditProduceModalProps) {
   const router = useRouter();
 
+  const [locations, setLocations] = useState<string[]>([]);
+  const [storageOptions, setStorageOptions] = useState<string[]>([]);
+
+  const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
+  const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
+
   const unitOptions = useMemo(
     () => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'],
     [],
@@ -91,8 +97,26 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
         image: produce.image ?? '',
         restockThreshold: produce.restockThreshold ?? null,
       });
+      setSelectedLocation(produce.location);
+      setSelectedStorage(produce.storage);
       setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
     }
+
+    const fetchLocations = async () => {
+      const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setLocations(data);
+    };
+    fetchLocations();
+
+    const fetchStorage = async () => {
+      const res = await fetch(`/api/produce/${produce.id}/storage?owner=${produce.owner}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setStorageOptions(data);
+    };
+    fetchStorage();
   }, [show, produce, reset, unitOptions]);
 
   const handleClose = () => {
@@ -124,7 +148,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
         <Modal.Title>Edit Pantry Item</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className="text-center">
         <Form onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...register('id')} value={produce.id} />
 
@@ -132,7 +156,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Name</Form.Label>
+                <Form.Label className="mb-0 required-field">Name</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('name')}
@@ -146,7 +170,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Type</Form.Label>
+                <Form.Label className="mb-0 required-field">Type</Form.Label>
                 <Form.Control
                   type="text"
                   {...register('type')}
@@ -164,30 +188,92 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Location</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('location')}
-                  placeholder="e.g., Pantry"
-                  isInvalid={!!errors.location}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.location?.message}
-                </Form.Control.Feedback>
+                <Form.Label className="mb-0 required-field">Location</Form.Label>
+                <Form.Select
+                  value={selectedLocation}
+                  required
+                  className={`${errors.location ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setSelectedLocation(value);
+                    if (value === 'Add Location') {
+                      // Clear the field so input starts empty
+                      setValue('location', '');
+                    } else {
+                      setValue('location', value);
+                    }
+                  }}
+                >
+                  <option value="" disabled>
+                    Select location...
+                  </option>
+
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
+                  <option value="Add Location">Add Location</option>
+                </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedLocation === 'Add Location' && (
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter new location"
+                    className={`mt-2 ${errors.location ? 'is-invalid' : ''}`}
+                    {...register('location', { required: true })}
+                    onChange={(e) => setValue('location', e.target.value)}
+                    required
+                  />
+                )}
+
+                <div className="invalid-feedback">{errors.location?.message}</div>
               </Form.Group>
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Storage</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('storage')}
-                  placeholder="e.g., Freezer"
-                  isInvalid={!!errors.storage}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.storage?.message}
-                </Form.Control.Feedback>
+                <Form.Label className="mb-0 required-field">Storage</Form.Label>
+                <Form.Select
+                  value={selectedStorage}
+                  required
+                  className={`${errors.storage ? 'is-invalid' : ''}`}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setSelectedStorage(value);
+                    if (value === 'Add Storage') {
+                      // Clear the field so input starts empty
+                      setValue('storage', '');
+                    } else {
+                      setValue('storage', value);
+                    }
+                  }}
+                >
+                  <option value="" disabled>
+                    Select storage...
+                  </option>
+
+                  {storageOptions.map((storage) => (
+                    <option key={storage} value={storage}>
+                      {storage}
+                    </option>
+                  ))}
+                  <option value="Add Storage">Add Storage</option>
+                </Form.Select>
+
+                {/* Conditionally render the custom input */}
+                {selectedStorage === 'Add Storage' && (
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter new storage"
+                    className={`mt-2 ${errors.storage ? 'is-invalid' : ''}`}
+                    {...register('storage', { required: true })}
+                    onChange={(e) => setValue('storage', e.target.value)}
+                    required
+                  />
+                )}
+
+                <div className="invalid-feedback">{errors.storage?.message}</div>
               </Form.Group>
             </Col>
           </Row>
@@ -196,7 +282,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Quantity</Form.Label>
+                <Form.Label className="mb-0 required-field">Quantity</Form.Label>
                 <Form.Control
                   type="number"
                   step={0.5}
@@ -211,7 +297,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
             <Col xs={6}>
               <Form.Group>
-                <Form.Label className="required-field">Unit</Form.Label>
+                <Form.Label className="mb-0 required-field">Unit</Form.Label>
                 <Form.Select
                   value={unitChoice}
                   onChange={(e) => {
@@ -225,6 +311,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                     <option key={u}>{u}</option>
                   ))}
                 </Form.Select>
+
                 {unitChoice === 'Other' && (
                   <Form.Control
                     type="text"
@@ -242,11 +329,33 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
           </Row>
 
+          {/* Restock Threshold */}
+          <Row className="mb-3">
+            <Col xs={12}>
+              <Form.Group>
+                <Form.Label className="mb-0">Restock Threshold</Form.Label>
+                <Form.Control
+                  type="number"
+                  step={0.5}
+                  {...register('restockThreshold')}
+                  placeholder="e.g., 0.5"
+                  isInvalid={!!errors.restockThreshold}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.restockThreshold?.message}
+                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  When quantity falls below this value, the item will be added to your shopping list.
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+
           {/* Expiration + Image (with picker) */}
           <Row className="mb-3">
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Expiration Date</Form.Label>
+                <Form.Label className="mb-0">Expiration Date</Form.Label>
                 <Form.Control
                   type="date"
                   {...register('expiration')}
@@ -260,7 +369,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
 
             <Col xs={6}>
               <Form.Group>
-                <Form.Label>Image</Form.Label>
+                <Form.Label className="mb-0">Image</Form.Label>
                 <InputGroup>
                   <Form.Control
                     type="text"
@@ -299,44 +408,26 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             </Col>
           </Row>
 
-          {/* Restock Threshold */}
-          <Row className="mb-3">
-            <Col xs={12}>
-              <Form.Group>
-                <Form.Label>Restock Threshold</Form.Label>
-                <Form.Control
-                  type="number"
-                  step={0.1}
-                  {...register('restockThreshold')}
-                  placeholder="e.g., 0.5"
-                  isInvalid={!!errors.restockThreshold}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.restockThreshold?.message}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  When quantity falls below this value, the item will be added to your shopping list.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-
           <input type="hidden" {...register('owner')} value={produce.owner} />
 
           {/* Buttons */}
-          <div className="d-flex justify-content-between mt-4">
-            <Button type="submit" className="btn-submit">
-              Save Changes
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              onClick={() => reset()}
-              className="btn-reset"
-            >
-              Reset
-            </Button>
-          </div>
+          <Row className="d-flex justify-content-between mt-4">
+            <Col xs={6}>
+              <Button type="submit" className="btn-submit">
+                Save Changes
+              </Button>
+            </Col>
+            <Col xs={6}>
+              <Button
+                type="button"
+                variant="warning"
+                onClick={() => reset()}
+                className="btn-reset"
+              >
+                Reset
+              </Button>
+            </Col>
+          </Row>
         </Form>
       </Modal.Body>
 
