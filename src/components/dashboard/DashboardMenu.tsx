@@ -7,8 +7,15 @@ import {
   CartCheck,
   BookHalf,
 } from 'react-bootstrap-icons';
+import QuickAlerts from './QuickAlerts';
 
-export default function DashboardMenu() {
+interface DashboardMenuProps {
+  ownerEmail: string;
+  recipes: any[];
+  produce: any[];
+}
+
+export default function DashboardMenu({ ownerEmail, recipes, produce }: DashboardMenuProps) {
   const parent = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
   const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
   const menuItems = [
@@ -60,9 +67,11 @@ export default function DashboardMenu() {
           </motion.div>
         </div>
 
+        <QuickAlerts ownerEmail={ownerEmail} recipes={recipes} produce={produce} />
+
         {/* Dashboard cards */}
         <motion.div
-          className="grid gap-4 mt-5"
+          className="grid gap-4 mt-5 mb-5"
           variants={parent}
           initial="hidden"
           animate="show"
