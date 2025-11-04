@@ -4,20 +4,35 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const owner = searchParams.get('owner');
+  const locationName = searchParams.get('location');
 
   if (!owner) {
     return NextResponse.json({ error: 'Missing owner' }, { status: 400 });
   }
 
-  const locations = await prisma.produce.findMany({
-    where: { owner },
-    distinct: ['storage'],
-    select: { storage: true },
+  if (!locationName) {
+    const storages = await prisma.storage.findMany({
+      where: { location: { owner } },
+      select: { name: true },
+      orderBy: { name: 'asc' },
+    });
+    return NextResponse.json(storages.map((s) => s.name));
+  }
+
+  const location = await prisma.location.findFirst({
+    where: { owner, name: locationName },
+    select: { id: true },
   });
 
-  const filtered = locations
-    .map((l) => l.storage)
-    .filter((l): l is string => !!l && l.trim().length > 0);
+  if (!location) {
+    return NextResponse.json({ error: 'Location not found' }, { status: 404 });
+  }
 
-  return NextResponse.json(filtered);
+  const storages = await prisma.storage.findMany({
+    where: { locationId: location.id },
+    select: { name: true },
+    orderBy: { name: 'asc' },
+  });
+
+  return NextResponse.json(storages.map((s) => s.name));
 }

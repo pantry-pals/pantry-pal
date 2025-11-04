@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Col,
@@ -100,32 +100,56 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
   const [showPicker, setShowPicker] = useState(false);
   const [imageAlt, setImageAlt] = useState('');
 
+  const fetchStorage = useCallback(
+    async (location: string) => {
+      if (!produce?.owner || !location) return;
+      const res = await fetch(
+        `/api/produce/${produce?.id ?? 0}/storage?owner=${produce.owner}&location=${encodeURIComponent(location)}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setStorageOptions(data);
+
+      // Optional: auto-select first storage if only one exists
+      if (data.length === 1) {
+        setSelectedStorage(data[0]);
+        setValue('storage', data[0]);
+      }
+    },
+    [produce?.owner, produce?.id, setValue], // dependencies for useCallback
+  );
+
+  // useEffect
   useEffect(() => {
     if (show) {
       reset();
       setSelectedLocation('');
       setSelectedStorage('');
       setUnitChoice('');
+
+      // Always fetch all available locations for this owner
+      const fetchLocations = async () => {
+        if (!produce?.owner) return;
+        const res = await fetch(`/api/produce/${produce?.id ?? 0}/locations?owner=${produce.owner}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setLocations(data);
+      };
+      fetchLocations();
+
+      // If editing an existing produce, pre-select its location and storage
+      if (produce?.location) {
+        const locationName = typeof produce.location === 'string'
+          ? produce.location
+          : (produce.location as any)?.name ?? '';
+
+        setSelectedLocation(locationName);
+        if (locationName) {
+          fetchStorage(locationName);
+        }
+      }
     }
-
-    const fetchLocations = async () => {
-      if (!produce) return;
-      const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setLocations(data);
-    };
-    fetchLocations();
-
-    const fetchStorage = async () => {
-      if (!produce) return;
-      const res = await fetch(`/api/produce/${produce.id}/storage?owner=${produce.owner}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setStorageOptions(data);
-    };
-    fetchStorage();
-  }, [show, reset, produce, setValue]);
+  }, [show, reset, produce, setValue, fetchStorage]);
 
   const handleClose = () => {
     reset();
@@ -252,14 +276,16 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   value={selectedLocation}
                   required
                   className={`${errors.location ? 'is-invalid' : ''}`}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const { value } = e.target;
                     setSelectedLocation(value);
+                    setSelectedStorage(''); // clear storage when location changes
                     if (value === 'Add Location') {
-                      // Clear the field so input starts empty
                       setValue('location', '');
+                      setStorageOptions([]);
                     } else {
                       setValue('location', value);
+                      await fetchStorage(value); // fetch storages for that location
                     }
                   }}
                 >
@@ -296,23 +322,29 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   onChange={(e) => {
                     const { value } = e.target;
                     setSelectedStorage(value);
+
                     if (value === 'Add Storage') {
-                      // Clear the field so input starts empty
+                      // Clear the field so user can enter custom storage
                       setValue('storage', '');
                     } else {
                       setValue('storage', value);
                     }
                   }}
                 >
-                  <option value="" disabled>Select storage...</option>
+                  <option value="" disabled>
+                    Select storage...
+                  </option>
+
                   {storageOptions.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
                   ))}
+
                   <option value="Add Storage">Add Storage</option>
                 </Form.Select>
 
+                {/* Conditionally render a text input when "Add Storage" is selected */}
                 {selectedStorage === 'Add Storage' && (
                   <Form.Control
                     type="text"

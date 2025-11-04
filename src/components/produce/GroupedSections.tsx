@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Container } from 'react-bootstrap';
-import { Produce } from '@prisma/client';
+import type { ProduceRelations } from '@/types/ProduceRelations';
 import ProduceTable from './ProduceTable';
 import ProduceCardGrid from './ProduceCardGrid';
 
@@ -11,7 +11,7 @@ function capitalizeFirst(s: string) {
 }
 
 type Props = {
-  groups: Array<[string, Produce[]]>;
+  groups: Array<[string, ProduceRelations[]]>;
   view: 'table' | 'cards';
 };
 

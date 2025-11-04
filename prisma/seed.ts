@@ -1,4 +1,5 @@
-import { PrismaClient, Role, Condition } from '@prisma/client';
+/* eslint-disable no-await-in-loop */
+import { PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
 
@@ -25,42 +26,54 @@ async function main() {
     });
   }
 
-  // Seed stuff
-  for (let index = 0; index < config.defaultData.length; index++) {
-    const data = config.defaultData[index];
-    const condition = (data.condition as Condition) || Condition.good;
-    console.log(`  Adding stuff: ${JSON.stringify(data)}`);
-
-    await prisma.stuff.upsert({
-      where: { id: index + 1 },
-      update: {},
-      create: {
-        name: data.name,
-        quantity: data.quantity,
-        owner: data.owner,
-        condition,
-      },
-    });
-  }
-
   // Seed produce
-  for (let index = 0; index < config.defaultProduce.length; index++) {
-    const produce = config.defaultProduce[index];
+  for (const produce of config.defaultProduce) {
     console.log(`  Adding produce: ${JSON.stringify(produce)}`);
 
+    // Upsert the Location (unique per owner)
+    const location = await prisma.location.upsert({
+      where: {
+        name_owner: {
+          name: produce.location,
+          owner: produce.owner,
+        },
+      },
+      update: {},
+      create: {
+        name: produce.location,
+        owner: produce.owner,
+      },
+    });
+
+    // Upsert the Storage (unique per location)
+    const storage = await prisma.storage.upsert({
+      where: {
+        name_locationId: {
+          name: produce.storage,
+          locationId: location.id,
+        },
+      },
+      update: {},
+      create: {
+        name: produce.storage,
+        locationId: location.id,
+      },
+    });
+
+    // Upsert the Produce (link via IDs)
     await prisma.produce.upsert({
       where: { name_owner: { name: produce.name, owner: produce.owner } },
       update: {},
       create: {
         name: produce.name,
         type: produce.type,
-        location: produce.location,
-        storage: produce.storage,
+        locationId: location.id,
+        storageId: storage.id,
         quantity: produce.quantity,
         unit: produce.unit,
         expiration: new Date(produce.expiration),
         owner: produce.owner,
-        image: produce.image ? produce.image : null,
+        image: produce.image ?? null,
       },
     });
   }
@@ -142,4 +155,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-  

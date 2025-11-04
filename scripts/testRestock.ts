@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { prisma } from '../src/lib/prisma';
 import { checkAndAddToShoppingList } from '../src/lib/restock';
 
@@ -27,13 +28,44 @@ async function testRestock() {
         name: p.name,
         owner,
         type: 'Test',
-        location: 'Fridge',
-        storage: 'Cold',
         quantity: p.quantity,
         unit: p.unit,
         restockTrigger: p.restockTrigger,
         restockThreshold: p.restockThreshold,
         customThreshold: p.customThreshold,
+
+        // Connect or create the Location (has owner)
+        location: {
+          connectOrCreate: {
+            where: { name_owner: { name: 'Fridge', owner } },
+            create: { name: 'Fridge', owner },
+          },
+        },
+
+        // Connect or create the Storage (linked by locationId)
+        storage: {
+          connectOrCreate: {
+            where: {
+              name_locationId: {
+                name: 'Cold',
+                locationId: (
+                  await prisma.location.findUnique({
+                    where: { name_owner: { name: 'Fridge', owner } },
+                    select: { id: true },
+                  })
+                )!.id,
+              },
+            },
+            create: {
+              name: 'Cold',
+              location: {
+                connect: {
+                  name_owner: { name: 'Fridge', owner },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }

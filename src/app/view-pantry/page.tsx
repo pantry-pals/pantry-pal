@@ -17,6 +17,10 @@ const ViewPantryPage = async () => {
 
   const produce = await prisma.produce.findMany({
     where: { owner },
+    include: {
+      location: { select: { id: true, name: true } },
+      storage: { select: { id: true, name: true } },
+    },
     orderBy: [{ name: 'asc' }],
   });
 

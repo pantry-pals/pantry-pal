@@ -9,15 +9,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing owner' }, { status: 400 });
   }
 
-  const locations = await prisma.produce.findMany({
+  const locations = await prisma.location.findMany({
     where: { owner },
-    distinct: ['location'],
-    select: { location: true },
+    select: { name: true },
+    orderBy: { name: 'asc' },
   });
 
-  const filtered = locations
-    .map((l) => l.location)
-    .filter((l): l is string => !!l && l.trim().length > 0);
-
-  return NextResponse.json(filtered);
+  return NextResponse.json(locations.map((l) => l.name));
 }

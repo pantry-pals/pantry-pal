@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { Produce } from '@prisma/client';
+import type { ProduceRelations } from '@/types/ProduceRelations';
 import SearchBarControls from './SearchBarControls';
 import ProduceTable from './ProduceTable';
 import ProduceCardGrid from './ProduceCardGrid';
@@ -25,7 +25,7 @@ export type SortType =
   | 'qty-desc'
   | 'qty-asc';
 
-function sortProduce(arr: Produce[], sort: string): Produce[] {
+function sortProduce(arr: ProduceRelations[], sort: string): ProduceRelations[] {
   const sorted = [...arr];
   switch (sort) {
     case 'name-asc':
@@ -49,7 +49,7 @@ function sortProduce(arr: Produce[], sort: string): Produce[] {
   return sorted;
 }
 
-const ProduceListWithGrouping: React.FC<{ initialProduce: Produce[] }> = ({ initialProduce }) => {
+const ProduceListWithGrouping: React.FC<{ initialProduce: ProduceRelations[] }> = ({ initialProduce }) => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('');
   const [groupByStorage, setGroupByStorage] = useState(false);
@@ -62,22 +62,23 @@ const ProduceListWithGrouping: React.FC<{ initialProduce: Produce[] }> = ({ init
       arr = arr.filter(
         (p) => p.name.toLowerCase().includes(q)
           || (p.type?.toLowerCase().includes(q) ?? false)
-          || (p.storage?.toLowerCase().includes(q) ?? false),
+          || (p.storage?.name?.toLowerCase().includes(q) ?? false)
+          || (p.location?.name?.toLowerCase().includes(q) ?? false),
       );
     }
     return sortProduce(arr, sort);
   }, [initialProduce, search, sort]);
 
   const grouped = useMemo(() => {
-    if (!groupByStorage) return [] as Array<[string, Produce[]]>;
-    const map = new Map<string, Produce[]>();
+    if (!groupByStorage) return [] as Array<[string, ProduceRelations[]]>;
+    const map = new Map<string, ProduceRelations[]>();
     for (const item of filteredSorted) {
-      const key = item.storage?.trim().toLowerCase() || 'unknown';
+      const key = item.storage?.name?.trim().toLowerCase() || 'unknown';
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(item);
     }
 
-    const sections: Array<[string, Produce[]]> = [];
+    const sections: Array<[string, ProduceRelations[]]> = [];
     for (const storage of STORAGE_ORDER) {
       if (map.has(storage)) {
         sections.push([storage, sortProduce(map.get(storage)!, sort)]);

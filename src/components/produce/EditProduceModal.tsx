@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Col,
@@ -19,6 +19,25 @@ import type { InferType } from 'yup';
 import { useRouter } from 'next/navigation';
 import ImagePickerModal from '@/components/images/ImagePickerModal';
 import '../../styles/buttons.css';
+import { ProduceRelations } from '@/types/ProduceRelations';
+
+function mapProduceToFormValues(produce: ProduceRelations) {
+  return {
+    id: produce.id,
+    name: produce.name,
+    type: produce.type,
+    quantity: produce.quantity,
+    unit: produce.unit,
+    owner: produce.owner,
+    image: produce.image ?? '',
+    restockThreshold: produce.restockThreshold ?? null,
+    expiration: produce.expiration
+      ? produce.expiration.toISOString().split('T')[0]
+      : null,
+    location: produce.location?.name || '',
+    storage: produce.storage?.name || '',
+  };
+}
 
 type ProduceValues =
   Omit<InferType<typeof EditProduceSchema>, 'expiration'> & {
@@ -28,19 +47,7 @@ type ProduceValues =
 interface EditProduceModalProps {
   show: boolean;
   onHide: () => void;
-  produce: {
-    id: number;
-    name: string;
-    type: string;
-    location: string;
-    storage: string;
-    quantity: number;
-    unit: string;
-    expiration: Date | null;
-    owner: string;
-    image?: string | null;
-    restockThreshold?: number | null;
-  };
+  produce: ProduceRelations & { restockThreshold?: number | null };
 }
 
 export default function EditProduceModal({ show, onHide, produce }: EditProduceModalProps) {
@@ -49,8 +56,8 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
   const [locations, setLocations] = useState<string[]>([]);
   const [storageOptions, setStorageOptions] = useState<string[]>([]);
 
-  const [selectedLocation, setSelectedLocation] = useState(produce.location || '');
-  const [selectedStorage, setSelectedStorage] = useState(produce.storage || '');
+  const [selectedLocation, setSelectedLocation] = useState(produce.location?.name || '');
+  const [selectedStorage, setSelectedStorage] = useState(produce.storage?.name || '');
 
   const unitOptions = useMemo(
     () => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'],
@@ -75,49 +82,53 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(EditProduceSchema) as any,
-    defaultValues: {
-      ...produce,
-      expiration: produce.expiration
-        ? produce.expiration.toISOString().split('T')[0]
-        : null,
-      image: produce.image ?? '',
-      restockThreshold: produce.restockThreshold ?? null,
-    },
+    defaultValues: { ...mapProduceToFormValues(produce) },
   });
 
   const imageVal = watch('image') || '';
 
-  useEffect(() => {
-    if (show) {
-      reset({
-        ...produce,
-        expiration: produce.expiration
-          ? produce.expiration.toISOString().split('T')[0]
-          : '',
-        image: produce.image ?? '',
-        restockThreshold: produce.restockThreshold ?? null,
-      });
-      setSelectedLocation(produce.location);
-      setSelectedStorage(produce.storage);
-      setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
-    }
-
-    const fetchLocations = async () => {
-      const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setLocations(data);
-    };
-    fetchLocations();
-
-    const fetchStorage = async () => {
-      const res = await fetch(`/api/produce/${produce.id}/storage?owner=${produce.owner}`);
+  const fetchStorage = useCallback(
+    async (location: string) => {
+      if (!produce?.owner || !location) return;
+      const res = await fetch(
+        `/api/produce/${produce.id}/storage?owner=${produce.owner}&location=${encodeURIComponent(location)}`,
+      );
       if (!res.ok) return;
       const data = await res.json();
       setStorageOptions(data);
-    };
-    fetchStorage();
-  }, [show, produce, reset, unitOptions]);
+
+      // Optional: auto-select if only one storage is found
+      if (data.length === 1) {
+        setSelectedStorage(data[0]);
+        setValue('storage', data[0]);
+      }
+    },
+    [produce?.id, produce?.owner, setValue],
+  );
+
+  useEffect(() => {
+    if (show) {
+      reset(mapProduceToFormValues(produce));
+      setSelectedLocation(produce.location?.name || '');
+      setSelectedStorage(produce.storage?.name || '');
+
+      setUnitChoice(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
+
+      // Always fetch available locations
+      const fetchLocations = async () => {
+        const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setLocations(data);
+      };
+      fetchLocations();
+
+      // Fetch storages for current location (when editing)
+      if (produce.location?.name) {
+        fetchStorage(produce.location.name);
+      }
+    }
+  }, [show, produce, reset, unitOptions, fetchStorage]);
 
   const handleClose = () => {
     reset();
@@ -193,14 +204,16 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                   value={selectedLocation}
                   required
                   className={`${errors.location ? 'is-invalid' : ''}`}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const { value } = e.target;
                     setSelectedLocation(value);
+                    setSelectedStorage('');
                     if (value === 'Add Location') {
-                      // Clear the field so input starts empty
                       setValue('location', '');
+                      setStorageOptions([]);
                     } else {
                       setValue('location', value);
+                      await fetchStorage(value); // fetch storages for selected location
                     }
                   }}
                 >
