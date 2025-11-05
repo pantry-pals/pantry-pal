@@ -120,13 +120,13 @@ export default function SignInPage() {
                   quantity: String(firstItem.quantity || 1),
                   unit: firstItem.unit || '',
                 });
-                window.location.href = `/shopping-list/view?${params.toString()}`;
+                window.location.href = `/shopping-list?${params.toString()}`;
               } else {
-                window.location.href = '/shopping-list/view';
+                window.location.href = '/shopping-list';
               }
             } else if (value === 'go') {
               // redirect after the user clicks "add to shopping list"
-              window.location.href = result.url || 'view-pantry';
+              window.location.href = '/view-pantry';
             } else {
               // Do nothing, user chose "Remind me later"
             }
