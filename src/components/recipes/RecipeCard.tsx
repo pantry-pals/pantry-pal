@@ -1,6 +1,7 @@
 'use client';
 
 /* eslint-disable react/require-default-props */
+/* eslint-disable no-alert */
 
 import Link from 'next/link';
 import { Card, Image, Badge, Button } from 'react-bootstrap';
