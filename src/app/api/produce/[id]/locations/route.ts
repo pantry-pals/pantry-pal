@@ -20,36 +20,42 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const name = searchParams.get('name');
-    const owner = searchParams.get('owner');
+    const url = new URL(request.url);
+    const name = url.searchParams.get('name')?.trim().toLowerCase();
+    const owner = url.searchParams.get('owner')?.trim().toLowerCase();
 
     if (!name || !owner) {
       return NextResponse.json({ error: 'Missing name or owner' }, { status: 400 });
     }
 
-    // Delete related records first (cascade)
-    await (prisma as any).produce.deleteMany({
-      where: { location: { is: { name, owner } } },
-    });
-
-    await (prisma as any).storage.deleteMany({
-      where: { location: { is: { name, owner } } },
-    });
-
-    // Finally delete the location
-    await (prisma as any).location.delete({
-      where: {
-        name_owner: {
-          name,
-          owner,
+    await prisma.$transaction([
+      prisma.produce.deleteMany({
+        where: {
+          location: {
+            name: { equals: name, mode: 'insensitive' },
+            owner: { equals: owner, mode: 'insensitive' },
+          },
         },
-      },
-    });
+      }),
+      prisma.storage.deleteMany({
+        where: {
+          location: {
+            name: { equals: name, mode: 'insensitive' },
+            owner: { equals: owner, mode: 'insensitive' },
+          },
+        },
+      }),
+      prisma.location.deleteMany({
+        where: {
+          name: { equals: name, mode: 'insensitive' },
+          owner: { equals: owner, mode: 'insensitive' },
+        },
+      }),
+    ]);
 
-    return NextResponse.json({ success: true });
-  } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ error: 'Failed to delete pantry' }, { status: 500 });
+    return NextResponse.json({ message: 'Location and related data deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting location:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

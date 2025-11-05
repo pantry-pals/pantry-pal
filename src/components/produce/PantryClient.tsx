@@ -39,7 +39,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
     if (!confirmLoc) return;
 
     try {
-      const url = `/api/locations?name=${encodeURIComponent(confirmLoc)}&owner=${encodeURIComponent(owner)}`;
+      const url = `/api/produce/0/locations?name=${encodeURIComponent(confirmLoc)}&owner=${encodeURIComponent(owner)}`;
       const res = await fetch(url, { method: 'DELETE' });
 
       if (!res.ok) {
