@@ -3,7 +3,9 @@
 /* eslint-disable react/require-default-props */
 
 import Link from 'next/link';
-import { Card, Image, Badge } from 'react-bootstrap';
+import { Card, Image, Badge, Button } from 'react-bootstrap';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export type RecipeCardProps = {
   id: number;
@@ -25,6 +27,29 @@ export default function RecipeCard({
   ingredients,
 }: RecipeCardProps) {
   const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/recipes/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Failed to delete recipe');
+
+      // Refresh page or revalidate the list
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong while deleting the recipe.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card className="recipe-card h-100 d-flex flex-column shadow-sm">
@@ -68,10 +93,19 @@ export default function RecipeCard({
           )}
         </div>
 
-        {/* Use Link styled as a button to avoid the as={Link} typing issue */}
-        <Link href={`/recipes/${id}`} className="btn btn-dark mt-3 w-100">
-          View Recipe
-        </Link>
+        <div className="mt-3 d-flex flex-column gap-2">
+          <Link href={`/recipes/${id}`} className="btn btn-dark w-100">
+            View Recipe
+          </Link>
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            disabled={loading}
+            className="w-100"
+          >
+            {loading ? 'Deleting…' : 'Delete'}
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );
