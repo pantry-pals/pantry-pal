@@ -102,7 +102,8 @@ footer a {
 /* Hover state */
 .pantry-controls .nav-link:hover,
 .pantry-controls .navbar-brand:hover {
-  color: #d4af37 !important;
+  color: var(--brunswick-green) !important;
+  background-color: var(--sage) !important;
 }
 
 /* Active state (links + brand on home) */
