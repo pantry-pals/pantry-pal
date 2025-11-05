@@ -125,7 +125,10 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
           {' '}
           <Link
             href={`/recipes/${availableRecipes[0].id}`}
-            className="text-success text-decoration-none fw-semibold"
+            className="text-success text-decoration-none"
+            style={{ transition: 'font-weight 0.2s ease' }}
+            onMouseEnter={(e) => (e.currentTarget.style.fontWeight = '900')}
+            onMouseLeave={(e) => (e.currentTarget.style.fontWeight = '600')}
           >
             {availableRecipes[0].title}
           </Link>
@@ -139,7 +142,10 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
           {' '}
           <Link
             href={`/recipes/${availableRecipes[0].id}`}
-            className="text-success text-decoration-none fw-semibold"
+            className="text-success text-decoration-none"
+            style={{ transition: 'font-weight 0.2s ease' }}
+            onMouseEnter={(e) => (e.currentTarget.style.fontWeight = '900')}
+            onMouseLeave={(e) => (e.currentTarget.style.fontWeight = '600')}
           >
             {availableRecipes[0].title}
           </Link>
@@ -148,7 +154,10 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
           {' '}
           <Link
             href={`/recipes/${availableRecipes[1].id}`}
-            className="text-success text-decoration-none fw-semibold"
+            className="text-success text-decoration-none"
+            style={{ transition: 'font-weight 0.2s ease' }}
+            onMouseEnter={(e) => (e.currentTarget.style.fontWeight = '900')}
+            onMouseLeave={(e) => (e.currentTarget.style.fontWeight = '600')}
           >
             {availableRecipes[1].title}
           </Link>
@@ -162,7 +171,10 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
         {' '}
         <Link
           href={`/recipes/${availableRecipes[0].id}`}
-          className="text-success text-decoration-none fw-semibold"
+          className="text-success text-decoration-none"
+          style={{ transition: 'font-weight 0.2s ease' }}
+          onMouseEnter={(e) => (e.currentTarget.style.fontWeight = '900')}
+          onMouseLeave={(e) => (e.currentTarget.style.fontWeight = '600')}
         >
           {availableRecipes[0].title}
         </Link>
@@ -170,7 +182,10 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
         {' '}
         <Link
           href={`/recipes/${availableRecipes[1].id}`}
-          className="text-success text-decoration-none fw-semibold"
+          className="text-success text-decoration-none"
+          style={{ transition: 'font-weight 0.2s ease' }}
+          onMouseEnter={(e) => (e.currentTarget.style.fontWeight = '900')}
+          onMouseLeave={(e) => (e.currentTarget.style.fontWeight = '600')}
         >
           {availableRecipes[1].title}
         </Link>
@@ -243,40 +258,44 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
 
           {/* Recipes Available */}
           <Col>
-            <Card className="h-100 border-start border-4 border-success shadow-sm">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <div className="d-flex align-items-center">
-                    <Search className="me-2 text-secondary" />
-                    <Card.Subtitle className="fw-semibold text-dark">Recipes Available</Card.Subtitle>
+            <Link href="/recipes" className="text-danger text-decoration-none fw-semibold">
+              <Card className="h-100 border-start border-4 border-success shadow-sm">
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex align-items-center">
+                      <Search className="me-2 text-secondary" />
+                      <Card.Subtitle className="fw-semibold text-dark">Recipes Available</Card.Subtitle>
+                    </div>
+                    <Badge bg="success">
+                      {recipeCount}
+                      {' '}
+                      new
+                    </Badge>
                   </div>
-                  <Badge bg="success">
-                    {recipeCount}
-                    {' '}
-                    new
-                  </Badge>
-                </div>
-                <Card.Text className="text-muted small mb-0">{formatRecipesText()}</Card.Text>
-              </Card.Body>
-            </Card>
+                  <Card.Text className="text-muted small mb-0">{formatRecipesText()}</Card.Text>
+                </Card.Body>
+              </Card>
+            </Link>
           </Col>
 
           {/* Shopping List Due */}
           <Col>
-            <Card className="h-100 border-start border-4 border-info shadow-sm">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <div className="d-flex align-items-center">
-                    <Cart className="me-2 text-secondary" />
-                    <Card.Subtitle className="fw-semibold text-dark">Shopping List Due</Card.Subtitle>
+            <Link href="/shopping-list" className="text-danger text-decoration-none fw-semibold">
+              <Card className="h-100 border-start border-4 border-info shadow-sm">
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex align-items-center">
+                      <Cart className="me-2 text-secondary" />
+                      <Card.Subtitle className="fw-semibold text-dark">Shopping List Due</Card.Subtitle>
+                    </div>
+                    <Badge bg="info" text="dark">
+                      {nextShoppingDate || 'N/A'}
+                    </Badge>
                   </div>
-                  <Badge bg="info" text="dark">
-                    {nextShoppingDate || 'N/A'}
-                  </Badge>
-                </div>
-                <Card.Text className="text-muted small mb-0">{formatShoppingText()}</Card.Text>
-              </Card.Body>
-            </Card>
+                  <Card.Text className="text-muted small mb-0">{formatShoppingText()}</Card.Text>
+                </Card.Body>
+              </Card>
+            </Link>  
           </Col>
         </Row>
       </Card.Body>
