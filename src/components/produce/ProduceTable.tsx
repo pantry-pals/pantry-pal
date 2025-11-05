@@ -1,11 +1,11 @@
 'use client';
 
 import { Table } from 'react-bootstrap';
-import { Produce } from '@prisma/client';
+import type { ProduceRelations } from '@/types/ProduceRelations';
 import { useEffect, useState } from 'react';
 import ProduceItem from './ProduceItem';
 
-const ProduceTable = ({ rows }: { rows: Produce[] }) => {
+const ProduceTable = ({ rows }: { rows: ProduceRelations[] }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {

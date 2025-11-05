@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { Produce } from '@prisma/client';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { PencilSquare, Trash } from 'react-bootstrap-icons';
+import { ProduceRelations } from '@/types/ProduceRelations';
 import EditProduceModal from './EditProduceModal';
 import '../../styles/buttons.css';
 import DeleteProduceModal from './DeleteProduceModal';
@@ -20,7 +20,7 @@ const ProduceItem = ({
   owner,
   image,
   restockThreshold = 1,
-}: Produce & { restockThreshold?: number }) => {
+}: ProduceRelations & { restockThreshold?: number }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -32,7 +32,8 @@ const ProduceItem = ({
         <td>{name}</td>
         <td>{type}</td>
         <td>
-          {storage} at {location}
+          {(typeof storage === 'object' ? storage?.name : storage) || 'N/A'} at{' '}
+          {(typeof location === 'object' ? location?.name : location) || 'N/A'}
         </td>
         <td>
           {quantity.toString()}

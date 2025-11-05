@@ -14,7 +14,8 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
   const locations = useMemo(() => {
     const set = new Set<string>();
     for (const item of initialProduce) {
-      if (item.location) set.add(item.location.trim().toLowerCase());
+      const locName = typeof item.location === 'object' ? item.location?.name : item.location;
+      if (locName) set.add(locName.trim().toLowerCase());
     }
     return Array.from(set).sort();
   }, [initialProduce]);
@@ -22,7 +23,10 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
   // Filter produce based on selected location
   const filteredProduce = useMemo(() => {
     if (activeLocation === 'all') return initialProduce;
-    return initialProduce.filter((p) => p.location?.trim().toLowerCase() === activeLocation);
+    return initialProduce.filter((p) => {
+      const locName = typeof p.location === 'object' ? p.location?.name : p.location;
+      return locName?.trim().toLowerCase() === activeLocation;
+    });
   }, [initialProduce, activeLocation]);
 
   return (

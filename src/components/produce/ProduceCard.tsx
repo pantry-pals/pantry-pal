@@ -2,13 +2,13 @@
 
 import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
 import Link from 'next/link';
-import type { Produce } from '@prisma/client';
+import type { ProduceRelations } from '@/types/ProduceRelations';
 import { useState } from 'react';
 import { PencilSquare, Trash } from 'react-bootstrap-icons';
 import EditProduceModal from './EditProduceModal';
 import DeleteProduceModal from './DeleteProduceModal';
 
-type Props = { produce: Produce };
+type Props = { produce: ProduceRelations };
 
 const formatDate = (d?: Date | string | null) => {
   if (!d) return 'Not Available';
@@ -46,11 +46,11 @@ export default function ProduceCard({ produce }: Props) {
         <ListGroup variant="flush">
           <ListGroup.Item>
             <strong>Location: </strong>
-            {produce.storage || 'Not Available'}
+            {produce.storage?.name || 'Not Available'}
             {' '}
             at
             {' '}
-            {produce.location || 'Not Available'}
+            {produce.location?.name || 'Not Available'}
           </ListGroup.Item>
           <ListGroup.Item>
             <strong>Quantity:</strong>

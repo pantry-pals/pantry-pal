@@ -1,10 +1,10 @@
 'use client';
 
 import { Row, Col } from 'react-bootstrap';
-import { Produce } from '@prisma/client';
+import type { ProduceRelations } from '@/types/ProduceRelations';
 import ProduceCard from './ProduceCard';
 
-const ProduceCardGrid = ({ rows }: { rows: Produce[] }) => {
+const ProduceCardGrid = ({ rows }: { rows: ProduceRelations[] }) => {
   if (!rows.length) return <div className="text-center">No items found</div>;
 
   return (

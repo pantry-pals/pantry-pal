@@ -7,26 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Stuff {
-  id        Int       @id @default(autoincrement())
-  name      String
-  quantity  Int
-  condition Condition @default(good)
-  owner     String
-
-  @@map("stuff")
-}
-
 enum Role {
   USER
   ADMIN
-}
-
-enum Condition {
-  excellent
-  good
-  fair
-  poor
 }
 
 model User {
@@ -70,18 +53,44 @@ model Produce {
   id               Int       @id @default(autoincrement())
   name             String
   type             String
-  location         String
-  storage          String
+  locationId       Int
+  storageId        Int
+  location         Location @relation(fields: [locationId], references: [id])
+  storage          Storage  @relation(fields: [storageId], references: [id])
   quantity         Float
   unit             String
   expiration       DateTime?
   owner            String
   image            String?
   restockThreshold Float?
-  restockTrigger    String   @default("empty")
-  customThreshold   Float?
+  restockTrigger   String   @default("empty")
+  customThreshold  Float?
 
   @@unique([name, owner])
+}
+
+model Location {
+  id         Int        @id @default(autoincrement())
+  name       String
+  owner      String
+  storages   Storage[]
+  produces   Produce[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([name, owner])
+}
+
+model Storage {
+  id          Int        @id @default(autoincrement())
+  name        String
+  locationId  Int
+  location    Location   @relation(fields: [locationId], references: [id])
+  produces    Produce[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([name, locationId])
 }
 
 model ShoppingList {
