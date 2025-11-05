@@ -35,5 +35,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: npm run test-acceptance-ci
 
