@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Col, Container, Row, Nav } from 'react-bootstrap';
+import { Button, Col, Container, Row, Nav, Modal, Toast } from 'react-bootstrap';
 import { useMemo, useState } from 'react';
 import AddProduceModal from './AddProduceModal';
 import ProduceListWithGrouping from './ProduceListWithGrouping';
@@ -9,6 +9,8 @@ import '../../styles/buttons.css';
 function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner: string }) {
   const [showModal, setShowModal] = useState(false);
   const [activeLocation, setActiveLocation] = useState<string>('all');
+  const [confirmLoc, setConfirmLoc] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Derive unique locations (sorted)
   const locations = useMemo(() => {
@@ -28,6 +30,34 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
       return locName?.trim().toLowerCase() === activeLocation;
     });
   }, [initialProduce, activeLocation]);
+
+  const handleDeleteLocation = async (loc: string) => {
+    setConfirmLoc(loc);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmLoc) return;
+
+    try {
+      const url = `/api/locations?name=${encodeURIComponent(confirmLoc)}&owner=${encodeURIComponent(owner)}`;
+      const res = await fetch(url, { method: 'DELETE' });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setToastMessage(`Failed to delete location: ${errorData.error || res.statusText}`);
+        setConfirmLoc(null);
+        return;
+      }
+
+      // Reload after success
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setToastMessage('An error occurred while deleting the location.');
+    } finally {
+      setConfirmLoc(null);
+    }
+  };
 
   return (
     <main>
@@ -55,12 +85,18 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
               </Nav.Item>
               {locations.map((loc) => (
                 <Nav.Item key={loc}>
-                  <Nav.Link
-                    eventKey={loc}
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {loc}
-                  </Nav.Link>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Nav.Link eventKey={loc} style={{ textTransform: 'capitalize' }}>
+                      {loc}
+                    </Nav.Link>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDeleteLocation(loc)}
+                    >
+                      🗑
+                    </Button>
+                  </div>
                 </Nav.Item>
               ))}
             </Nav>
@@ -75,7 +111,7 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
         </Row>
       </Container>
 
-      {/* Modal */}
+      {/* Add Item Modal */}
       <AddProduceModal
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -93,6 +129,39 @@ function PantryClient({ initialProduce, owner }: { initialProduce: any[]; owner:
           restockThreshold: 0,
         }}
       />
+
+      {/* Confirm Delete Modal */}
+      <Modal show={!!confirmLoc} onHide={() => setConfirmLoc(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Location</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete
+          {' '}
+          <strong>{confirmLoc}</strong>
+          ? This will remove all related items.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setConfirmLoc(null)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Toast Notification */}
+      <Toast
+        show={!!toastMessage}
+        onClose={() => setToastMessage(null)}
+        delay={4000}
+        autohide
+        bg="danger"
+        style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}
+      >
+        <Toast.Body>{toastMessage}</Toast.Body>
+      </Toast>
     </main>
   );
 }
