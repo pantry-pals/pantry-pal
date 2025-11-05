@@ -89,15 +89,17 @@ export default function SignInPage() {
         const data = await res.json();
         if (data.expiringItems?.length > 0) {
           const itemList = data.expiringItems
-            .map(
-              (item: any) => `${item.name} (expires on ${new Date(item.expiration).toLocaleDateString()})`,
-            )
+            .map((item: any) => `${item.name} (expires on ${new Date(item.expiration).toLocaleDateString()})`)
             .join('\n');
           swal({
             title: 'Expiring Items!',
             text: `You have the following items expiring soon:\n\n${itemList}`,
             icon: 'warning',
             buttons: {
+              add: {
+                text: 'Add to Shopping List',
+                value: 'add',
+              },
               go: {
                 text: 'Go to pantry',
                 value: 'go',
@@ -108,7 +110,19 @@ export default function SignInPage() {
               },
             },
           }).then((value) => {
-            if (value === 'go') {
+            if (value === 'add') {
+              const firstItem = data.expiringItems[0];
+              if (firstItem) {
+                const params = new URLSearchParams({
+                  addItem: firstItem.name,
+                  quantity: String(firstItem.quantity || 1),
+                  unit: firstItem.unit || '',
+                });
+                window.location.href = `/shopping-list/view?${params.toString()}`;
+              } else {
+                window.location.href = '/shopping-list/view';
+              }
+            } else if (value === 'go') {
               // redirect after the user clicks "add to shopping list"
               window.location.href = result.url || 'view-pantry';
             } else {
@@ -164,19 +178,11 @@ export default function SignInPage() {
       {!showVerification && (
         <div className={styles.formWrapper}>
           <h1 className={styles.title}>Sign In</h1>
-          <p className={styles.descriptionCentered}>
-            Enter your email and password to access your Pantry Pal account.
-          </p>
+          <p className={styles.descriptionCentered}>Enter your email and password to access your Pantry Pal account.</p>
           <form onSubmit={handleSubmit}>
             <div className={styles.inputGroup}>
               <label className={styles.label}>Email</label>
-              <input
-                type="email"
-                name="email"
-                required
-                className={styles.input}
-                placeholder="you@example.com"
-              />
+              <input type="email" name="email" required className={styles.input} placeholder="you@example.com" />
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.label}>
@@ -185,13 +191,7 @@ export default function SignInPage() {
                   <a href="/auth/forgot-password">Forgot password?</a>
                 </span>
               </label>
-              <input
-                type="password"
-                name="password"
-                required
-                className={styles.input}
-                placeholder="Password"
-              />
+              <input type="password" name="password" required className={styles.input} placeholder="Password" />
             </div>
             <button type="submit" className={styles.button} disabled={isSigningIn}>
               {isSigningIn ? <span className={styles.spinner} /> : 'Sign In'}
@@ -199,9 +199,10 @@ export default function SignInPage() {
             {error && <p className={styles.error}>{error}</p>}
           </form>
           <p className={styles.accountPromptWrapper}>
-            Don&apos;t have an account?
-            {' '}
-            <a href="/auth/signup" className={styles.logIn}>Sign up</a>
+            Don&apos;t have an account?{' '}
+            <a href="/auth/signup" className={styles.logIn}>
+              Sign up
+            </a>
           </p>
         </div>
       )}
@@ -210,10 +211,7 @@ export default function SignInPage() {
         <div className={styles.verificationPopup}>
           <h2>Verify Your Email</h2>
           <p>
-            We sent a code to
-            {' '}
-            <strong>{formData.email}</strong>
-            . Enter it below:
+            We sent a code to <strong>{formData.email}</strong>. Enter it below:
           </p>
           <input
             type="text"
@@ -225,12 +223,7 @@ export default function SignInPage() {
           {verificationError && <p className={styles.error}>{verificationError}</p>}
           {verificationSuccess && <p className={styles.success}>{verificationSuccess}</p>}
 
-          <button
-            type="button"
-            className={styles.button}
-            onClick={handleVerifyCode}
-            disabled={isSubmitting}
-          >
+          <button type="button" className={styles.button} onClick={handleVerifyCode} disabled={isSubmitting}>
             {isSubmitting ? <span className={styles.spinner} /> : 'Verify Code'}
           </button>
 
