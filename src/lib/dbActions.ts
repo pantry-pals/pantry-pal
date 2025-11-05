@@ -247,6 +247,24 @@ export async function getUserProduceByEmail(owner: string) {
 }
 
 /**
+ * Adds a new location.
+ */
+export async function addLocation(location: { name: string; owner: string }) {
+  // Normalize input (trim whitespace)
+  const name = location.name.trim();
+  const owner = location.owner.trim();
+
+  // Create the location if it doesn’t already exist
+  const newLocation = await prisma.location.upsert({
+    where: { name_owner: { name, owner } },
+    update: {}, // do nothing if exists
+    create: { name, owner },
+  });
+
+  return newLocation;
+}
+
+/**
  * Adds a new shopping list.
  */
 export async function addShoppingList(list: { name: string; owner: string }) {
