@@ -71,7 +71,7 @@ async function main() {
         storageId: storage.id,
         quantity: produce.quantity,
         unit: produce.unit,
-        expiration: new Date(produce.expiration),
+        expiration: produce.expiration ? new Date(produce.expiration) : null,
         owner: produce.owner,
         image: produce.image ?? null,
       },
