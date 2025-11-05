@@ -14,26 +14,54 @@ type Props = {
 export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
+  const [recipeList, setRecipeList] = useState(recipes);
 
   const pantryNames = useMemo(
     () => new Set(produce.map((p) => p.name.toLowerCase())),
     [produce],
   );
 
+  // async delete handler
+  const handleDelete = async (id: number) => {
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm('Are you sure you want to delete this recipe?');
+      if (!confirmed) return;
+
+      try {
+        const res = await fetch(`/api/recipes/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          alert(error.error || 'Failed to delete recipe.');
+          return;
+        }
+
+        setRecipeList((prev) => prev.filter((r) => r.id !== id));
+      } catch (err) {
+        console.error(err);
+        alert('Something went wrong while deleting the recipe.');
+      }
+    }
+  };
+
   // Step 1: filter by what user can make
   const canMakeFiltered = useMemo(() => {
-    if (!showCanMake) return recipes;
-    return recipes.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
-  }, [recipes, showCanMake, pantryNames]);
+    if (!showCanMake) return recipeList;
+    return recipeList.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
+  }, [recipeList, showCanMake, pantryNames]);
 
   // Step 2: then filter by search query
   const filteredRecipes = useMemo(() => {
     const query = search.toLowerCase();
     if (!query) return canMakeFiltered;
-    return canMakeFiltered.filter((r) => r.title.toLowerCase().includes(query)
-      || r.cuisine.toLowerCase().includes(query)
-      || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
-      || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)));
+    return canMakeFiltered.filter(
+      (r) => r.title.toLowerCase().includes(query)
+        || r.cuisine.toLowerCase().includes(query)
+        || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
+        || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)),
+    );
   }, [canMakeFiltered, search]);
 
   return (
@@ -68,6 +96,8 @@ export default function RecipesClient({ recipes, produce, isAdmin }: Props) {
                 cuisine={r.cuisine}
                 dietary={r.dietary ?? []}
                 ingredients={r.ingredients ?? []}
+                isAdmin={isAdmin}
+                onDelete={handleDelete}
               />
             </Col>
           ))

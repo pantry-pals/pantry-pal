@@ -10,10 +10,22 @@ export type RecipeCardProps = {
   cuisine: string;
   dietary: string[];
   ingredients: string[];
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
 };
 
 export default function RecipeCard(props: RecipeCardProps) {
-  const { id, title, description, imageUrl, cuisine, dietary, ingredients } = props;
+  const {
+    id,
+    title,
+    description,
+    imageUrl,
+    cuisine,
+    dietary,
+    ingredients,
+    isAdmin = false,
+    onDelete,
+  } = props;
 
   return (
     <Card className="h-100 shadow-sm d-flex flex-column">
@@ -24,6 +36,27 @@ export default function RecipeCard(props: RecipeCardProps) {
           fluid
           style={{ objectFit: 'cover', height: '100%', width: '100%' }}
         />
+        {isAdmin && (
+          <Button
+            variant="danger"
+            size="sm"
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              borderRadius: '50%',
+              padding: '0.4rem 0.55rem',
+              lineHeight: 1,
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onDelete?.(id);
+            }}
+          >
+            ✕
+          </Button>
+        )}
       </div>
       <Card.Body className="d-flex flex-column flex-grow-1">
         <div className="flex-grow-1">
@@ -40,7 +73,9 @@ export default function RecipeCard(props: RecipeCardProps) {
               <>
                 <small className="text-muted">Ingredients:</small>
                 <br />
-                <small className="text-muted">{ingredients.join(', ')}</small>
+                <small className="text-muted">
+                  {ingredients.join(', ')}
+                </small>
               </>
             ) : null}
           </div>
@@ -56,4 +91,6 @@ export default function RecipeCard(props: RecipeCardProps) {
 RecipeCard.defaultProps = {
   description: null,
   imageUrl: null,
+  isAdmin: false,
+  onDelete: undefined,
 };
