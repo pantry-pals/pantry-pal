@@ -295,7 +295,7 @@ export default function QuickAlerts({ ownerEmail, recipes, produce }: QuickAlert
                   <Card.Text className="text-muted small mb-0">{formatShoppingText()}</Card.Text>
                 </Card.Body>
               </Card>
-            </Link>  
+            </Link> 
           </Col>
         </Row>
       </Card.Body>
