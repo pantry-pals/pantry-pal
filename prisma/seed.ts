@@ -113,7 +113,7 @@ async function main() {
 
   // Seed Recipe
   if ((config as any).defaultRecipes?.length) {
-    for (const r of (config as any).defaultRecipes as Array<{
+    type RecipeSeed = {
       title: string;
       cuisine: string;
       description?: string;
@@ -121,7 +121,14 @@ async function main() {
       dietary?: string[];
       ingredients?: string[];
       owner: string;
-    }>) {
+      instructions?: string;
+      servings?: number;
+      prepMinutes?: number;
+      cookMinutes?: number;
+      sourceUrl?: string;
+    };
+
+    for (const r of (config as any).defaultRecipes as RecipeSeed[]) {
       console.log(`  upsert recipe: ${r.title} (${r.owner})`);
       await prisma.recipe.upsert({
         where: { title_owner: { title: r.title, owner: r.owner } },
@@ -131,6 +138,12 @@ async function main() {
           imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
           dietary: r.dietary ?? [],
           ingredients: r.ingredients ?? [],
+          // NEW fields
+          instructions: r.instructions ?? null,
+          servings: r.servings ?? null,
+          prepMinutes: r.prepMinutes ?? null,
+          cookMinutes: r.cookMinutes ?? null,
+          sourceUrl: r.sourceUrl ?? null,
         },
         create: {
           title: r.title,
@@ -140,6 +153,12 @@ async function main() {
           dietary: r.dietary ?? [],
           ingredients: r.ingredients ?? [],
           owner: r.owner,
+          // NEW fields
+          instructions: r.instructions ?? null,
+          servings: r.servings ?? null,
+          prepMinutes: r.prepMinutes ?? null,
+          cookMinutes: r.cookMinutes ?? null,
+          sourceUrl: r.sourceUrl ?? null,
         },
       });
     }
