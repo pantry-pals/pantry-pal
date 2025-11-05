@@ -37,6 +37,9 @@ const NavBar: React.FC = () => {
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto justify-content-start">
+                <Nav.Link as={Link} id="dashboard-nav" href="/dashboard" active={isActive('/dashboard')}>
+                  Dashboard
+                </Nav.Link>
                 <Nav.Link as={Link} id="view-pantry-nav" href="/view-pantry" active={isActive('/view-pantry')}>
                   View Pantry
                 </Nav.Link>

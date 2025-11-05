@@ -1,3 +1,5 @@
+/* eslint-disable implicit-arrow-linebreak */
+
 'use client';
 
 import { useState } from 'react';
@@ -13,9 +15,11 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
   const [searchTerm, setSearchTerm] = useState('');
   const [show, setShow] = useState(false);
 
-  const filteredLists = initialShoppingLists.filter((list) => (
-    list.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ));
+  // eslint-disable-next-line max-len
+  const filteredLists = initialShoppingLists.filter(
+    (list) => list.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    // eslint-disable-next-line function-paren-newline
+  );
 
   return (
     <>

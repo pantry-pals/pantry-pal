@@ -3,68 +3,150 @@
     { "email": "admin@foo.com", "password": "changme", "role": "ADMIN", "verified": true, "verificationToken": "test-token-123" },
     { "email": "john@foo.com", "password": "changeme", "role": "USER", "verified": true, "verificationToken": "test-token-123" }
   ],
-
-  "defaultData": [
-    { "name": "Basket", "quantity": 3, "owner": "john@foo.com", "condition": "excellent" },
-    { "name": "Bicycle", "quantity": 2, "owner": "john@foo.com", "condition": "poor" },
-    { "name": "Banana", "quantity": 2, "owner": "admin@foo.com", "condition": "good" },
-    { "name": "Boogie Board", "quantity": 2, "owner": "admin@foo.com", "condition": "excellent" }
-  ],
-
+  
   "defaultProduce": [
     {
       "name": "Banana",
-      "type": "fruit",
-      "location": "pantry",
-      "quantity": 20.00,
-      "unit": "pieces",
-      "expiration": "2025-12-31T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "type": "Fruit",
+      "location": "House 1",
+      "storage": "Pantry",
+      "quantity": 20,
+      "unit": "pcs",
+      "expiration": "2025-12-31T10:00:00.000Z",
+      "owner": "john@foo.com",
+      "image": "/banana.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     },
     {
       "name": "Apple",
-      "type": "fruit",
-      "location": "pantry",
-      "quantity": 15.00,
+      "type": "Fruit",
+      "location": "House 1",
+      "storage": "Pantry",
+      "quantity": 15,
       "unit": "pieces",
-      "expiration": "2025-11-30T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "expiration": "2025-11-30T10:00:00.000Z",
+      "owner": "admin@foo.com",
+      "image": "/apple.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     },
     {
       "name": "Carrot",
-      "type": "vegetable",
-      "location": "fridge",
-      "quantity": 10.00,
+      "type": "Vegetable",
+      "location": "House 2",
+      "storage": "Fridge",
+      "quantity": 10,
       "unit": "pieces",
-      "expiration": "2025-10-15T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "expiration": "2025-10-15T10:00:00.000Z",
+      "owner": "admin@foo.com",
+      "image": "/carrot.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     },
     {
       "name": "Broccoli",
-      "type": "vegetable",
-      "location": "fridge",
-      "quantity": 8.00,
+      "type": "Vegetable",
+      "location": "House 2",
+      "storage": "Fridge",
+      "quantity": 8,
       "unit": "heads",
-      "expiration": "2025-10-10T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "expiration": "2025-10-10T10:00:00.000Z",
+      "owner": "john@foo.com",
+      "image": "/broccoli.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     },
     {
       "name": "Chicken Breast",
-      "type": "meat",
-      "location": "freezer",
-      "quantity": 5.00,
+      "type": "Meat",
+      "location": "House 1",
+      "storage": "Freezer",
+      "quantity": 5,
       "unit": "pieces",
-      "expiration": "2026-01-20T00:00:00.000Z",
-      "owner": "john@foo.com"
+      "expiration": "2026-01-20T10:00:00.000Z",
+      "owner": "john@foo.com",
+      "image": "/chickenbreast.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     },
     {
       "name": "Salmon Fillet",
-      "type": "meat",
-      "location": "freezer",
-      "quantity": 4.00,
+      "type": "Meat",
+      "location": "House 2",
+      "storage": "Freezer",
+      "quantity": 4,
       "unit": "fillets",
-      "expiration": "2026-02-15T00:00:00.000Z",
-      "owner": "admin@foo.com"
+      "expiration": "2026-02-15T10:00:00.000Z",
+      "owner": "admin@foo.com",
+      "image": "/salmonfillet.png",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
+    },
+    {
+      "name": "Bread",
+      "type": "Grain",
+      "location": "House 1",
+      "storage": "Pantry",
+      "quantity": 3,
+      "unit": "slices",
+      "expiration": null,
+      "owner": "admin@foo.com",
+      "image": "https://images.unsplash.com/photo-1598373182133-52452f7691ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MjIxOTB8MHwxfHNlYXJjaHwyfHxicmVhZHxlbnwxfHx8fDE3NjE2MDcyNzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
+    },
+    {
+      "name": "Butter",
+      "type": "Dairy",
+      "location": "House 1",
+      "storage": "Fridge",
+      "quantity": 2,
+      "unit": "sticks",
+      "expiration": null,
+      "owner": "admin@foo.com",
+      "image": "https://images.unsplash.com/photo-1587185717368-4d92f8de4ad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MjIxOTB8MHwxfHNlYXJjaHwxMXx8YnV0dGVyfGVufDF8fHx8MTc2MTYwNzI2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
+    },
+    {
+      "name": "Cheese",
+      "type": "Dairy",
+      "location": "House 1",
+      "storage": "Fridge",
+      "quantity": 10,
+      "unit": "squares",
+      "expiration": null,
+      "owner": "admin@foo.com",
+      "image": "https://images.unsplash.com/photo-1683314573422-649a3c6ad784?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MjIxOTB8MHwxfHNlYXJjaHwxfHxjaGVlc2V8ZW58MXx8fHwxNzYxNTcxMDA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
+    },
+    {
+      "name": "Salt",
+      "type": "Spice",
+      "location": "House 1",
+      "storage": "Pantry",
+      "quantity": 5,
+      "unit": "g",
+      "expiration": null,
+      "owner": "admin@foo.com",
+      "image": "https://images.unsplash.com/photo-1646722670581-974d084e0ec0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MjIxOTB8MHwxfHNlYXJjaHwyfHxzYWx0JTIwc2hha2VyfGVufDF8fHx8MTc2MTYwNzA4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
+    },
+    {
+      "name": "Chicken",
+      "type": "Meat",
+      "location": "House 1",
+      "storage": "Fridge",
+      "quantity": 3,
+      "unit": "breasts",
+      "expiration": "2025-11-06T10:00:00.000Z",
+      "owner": "admin@foo.com",
+      "image": "https://images.unsplash.com/photo-1587593810167-a84920ea0781?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MjIxOTB8MHwxfHNlYXJjaHwxMnx8Y2hpY2tlbiUyMGJyZWFzdHxlbnwxfHx8fDE3NjE2ODg2NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "restockThreshold": 1,
+      "restockTrigger": "empty"
     }
   ],
 
@@ -72,19 +154,39 @@
     {
       "name": "Weekly Groceries",
       "owner": "john@foo.com",
+      "createdAt": "2025-10-26T12:15:12.630Z",
       "items": [
-        { "produceName": "Banana", "quantity": 6,  "price": 0.5 },
-        { "produceName": "Apple", "quantity": 4, "price": 0.75 },
-        { "produceName": "Carrot", "quantity": 3, "price": 0.3 }
+        { "name": "Banana", "quantity": 6, "unit": "pieces", "price": 0.5 },
+        { "name": "Apple", "quantity": 4, "unit": "pieces", "price": 0.75 },
+        { "name": "Carrot", "quantity": 3, "unit": "pieces", "price": 0.3 }
       ]
     },
     {
       "name": "Party Prep",
       "owner": "john@foo.com",
+      "createdAt": "2025-10-26T12:15:16.346Z",
       "items": [
-        { "produceName": "Broccoli", "quantity": 2, "price": 1.2 },
-        { "produceName": "Chicken Breast", "quantity": 2, "price": 5.0 },
-        { "produceName": "Salmon Fillet", "quantity": 1, "price": 7.5 }
+        { "name": "Broccoli", "quantity": 2, "unit": "heads", "price": 1.2 },
+        { "name": "Chicken Breast", "quantity": 2, "unit": "pieces", "price": 5.0 },
+        { "name": "Salmon Fillet", "quantity": 1, "unit": "fillets", "price": 7.5 }
+      ]
+    },
+    {
+      "name": "Party Prep",
+      "owner": "admin@foo.com",
+      "createdAt": "2025-10-27T03:30:48.980Z",
+      "items": [
+        { "name": "Broccoli", "quantity": 2, "unit": "heads", "price": 1.2 },
+        { "name": "Chicken Breast", "quantity": 2, "unit": "pieces", "price": 5.0 },
+        { "name": "Salmon Fillet", "quantity": 1, "unit": "fillets", "price": 7.5 }
+      ]
+    },
+    {
+      "name": "Auto Restock",
+      "owner": "john@foo.com",
+      "createdAt": "2025-10-28T03:29:56.404Z",
+      "items": [
+        { "name": "test", "quantity": 1, "unit": "oz", "price": null }
       ]
     }
   ],

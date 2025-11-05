@@ -1,51 +1,9 @@
 'use server';
 
-import { Condition, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
-
-/**
- * Adds a new stuff to the database.
- */
-export async function addStuff(stuff: { name: string; quantity: number; owner: string; condition: string }) {
-  const inputCondition = stuff.condition.toLowerCase() as Condition;
-  const condition: Condition = ['poor', 'fair', 'good', 'excellent'].includes(inputCondition)
-    ? (inputCondition as Condition)
-    : 'good';
-
-  await prisma.stuff.create({
-    data: {
-      name: stuff.name,
-      quantity: stuff.quantity,
-      owner: stuff.owner,
-      condition,
-    },
-  });
-
-  redirect('/list');
-}
-
-/**
- * Edits an existing stuff.
- */
-export async function editStuff(stuff: Prisma.StuffUpdateInput & { id: number }) {
-  await prisma.stuff.update({
-    where: { id: stuff.id },
-    data: stuff,
-  });
-}
-
-/**
- * Deletes a stuff by id.
- */
-export async function deleteStuff(id: number) {
-  await prisma.stuff.delete({
-    where: { id },
-  });
-
-  redirect('/list');
-}
 
 /**
  * Creates a new user.
@@ -106,6 +64,7 @@ export async function addProduce(produce: {
   name: string;
   type: string;
   location: string;
+  storage: string;
   quantity: number;
   unit: string;
   expiration: string | Date | null;
@@ -113,47 +72,60 @@ export async function addProduce(produce: {
   image: string | null;
   restockThreshold?: number;
 }) {
+
+  // Upsert or find Location by name + owner
+  const location = await prisma.location.upsert({
+    where: { name_owner: { name: produce.location, owner: produce.owner } },
+    update: {},
+    create: { name: produce.location, owner: produce.owner },
+  });
+
+  // Upsert or find Storage by name + locationId
+  const storage = await prisma.storage.upsert({
+    where: { name_locationId: { name: produce.storage, locationId: location.id } },
+    update: {},
+    create: { name: produce.storage, locationId: location.id },
+  });
+
+  // Create or update Produce, linking by IDs
   const newProduce = await prisma.produce.upsert({
     where: { name_owner: { name: produce.name, owner: produce.owner } },
     update: {
-      name: produce.name,
       type: produce.type,
-      owner: produce.owner,
-      location: produce.location,
+      locationId: location.id,
+      storageId: storage.id,
       quantity: produce.quantity,
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
-      image: produce.image ? produce.image : null,
+      image: produce.image ?? null,
       restockThreshold: produce.restockThreshold ?? 0,
     },
     create: {
       name: produce.name,
       type: produce.type,
       owner: produce.owner,
-      location: produce.location,
+      locationId: location.id,
+      storageId: storage.id,
       quantity: produce.quantity,
       unit: produce.unit,
       expiration: produce.expiration ? new Date(produce.expiration) : null,
-      image: produce.image ? produce.image : null,
+      image: produce.image ?? null,
       restockThreshold: produce.restockThreshold ?? 0,
     },
   });
 
-  // AUTO-ADD to shopping list if below threshold
+  // Auto-add to shopping list if below threshold
   if (newProduce.restockThreshold !== null && newProduce.quantity <= newProduce.restockThreshold) {
     const shoppingList = await prisma.shoppingList.upsert({
       where: { name_owner: { name: 'Auto Restock', owner: newProduce.owner } },
       update: {},
-      create: {
-        name: 'Auto Restock',
-        owner: newProduce.owner,
-      },
+      create: { name: 'Auto Restock', owner: newProduce.owner },
     });
 
     const existingItem = await prisma.shoppingListItem.findFirst({
       where: {
         shoppingListId: shoppingList.id,
-        produceId: newProduce.id,
+        name: newProduce.name,
       },
     });
 
@@ -161,8 +133,10 @@ export async function addProduce(produce: {
       await prisma.shoppingListItem.create({
         data: {
           shoppingListId: shoppingList.id,
-          produceId: newProduce.id,
-          quantity: newProduce.restockThreshold, // or default quantity
+          name: newProduce.name,
+          quantity: newProduce.restockThreshold ?? 1,
+          unit: newProduce.unit,
+          price: null,
         },
       });
     }
@@ -174,7 +148,28 @@ export async function addProduce(produce: {
 /**
  * Edits an existing produce.
  */
-export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: number }) {
+export async function editProduce(
+  produce: Prisma.ProduceUpdateInput & {
+    id: number;
+    location: string;
+    storage: string;
+    owner: string;
+  },
+) {
+  // Find or create location and storage first
+  const location = await prisma.location.upsert({
+    where: { name_owner: { name: produce.location as string, owner: produce.owner as string } },
+    update: {},
+    create: { name: produce.location as string, owner: produce.owner as string },
+  });
+
+  const storage = await prisma.storage.upsert({
+    where: { name_locationId: { name: produce.storage as string, locationId: location.id } },
+    update: {},
+    create: { name: produce.storage as string, locationId: location.id },
+  });
+
+  // Handle expiration
   let expiration: Date | Prisma.DateTimeFieldUpdateOperationsInput | null | undefined = null;
   if (produce.expiration) {
     if (produce.expiration instanceof Date) {
@@ -186,12 +181,14 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     }
   }
 
+  // Update produce linking new IDs
   const updatedProduce = await prisma.produce.update({
     where: { id: produce.id },
     data: {
       name: produce.name,
       type: produce.type,
-      location: produce.location,
+      locationId: location.id,
+      storageId: storage.id,
       quantity: produce.quantity,
       unit: produce.unit,
       expiration,
@@ -206,16 +203,13 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
     const shoppingList = await prisma.shoppingList.upsert({
       where: { name_owner: { name: 'Auto Restock', owner: updatedProduce.owner } },
       update: {},
-      create: {
-        name: 'Auto Restock',
-        owner: updatedProduce.owner,
-      },
+      create: { name: 'Auto Restock', owner: updatedProduce.owner },
     });
 
     const existingItem = await prisma.shoppingListItem.findFirst({
       where: {
         shoppingListId: shoppingList.id,
-        produceId: updatedProduce.id,
+        name: updatedProduce.name,
       },
     });
 
@@ -223,8 +217,10 @@ export async function editProduce(produce: Prisma.ProduceUpdateInput & { id: num
       await prisma.shoppingListItem.create({
         data: {
           shoppingListId: shoppingList.id,
-          produceId: updatedProduce.id,
-          quantity: updatedProduce.restockThreshold,
+          name: updatedProduce.name,
+          quantity: updatedProduce.restockThreshold ?? 1,
+          unit: updatedProduce.unit,
+          price: null,
         },
       });
     }
@@ -302,15 +298,17 @@ export async function deleteShoppingList(id: number) {
  */
 export async function addShoppingListItem(item: {
   shoppingListId: number;
-  produceId: number;
+  name: string;
   quantity: number;
+  unit?: string;
   price?: number;
 }) {
   const newItem = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: item.shoppingListId,
-      produceId: item.produceId,
+      name: item.name,
       quantity: item.quantity,
+      unit: item.unit,
       price: item.price !== undefined ? new Prisma.Decimal(item.price) : undefined,
     },
   });

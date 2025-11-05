@@ -86,10 +86,66 @@ footer a {
   }
 }
 
-.addbutton {
-  background-color: var(--fern-green);
-  border: none;
-  &:hover {
-    background-color: var(--hunter-green);
-  }
+.required-field::after {
+    content: "*";
+    color: red;
+}
+
+/* Default nav/link colors (use classes, not IDs) */
+.pantry-controls .nav-link,
+.pantry-controls .navbar-brand,
+.pantry-controls .dropdown-toggle {
+  color: var(--brunswick-green) !important;
+  font-weight: 700 !important;
+}
+
+/* Hover state */
+.pantry-controls .nav-link:hover,
+.pantry-controls .navbar-brand:hover {
+  color: #d4af37 !important;
+}
+
+/* Active state (links + brand on home) */
+.pantry-controls .nav-link.active,
+.pantry-controls .nav-item.show .nav-link,
+.pantry-controls .nav-link.show,
+.pantry-controls .navbar-brand.active {
+  color: #d4af37 !important;
+  background-color: var(--hunter-green) !important;
+}
+
+.recipe-card {
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.12);
+}
+
+.recipe-card-img {
+  height: 220px;
+  object-fit: cover;
+}
+
+.recipe-title {
+  margin-bottom: .35rem;
+  font-weight: 600;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
