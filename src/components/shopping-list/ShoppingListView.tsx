@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
 import ShoppingListCard from './ShoppingListCard';
-import AddToShoppingListModal from '../AddToShoppingListModal';
+import AddToShoppingListModal from './AddToShoppingListModal';
 
 type ShoppingListViewProps = {
   initialShoppingLists: any[];
@@ -33,11 +33,18 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
           />
         </Col>
         <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
-          <Button onClick={() => setShow(true)} className="addbutton">+ Add Item to List</Button>
+          <Button
+            onClick={() => setShow(true)}
+            style={{ backgroundColor: 'var(--fern-green)' }}
+            className="btn-submit"
+          >
+            + Add Item to List
+          </Button>
           <AddToShoppingListModal
             show={show}
             onHide={() => setShow(false)}
             shoppingLists={initialShoppingLists}
+            sidePanel={false}
           />
         </Col>
       </Row>

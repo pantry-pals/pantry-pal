@@ -72,7 +72,6 @@ export async function addProduce(produce: {
   image: string | null;
   restockThreshold?: number;
 }) {
-
   // Upsert or find Location by name + owner
   const location = await prisma.location.upsert({
     where: { name_owner: { name: produce.location, owner: produce.owner } },
@@ -250,16 +249,15 @@ export async function getUserProduceByEmail(owner: string) {
 /**
  * Adds a new shopping list.
  */
-export async function addShoppingList(list: { name: string; owner: string }) {
-  const shoppingList = await prisma.shoppingList.create({
+export async function addShoppingList(data: { name: string; owner: string }) {
+  const list = await prisma.shoppingList.create({
     data: {
-      name: list.name,
-      owner: list.owner,
+      name: data.name,
+      owner: data.owner,
     },
   });
-
-  redirect('/shopping-list');
-  return shoppingList;
+  console.log('✅ Created shopping list:', list);
+  return list;
 }
 
 /**
@@ -296,24 +294,24 @@ export async function deleteShoppingList(id: number) {
 /**
  * Adds a new item to a shopping list.
  */
-export async function addShoppingListItem(item: {
-  shoppingListId: number;
+export async function addShoppingListItem(data: {
   name: string;
   quantity: number;
   unit?: string;
   price?: number;
+  shoppingListId: number;
 }) {
-  const newItem = await prisma.shoppingListItem.create({
+  const item = await prisma.shoppingListItem.create({
     data: {
-      shoppingListId: item.shoppingListId,
-      name: item.name,
-      quantity: item.quantity,
-      unit: item.unit,
-      price: item.price !== undefined ? new Prisma.Decimal(item.price) : undefined,
+      name: data.name,
+      quantity: data.quantity,
+      unit: data.unit || '',
+      price: data.price ?? null,
+      shoppingListId: data.shoppingListId,
     },
   });
-
-  return newItem;
+  console.log('✅ Added item to shopping list:', item);
+  return item;
 }
 
 /**

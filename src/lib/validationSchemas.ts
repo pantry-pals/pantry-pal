@@ -54,21 +54,19 @@ export const EditShoppingListSchema = Yup.object({
 });
 
 export const AddShoppingListItemSchema = Yup.object({
-  shoppingListId: Yup.number().required('Shopping list ID is required'),
   name: Yup.string().required('Item name is required'),
-  quantity: Yup.number().positive('Quantity must be positive').required('Quantity is required'),
-  unit: Yup.string().nullable().notRequired(),
+  quantity: Yup.number()
+    .typeError('Quantity must be a number')
+    .positive('Must be greater than 0')
+    .required('Quantity is required'),
+  unit: Yup.string().optional(),
   price: Yup.number()
-    .nullable()
-    .transform((curr, orig) => (orig === '' ? null : curr))
-    .min(0, 'Price cannot be negative')
-    .notRequired(),
-  restockTrigger: Yup.string().nullable().notRequired(),
-  customThreshold: Yup.number()
-    .nullable()
-    .transform((curr, orig) => (orig === '' ? null : curr))
-    .min(0, 'Threshold cannot be negative')
-    .notRequired(),
+    .typeError('Price must be a number')
+    .optional()
+    .transform((_, val) => (val !== '' ? Number(val) : null)),
+  shoppingListId: Yup.number()
+    .typeError('A shopping list must be selected')
+    .required('Shopping list is required'),
 });
 
 export const EditShoppingListItemSchema = Yup.object({
