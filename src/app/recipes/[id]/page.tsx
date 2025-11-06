@@ -13,72 +13,188 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   const recipe = await getRecipeById(id);
   if (!recipe) return notFound();
 
+  const displayOwner = recipe.owner?.includes('admin@foo.com') ? ['Pantry Pals Team'] : recipe.owner;
+
   return (
-    <main>
-      <Container className="py-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="m-0">{recipe.title}</h2>
+    <main style={{ backgroundColor: '#f8f9fa' }}>
+      <Container className="py-5">
+        {/* Header Section */}
+        <div className="mb-4">
           <Link href="/recipes" passHref>
-            <Button variant="outline-dark">← Back to Recipes</Button>
+            <Button
+              variant="link"
+              className="text-decoration-none p-0 mb-3"
+              style={{ color: '#6c757d', fontSize: '0.95rem' }}
+            >
+              ← Back to Recipes
+            </Button>
           </Link>
-        </div>
 
-        {recipe.cuisine && <div className="text-muted mb-2">{recipe.cuisine}</div>}
+          <h1 className="display-5 fw-bold mb-3" style={{ color: '#2c3e50' }}>
+            {recipe.title}
+          </h1>
 
-        {recipe.dietary?.length ? (
-          <div className="d-flex flex-wrap gap-2 mb-3">
-            {recipe.dietary.map((d) => (
-              <Badge bg="secondary" key={d}>{d}</Badge>
-            ))}
-          </div>
-        ) : null}
-
-        <Row className="align-items-start g-4">
-          <Col lg={6} className="order-2 order-lg-1">
-            {recipe.description && <p className="mb-4">{recipe.description}</p>}
-
-            <section className="mb-4">
-              <h5 className="mb-2">Ingredients</h5>
-              <ul>
-                {(recipe.ingredients ?? []).map((ing) => (
-                  <li key={ing}>{ing}</li>
-                ))}
-              </ul>
-            </section>
-
-            {recipe.instructions?.trim() && (
-              <section className="mb-4">
-                <h5 className="mb-2">Instructions</h5>
-                {/* preserve newlines from the DB */}
-                <p style={{ whiteSpace: 'pre-line' }}>{recipe.instructions}</p>
-              </section>
+          <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
+            {recipe.owner && (
+              <div className="d-flex align-items-center">
+                <span
+                  style={{
+                    fontSize: '0.9rem',
+                    color: '#6c757d',
+                    fontWeight: 500,
+                  }}
+                >
+                  {'By '}
+                  {displayOwner}
+                </span>
+              </div>
             )}
 
+            {recipe.cuisine && (
+              <Badge
+                bg="light"
+                text="dark"
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  padding: '0.4rem 0.8rem',
+                  border: '1px solid #dee2e6',
+                }}
+              >
+                {recipe.cuisine}
+              </Badge>
+            )}
+          </div>
+
+          {recipe.dietary?.length ? (
+            <div className="d-flex flex-wrap gap-2">
+              {recipe.dietary.map((d) => (
+                <Badge
+                  bg="success"
+                  key={d}
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    padding: '0.4rem 0.75rem',
+                  }}
+                >
+                  {d}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <Row className="g-4">
+          {/* Image Section */}
+          <Col lg={5}>
+            <div className="card border-0 shadow-sm" style={{ overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', paddingBottom: '75%' }}>
+                <Image
+                  src={recipe.imageUrl || 'https://placehold.co/800x600?text=Recipe'}
+                  alt={recipe.title}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    objectFit: 'cover',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Quick Info Card */}
             {(recipe.servings || recipe.prepMinutes || recipe.cookMinutes) && (
-              <section className="mb-4 text-muted">
-                {recipe.servings ? (
-                  <div>
-                    Servings:
-                    {recipe.servings}
-                  </div>
-                ) : null}
-                {recipe.prepMinutes ? (
-                  <div>
-                    Prep time:
-                    {recipe.prepMinutes}
-                    {' '}
-                    min
-                  </div>
-                ) : null}
-                {recipe.cookMinutes ? (
-                  <div>
-                    Cook time:
-                    {recipe.cookMinutes}
-                    {' '}
-                    min
-                  </div>
-                ) : null}
-              </section>
+              <div className="card border-0 shadow-sm mt-4">
+                <div className="card-body">
+                  <h6
+                    className="text-uppercase fw-bold mb-3"
+                    style={{
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.5px',
+                      color: '#495057',
+                    }}
+                  >
+                    Recipe Info
+                  </h6>
+                  <Row className="g-3">
+                    {recipe.servings && (
+                      <Col xs={4}>
+                        <div className="text-center">
+                          <div
+                            style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 'bold',
+                              color: '#28a745',
+                            }}
+                          >
+                            {recipe.servings}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#6c757d',
+                              marginTop: '0.25rem',
+                            }}
+                          >
+                            Servings
+                          </div>
+                        </div>
+                      </Col>
+                    )}
+                    {recipe.prepMinutes && (
+                      <Col xs={4}>
+                        <div className="text-center">
+                          <div
+                            style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 'bold',
+                              color: '#17a2b8',
+                            }}
+                          >
+                            {recipe.prepMinutes}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#6c757d',
+                              marginTop: '0.25rem',
+                            }}
+                          >
+                            Prep (min)
+                          </div>
+                        </div>
+                      </Col>
+                    )}
+                    {recipe.cookMinutes && (
+                      <Col xs={4}>
+                        <div className="text-center">
+                          <div
+                            style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 'bold',
+                              color: '#fd7e14',
+                            }}
+                          >
+                            {recipe.cookMinutes}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#6c757d',
+                              marginTop: '0.25rem',
+                            }}
+                          >
+                            Cook (min)
+                          </div>
+                        </div>
+                      </Col>
+                    )}
+                  </Row>
+                </div>
+              </div>
             )}
 
             {recipe.sourceUrl && (
@@ -87,22 +203,76 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                 href={recipe.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                variant="success"
+                variant="outline-success"
+                className="w-100 mt-3"
+                style={{ fontWeight: 500 }}
               >
-                View Original Recipe
+                View Original Recipe →
               </Button>
             )}
           </Col>
 
-          <Col lg={6} className="order-1 order-lg-2">
-            <div style={{ position: 'relative', width: '100%', height: 320 }}>
-              <Image
-                src={recipe.imageUrl || 'https://placehold.co/800x320?text=Recipe'}
-                alt={recipe.title}
-                fluid
-                style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: 8 }}
-              />
+          {/* Content Section */}
+          <Col lg={7}>
+            {recipe.description && (
+              <div className="card border-0 shadow-sm mb-4">
+                <div className="card-body">
+                  <p
+                    className="mb-0"
+                    style={{
+                      fontSize: '1.05rem',
+                      lineHeight: '1.7',
+                      color: '#495057',
+                    }}
+                  >
+                    {recipe.description}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Ingredients */}
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-body">
+                <h5 className="mb-3 fw-bold" style={{ color: '#2c3e50' }}>
+                  Ingredients
+                </h5>
+                <ul
+                  style={{
+                    paddingLeft: '1.25rem',
+                    lineHeight: '2',
+                    color: '#495057',
+                  }}
+                >
+                  {(recipe.ingredients ?? []).map((ing) => (
+                    <li key={ing} style={{ marginBottom: '0.5rem' }}>
+                      {ing}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
+
+            {/* Instructions */}
+            {recipe.instructions?.trim() && (
+              <div className="card border-0 shadow-sm">
+                <div className="card-body">
+                  <h5 className="mb-3 fw-bold" style={{ color: '#2c3e50' }}>
+                    Instructions
+                  </h5>
+                  <div
+                    style={{
+                      whiteSpace: 'pre-line',
+                      lineHeight: '1.8',
+                      color: '#495057',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    {recipe.instructions}
+                  </div>
+                </div>
+              </div>
+            )}
           </Col>
         </Row>
       </Container>
