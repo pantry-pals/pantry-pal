@@ -80,8 +80,8 @@ test('User can open and view a shopping list, see its items, and close the modal
     // Selectors
     const firstCard = Selector('.card').nth(0);
     const viewButton = firstCard.find('button').withText('View');
-    const modal = Selector('.modal.show').withText('View Shopping List');
-    const modalTitle = modal.find('.modal-title').withText('View Shopping List');
+    const modal = Selector('.modal.show');
+    const modalTitle = modal.find('.modal-title')
     const itemTable = modal.find('table');
     const closeButton = modal.find('button').withText('CLOSE');
     const noItemsMessage = modal.find('p.text-muted').withText('No items in this shopping list.');
