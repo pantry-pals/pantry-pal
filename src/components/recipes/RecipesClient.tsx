@@ -84,6 +84,7 @@ export default function RecipesClient({ recipes, produce, canAdd }: Props) {
                 cuisine={r.cuisine}
                 dietary={r.dietary ?? []}
                 ingredients={r.ingredients ?? []}
+                owner={r.owner ?? 'Pantry Pals Team'}
               />
             </Col>
           ))

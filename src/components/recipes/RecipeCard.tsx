@@ -16,6 +16,7 @@ export type RecipeCardProps = {
   cuisine: string;
   dietary: string[];
   ingredients: string[];
+  owner: string[];
 };
 
 export default function RecipeCard({
@@ -26,6 +27,7 @@ export default function RecipeCard({
   cuisine,
   dietary,
   ingredients,
+  owner,
 }: RecipeCardProps) {
   const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
   const router = useRouter();
@@ -52,6 +54,10 @@ export default function RecipeCard({
     }
   };
 
+  const displayOwner = owner.includes('admin@foo.com')
+    ? ['Pantry Pals Team']
+    : owner;
+
   return (
     <Card className="recipe-card h-100 d-flex flex-column shadow-sm">
       <div className="position-relative">
@@ -68,7 +74,7 @@ export default function RecipeCard({
           <Card.Title className="recipe-title line-clamp-2">{title}</Card.Title>
 
           {/* Cuisine + Dietary badges in white body */}
-          <div className="mb-3">
+          <div>
             <Badge bg="secondary" pill className="me-2 mb-2">
               {cuisine}
             </Badge>
@@ -77,6 +83,13 @@ export default function RecipeCard({
                 {tag}
               </Badge>
             ))}
+          </div>
+
+          <div className="mb-2">
+            <Badge bg="light" text="dark">
+              {'Made By: '}
+              {displayOwner}
+            </Badge>
           </div>
 
           {description && (
