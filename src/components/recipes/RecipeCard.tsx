@@ -16,7 +16,9 @@ export type RecipeCardProps = {
   cuisine: string;
   dietary: string[];
   ingredients: string[];
-  owner: string[];
+  owner: string | string[];
+  canDelete: boolean;
+  showDelete: boolean;
 };
 
 export default function RecipeCard({
@@ -28,12 +30,16 @@ export default function RecipeCard({
   dietary,
   ingredients,
   owner,
+  canDelete,
+  showDelete,
 }: RecipeCardProps) {
   const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
+    if (!canDelete) return;
+
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
 
     setLoading(true);
@@ -44,7 +50,6 @@ export default function RecipeCard({
 
       if (!res.ok) throw new Error('Failed to delete recipe');
 
-      // Refresh page or revalidate the list
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -54,9 +59,12 @@ export default function RecipeCard({
     }
   };
 
-  const displayOwner = owner.includes('admin@foo.com')
-    ? ['Pantry Pals Team']
-    : owner;
+  const isAdminOwner = Array.isArray(owner)
+    ? owner.includes('admin@foo.com')
+    : owner === 'admin@foo.com';
+
+  const ownerLabel = Array.isArray(owner) ? owner.join(', ') : owner;
+  const displayOwner = isAdminOwner ? 'Pantry Pals Team' : ownerLabel;
 
   return (
     <Card className="recipe-card h-100 d-flex flex-column shadow-sm">
@@ -71,7 +79,9 @@ export default function RecipeCard({
 
       <Card.Body className="d-flex flex-column">
         <div className="flex-grow-1">
-          <Card.Title className="recipe-title line-clamp-2">{title}</Card.Title>
+          <Card.Title className="recipe-title line-clamp-2">
+            {title}
+          </Card.Title>
 
           {/* Cuisine + Dietary badges in white body */}
           <div>
@@ -111,14 +121,17 @@ export default function RecipeCard({
           <Link href={`/recipes/${id}`} className="btn btn-dark w-100">
             View Recipe
           </Link>
-          <Button
-            variant="danger"
-            onClick={handleDelete}
-            disabled={loading}
-            className="w-100"
-          >
-            {loading ? 'Deleting…' : 'Delete'}
-          </Button>
+
+          {showDelete && canDelete && (
+            <Button
+              variant="danger"
+              onClick={handleDelete}
+              disabled={loading}
+              className="w-100"
+            >
+              {loading ? 'Deleting…' : 'Delete'}
+            </Button>
+          )}
         </div>
       </Card.Body>
     </Card>
