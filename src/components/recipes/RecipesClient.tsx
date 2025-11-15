@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
 import RecipeCard from './RecipeCard';
-import '../../styles/buttons.css'; // adjust path if styles folder is elsewhere
+import '../../styles/buttons.css';
 
 type Props = {
   recipes: any[];
@@ -24,15 +24,7 @@ export default function RecipesClient({
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
-
-  //
-  // FIX: Reset delete mode when user changes
-  //
-  useEffect(() => {
-    setDeleteMode(false);
-  }, [currentUserEmail, isAdmin]);
-  //
+  const [editMode, setEditMode] = useState(false);
 
   const pantryNames = useMemo(
     () => new Set(produce.map((p) => p.name.toLowerCase())),
@@ -55,24 +47,27 @@ export default function RecipesClient({
     );
   }, [canMakeFiltered, search]);
 
-  // When deleteMode is on, show only recipes the current user can delete
-  const recipesToShow = useMemo(() => {
-    if (!deleteMode) return filteredRecipes;
-
-    return filteredRecipes.filter((r) => {
+  // Helper: can current user edit this recipe?
+  const canEditRecipe = useCallback(
+    (ownerRaw: string | string[] | undefined): boolean => {
       if (!currentUserEmail) return false;
       if (isAdmin) return true;
 
-      const { owner } = r;
-      if (!owner) return false;
+      const owner = ownerRaw ?? 'Pantry Pals Team';
 
       if (Array.isArray(owner)) {
         return owner.includes(currentUserEmail);
       }
-
       return owner === currentUserEmail;
-    });
-  }, [filteredRecipes, deleteMode, currentUserEmail, isAdmin]);
+    },
+    [currentUserEmail, isAdmin],
+  );
+
+  // When editMode is ON, only show recipes the user can edit
+  const recipesToShow = useMemo(() => {
+    if (!editMode) return filteredRecipes;
+    return filteredRecipes.filter((r) => canEditRecipe(r.owner));
+  }, [filteredRecipes, editMode, canEditRecipe]);
 
   return (
     <>
@@ -105,14 +100,13 @@ export default function RecipesClient({
             </Button>
           )}
 
-          {/* Small toggle to enter "delete mode" */}
           {canAdd && (
             <Button
-              variant={deleteMode ? 'outline-danger' : 'outline-secondary'}
+              variant={editMode ? 'danger' : 'outline-secondary'}
               size="sm"
-              onClick={() => setDeleteMode((v) => !v)}
+              onClick={() => setEditMode((v) => !v)}
             >
-              {deleteMode ? 'Cancel' : 'Edit'}
+              {editMode ? 'Cancel' : 'Edit Recipes'}
             </Button>
           )}
         </div>
@@ -123,17 +117,7 @@ export default function RecipesClient({
         {recipesToShow.length > 0 ? (
           recipesToShow.map((r) => {
             const owner = r.owner ?? 'Pantry Pals Team';
-
-            let canDelete = false;
-            if (currentUserEmail) {
-              if (isAdmin) {
-                canDelete = true;
-              } else if (Array.isArray(owner)) {
-                canDelete = owner.includes(currentUserEmail);
-              } else {
-                canDelete = owner === currentUserEmail;
-              }
-            }
+            const canEdit = canEditRecipe(owner);
 
             return (
               <Col key={r.id}>
@@ -146,8 +130,13 @@ export default function RecipesClient({
                   dietary={r.dietary ?? []}
                   ingredients={r.ingredients ?? []}
                   owner={owner}
-                  canDelete={canDelete}
-                  showDelete={deleteMode}
+                  canEdit={canEdit}
+                  editMode={editMode}
+                  instructions={r.instructions ?? null}
+                  servings={r.servings ?? null}
+                  prepMinutes={r.prepMinutes ?? null}
+                  cookMinutes={r.cookMinutes ?? null}
+                  sourceUrl={r.sourceUrl ?? null}
                 />
               </Col>
             );
