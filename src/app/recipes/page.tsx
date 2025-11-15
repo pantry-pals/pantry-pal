@@ -13,6 +13,8 @@ export default async function RecipeListPage() {
 
   const email = session?.user?.email ?? null;
   const canAdd = !!email; // anyone logged-in can add
+  const isAdmin = email === 'admin@foo.com'; // adjust if you have a real role system
+
   let pantry: any[] = [];
   if (email) pantry = await getUserProduceByEmail(email);
 
@@ -23,7 +25,14 @@ export default async function RecipeListPage() {
       <Container id="list" fluid className="py-3">
         <Container>
           <h2 className="text-center mb-4">Recipes</h2>
-          <RecipesClient recipes={recipes} produce={pantry} canAdd={canAdd} />
+          <RecipesClient
+            key={email}
+            recipes={recipes}
+            produce={pantry}
+            canAdd={canAdd}
+            currentUserEmail={email}
+            isAdmin={isAdmin}
+          />
         </Container>
       </Container>
     </main>
