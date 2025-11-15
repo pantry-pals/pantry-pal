@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 
+type RouteParams = {
+  params: { id: string };
+};
+
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: RouteParams,
 ) {
   try {
-    // get session without authOptions (route handlers infer it automatically)
     const session = await getServerSession();
     const email = session?.user?.email ?? null;
 
@@ -26,21 +29,21 @@ export async function DELETE(
       );
     }
 
-    const recipeRecord = await prisma.recipe.findUnique({
+    const recipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
       select: { owner: true },
     });
 
-    if (!recipeRecord) {
+    if (!recipe) {
       return NextResponse.json(
         { error: 'Recipe not found' },
         { status: 404 },
       );
     }
 
-    const ownerField = recipeRecord.owner;
+    const { owner: ownerField } = recipe;
 
-    // Normalize owner to array
+    // Normalize owner to an array
     let owners: string[] = [];
     if (Array.isArray(ownerField)) {
       owners = ownerField;
@@ -62,10 +65,7 @@ export async function DELETE(
       where: { id: recipeId },
     });
 
-    return NextResponse.json(
-      { message: 'Recipe deleted successfully' },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: 'Recipe deleted successfully' });
   } catch (error) {
     console.error('Error deleting recipe:', error);
     return NextResponse.json(

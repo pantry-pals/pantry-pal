@@ -1,0 +1,326 @@
+'use client';
+
+import {
+  Modal,
+  Button,
+  Form,
+  Alert,
+  Row,
+  Col,
+  InputGroup,
+  Image as RBImage,
+} from 'react-bootstrap';
+import { useState, useTransition, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import ImagePickerModal from '@/components/images/ImagePickerModal';
+import { updateRecipe } from '@/lib/recipes';
+import '@/styles/buttons.css';
+
+type EditRecipeModalProps = {
+  show: boolean;
+  onHide: () => void;
+  recipe: {
+    id: number;
+    title: string;
+    cuisine: string;
+    description: string;
+    imageUrl: string;
+    dietary: string[]; // array in DB
+    ingredients: string[]; // array in DB
+    instructions?: string | null;
+    servings?: number | null;
+    prepMinutes?: number | null;
+    cookMinutes?: number | null;
+    sourceUrl?: string | null;
+  };
+};
+
+export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModalProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+
+  // Local form state (prefilled)
+  const [title, setTitle] = useState(recipe.title);
+  const [cuisine, setCuisine] = useState(recipe.cuisine);
+  const [description, setDescription] = useState(recipe.description || '');
+  const [imageUrl, setImageUrl] = useState(recipe.imageUrl || '');
+  const [dietary, setDietary] = useState((recipe.dietary ?? []).join(', '));
+  const [ingredients, setIngredients] = useState(
+    (recipe.ingredients ?? []).join(', '),
+  );
+  const [instructions, setInstructions] = useState(recipe.instructions || '');
+  const [servings, setServings] = useState<number | ''>(
+    recipe.servings ?? '',
+  );
+  const [prepMinutes, setPrepMinutes] = useState<number | ''>(
+    recipe.prepMinutes ?? '',
+  );
+  const [cookMinutes, setCookMinutes] = useState<number | ''>(
+    recipe.cookMinutes ?? '',
+  );
+  const [sourceUrl, setSourceUrl] = useState(recipe.sourceUrl || '');
+
+  // image picker modal
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageAlt, setImageAlt] = useState('');
+
+  // If the recipe prop changes while modal is open, re-sync state
+  useEffect(() => {
+    setTitle(recipe.title);
+    setCuisine(recipe.cuisine);
+    setDescription(recipe.description || '');
+    setImageUrl(recipe.imageUrl || '');
+    setDietary((recipe.dietary ?? []).join(', '));
+    setIngredients((recipe.ingredients ?? []).join(', '));
+    setInstructions(recipe.instructions || '');
+    setServings(recipe.servings ?? '');
+    setPrepMinutes(recipe.prepMinutes ?? '');
+    setCookMinutes(recipe.cookMinutes ?? '');
+    setSourceUrl(recipe.sourceUrl || '');
+  }, [recipe]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setErr(null);
+
+      try {
+        await updateRecipe(recipe.id, {
+          title,
+          cuisine,
+          description,
+          imageUrl,
+          dietary: dietary.split(',').map((s) => s.trim()).filter(Boolean),
+          ingredients: ingredients
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+          instructions,
+          servings: servings === '' ? undefined : Number(servings),
+          prepMinutes:
+            prepMinutes === '' ? undefined : Number(prepMinutes),
+          cookMinutes: cookMinutes === '' ? undefined : Number(cookMinutes),
+          sourceUrl: sourceUrl || undefined,
+        });
+
+        startTransition(() => {
+          router.refresh();
+          onHide();
+        });
+      } catch (error: any) {
+        setErr(error?.message ?? 'Failed to update recipe');
+      }
+    },
+    [
+      recipe.id,
+      title,
+      cuisine,
+      description,
+      imageUrl,
+      dietary,
+      ingredients,
+      instructions,
+      servings,
+      prepMinutes,
+      cookMinutes,
+      sourceUrl,
+      router,
+      onHide,
+    ],
+  );
+
+  return (
+    <Modal show={show} onHide={onHide} centered backdrop="static" size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Recipe</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        {err && <Alert variant="danger">{err}</Alert>}
+
+        <Form onSubmit={handleSubmit}>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Title *</Form.Label>
+                <Form.Control
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Cuisine *</Form.Label>
+                <Form.Control
+                  value={cuisine}
+                  onChange={(e) => setCuisine(e.target.value)}
+                  required
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </Form.Group>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Image URL</Form.Label>
+                <InputGroup>
+                  <Form.Control
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    type="button"
+                    onClick={() => setShowPicker(true)}
+                  >
+                    Pick image
+                  </Button>
+                </InputGroup>
+                {imageAlt && (
+                  <Form.Text className="text-muted">
+                    Alt:
+                    {imageAlt}
+                  </Form.Text>
+                )}
+                {imageUrl && (
+                  <div className="mt-2">
+                    <RBImage
+                      src={imageUrl}
+                      alt={imageAlt || 'Preview'}
+                      style={{
+                        maxHeight: 140,
+                        borderRadius: 8,
+                        objectFit: 'cover',
+                      }}
+                      thumbnail
+                    />
+                  </div>
+                )}
+              </Form.Group>
+            </Col>
+
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Dietary (comma-separated)</Form.Label>
+                <Form.Control
+                  placeholder="Vegan, Gluten-Free"
+                  value={dietary}
+                  onChange={(e) => setDietary(e.target.value)}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Ingredients (comma-separated)</Form.Label>
+            <Form.Control
+              placeholder="onion, tomato, basil"
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Instructions (one step per line)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={6}
+              placeholder={'1. Preheat oven...\n2. Mix the dry ingredients...\n3. ...'}
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+            />
+            <Form.Text className="text-muted">
+              Line breaks will be preserved on the recipe page.
+            </Form.Text>
+          </Form.Group>
+
+          <Row>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Servings</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={servings}
+                  onChange={(e) => setServings(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Prep (minutes)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  value={prepMinutes}
+                  onChange={(e) => setPrepMinutes(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Cook (minutes)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  value={cookMinutes}
+                  onChange={(e) => setCookMinutes(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Source URL (optional)</Form.Label>
+            <Form.Control
+              type="url"
+              placeholder="https://example.com/recipe"
+              value={sourceUrl}
+              onChange={(e) => setSourceUrl(e.target.value)}
+            />
+          </Form.Group>
+
+          <div className="d-flex justify-content-between mt-3">
+            <Button type="submit" className="btn-add" disabled={isPending}>
+              {isPending ? 'Saving…' : 'Save Changes'}
+            </Button>
+            <Button variant="secondary" type="button" onClick={onHide}>
+              Cancel
+            </Button>
+          </div>
+        </Form>
+      </Modal.Body>
+
+      {/* Image picker modal */}
+      <ImagePickerModal
+        show={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={(url, meta) => {
+          setImageUrl(url);
+          if (meta?.alt) setImageAlt(meta.alt);
+        }}
+      />
+    </Modal>
+  );
+}
