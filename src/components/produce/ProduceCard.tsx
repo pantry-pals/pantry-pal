@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-one-expression-per-line */
+
 'use client';
 
 import { Card, ListGroup, Image, Button } from 'react-bootstrap/';
@@ -18,7 +20,7 @@ const formatDate = (d?: Date | string | null) => {
 };
 
 export default function ProduceCard({ produce }: Props) {
-  const imageSrc = produce.image || '/no-image.png'; // default image if none provided
+  const imageSrc = produce.image || '/no-image.png';
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -28,9 +30,7 @@ export default function ProduceCard({ produce }: Props) {
         <Link href={`/produce/${produce.id}`} className="link-dark">
           <Card.Title className="mb-1">{produce.name}</Card.Title>
         </Link>
-        <Card.Subtitle className="text-muted">
-          {produce.type || 'Type Not Available'}
-        </Card.Subtitle>
+        <Card.Subtitle className="text-muted">{produce.type || 'Type Not Available'}</Card.Subtitle>
       </Card.Header>
 
       <Card.Body>
@@ -46,22 +46,14 @@ export default function ProduceCard({ produce }: Props) {
         <ListGroup variant="flush">
           <ListGroup.Item>
             <strong>Location: </strong>
-            {produce.storage?.name || 'Not Available'}
-            {' '}
-            at
-            {' '}
-            {produce.location?.name || 'Not Available'}
+            {produce.storage?.name || 'Not Available'} at {produce.location?.name || 'Not Available'}
           </ListGroup.Item>
           <ListGroup.Item>
-            <strong>Quantity:</strong>
-            {' '}
-            {typeof produce.quantity === 'number' ? produce.quantity : 'Not Available'}
+            <strong>Quantity:</strong> {typeof produce.quantity === 'number' ? produce.quantity : 'Not Available'}
             {produce.unit ? ` ${produce.unit}` : ''}
           </ListGroup.Item>
           <ListGroup.Item>
-            <strong>Expiration:</strong>
-            {' '}
-            {formatDate(produce.expiration)}
+            <strong>Expiration:</strong> {formatDate(produce.expiration)}
           </ListGroup.Item>
         </ListGroup>
         <Card.Footer className="d-flex">
@@ -80,18 +72,10 @@ export default function ProduceCard({ produce }: Props) {
       </Card.Body>
 
       {/* Modal component for editing produce item */}
-      <EditProduceModal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        produce={produce}
-      />
+      <EditProduceModal show={showEditModal} onHide={() => setShowEditModal(false)} produce={produce} />
 
       {/* Modal component for deleting produce item */}
-      <DeleteProduceModal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        produce={produce}
-      />
+      <DeleteProduceModal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} produce={produce} />
     </Card>
   );
 }
