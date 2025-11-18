@@ -86,8 +86,6 @@ test('Edit and Delete Recipe buttons work', async t => {
     .ok('Expected at least one Delete button in edit mode');
 
   // ----- EDIT BUTTON BEHAVIOR -----
-  const urlBeforeEdit = await getLocation();
-
   // Click the Edit button (should NOT navigate away, should open modal)
   await t.click(firstEditButton);
 
