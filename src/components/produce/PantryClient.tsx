@@ -103,7 +103,7 @@ function PantryClient({ initialProduce, initialLocations, owner }: PantryClientP
 
               {locations.map((loc) => (
                 <Nav.Item key={loc}>
-                  <div style={{ display: 'flex', alignItems: 'center', marginLeft: '6px' }}>
+                  <div className="location-tab">
                     <Nav.Link eventKey={loc} style={{ textTransform: 'capitalize' }}>
                       {loc}
                     </Nav.Link>
@@ -111,9 +111,10 @@ function PantryClient({ initialProduce, initialLocations, owner }: PantryClientP
                       variant="danger"
                       size="sm"
                       onClick={() => handleDeleteLocation(loc)}
-                      style={{ marginLeft: '4px' }}
+                      className="delete-btn"
+                      title={`Delete ${loc}`}
                     >
-                      <Trash color="white" size={16} />
+                      <Trash size={14} />
                     </Button>
                   </div>
                 </Nav.Item>

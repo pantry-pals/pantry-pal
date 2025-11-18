@@ -130,3 +130,20 @@
     background-color: var(--sage) !important;
     color: white !important;
 }
+
+.location-tab {
+  display: flex;
+  align-items: center;
+  margin-left: 6px;
+  position: relative;
+}
+
+.delete-btn {
+  margin-left: 4px;
+  opacity: 0; /* hidden by default */
+  transition: opacity 0.2s;
+}
+
+.location-tab:hover .delete-btn {
+  opacity: 1; /* show on hover */
+}
