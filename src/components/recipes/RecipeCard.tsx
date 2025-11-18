@@ -80,7 +80,11 @@ export default function RecipeCard({
 
   return (
     <>
-      <Card className="recipe-card h-100 d-flex flex-column shadow-sm">
+      <Card
+        className={`recipe-card h-100 d-flex flex-column shadow-sm position-relative ${
+          !editMode ? 'clickable-card' : ''
+        }`}
+      >
         <div className="position-relative">
           <Image
             src={imageUrl || 'https://placehold.co/800x450?text=Recipe'}
@@ -93,7 +97,12 @@ export default function RecipeCard({
         <Card.Body className="d-flex flex-column">
           <div className="flex-grow-1">
             <Card.Title className="recipe-title line-clamp-2">
-              {title}
+              <Link
+                href={`/recipes/${id}`}
+                className="stretched-link text-decoration-none text-reset"
+              >
+                {title}
+              </Link>
             </Card.Title>
 
             {/* Cuisine + Dietary badges in white body */}
@@ -131,7 +140,11 @@ export default function RecipeCard({
           </div>
 
           <div className="mt-3 d-flex flex-column gap-2">
-            {editMode && canEdit ? (
+            {/* This logic is now changed.
+              The "View Recipe" button is gone because the card is clickable.
+              We only show the "Edit" button if we are in editMode.
+            */}
+            {editMode && canEdit && (
               <Button
                 variant="primary"
                 className="w-100"
@@ -139,10 +152,6 @@ export default function RecipeCard({
               >
                 Edit Recipe
               </Button>
-            ) : (
-              <Link href={`/recipes/${id}`} className="btn btn-dark w-100">
-                View Recipe
-              </Link>
             )}
 
             {editMode && canEdit && (
