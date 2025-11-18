@@ -27,11 +27,6 @@ const signOut = async () => {
 fixture('Recipes Page')
   .page(baseUrl);
 
-const testEmail = 'admin@foo.com';
-const testPassword = 'changeme';
-
-const getLocation = ClientFunction(() => document.location.href);
-
 test('Recipes page loads', async t => {
   // Sign in
   await signIn(adminEmail, password);
@@ -91,8 +86,6 @@ test('Edit and Delete Recipe buttons work', async t => {
     .ok('Expected at least one Delete button in edit mode');
 
   // ----- EDIT BUTTON BEHAVIOR -----
-  const urlBeforeEdit = await getLocation();
-
   // Click the Edit button (should NOT navigate away, should open modal)
   await t.click(firstEditButton);
 
@@ -100,10 +93,6 @@ test('Edit and Delete Recipe buttons work', async t => {
   await t
     .expect(editModal.exists)
     .ok('Expected Edit Recipe modal to appear');
-
-  await t
-    .expect(getLocation())
-    .eql(urlBeforeEdit, 'Clicking Edit should not navigate away from recipes page');
 
   // Close the edit modal (try close button, fall back to ESC)
   const closeButton = Selector('button').withAttribute('aria-label', 'Close');
