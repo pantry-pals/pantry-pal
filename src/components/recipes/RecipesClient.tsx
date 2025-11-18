@@ -137,6 +137,7 @@ export default function RecipesClient({
                   prepMinutes={r.prepMinutes ?? null}
                   cookMinutes={r.cookMinutes ?? null}
                   sourceUrl={r.sourceUrl ?? null}
+                  pantryNames={pantryNames}
                 />
               </Col>
             );

@@ -26,6 +26,7 @@ export type RecipeCardProps = {
   prepMinutes?: number | null;
   cookMinutes?: number | null;
   sourceUrl?: string | null;
+  pantryNames: Set<string>;
 };
 
 export default function RecipeCard({
@@ -44,6 +45,7 @@ export default function RecipeCard({
   prepMinutes = null,
   cookMinutes = null,
   sourceUrl = null,
+  pantryNames,
 }: RecipeCardProps) {
   const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
   const router = useRouter();
@@ -144,11 +146,27 @@ export default function RecipeCard({
             )}
 
             {ingredients?.length > 0 && (
-              <Card.Text className="text-muted small line-clamp-2 mb-0">
+              <div className="mt-2">
                 <span className="fw-semibold">Ingredients:</span>
-                {' '}
-                {ingredients.join(', ')}
-              </Card.Text>
+
+                <div className="mt-1 d-flex flex-wrap gap-2">
+                  {ingredients.map((ing) => {
+                    const key = `${id}-${ing}`; // ✔ stable unique key
+                    const hasItem = pantryNames.has(ing.toLowerCase());
+
+                    return (
+                      <Badge
+                        key={key}
+                        pill
+                        bg={hasItem ? 'success' : 'danger'} // green = available, red = missing
+                        className="px-2 py-1"
+                      >
+                        {ing}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
 
