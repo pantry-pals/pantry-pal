@@ -26,6 +26,7 @@ export type RecipeCardProps = {
   prepMinutes?: number | null;
   cookMinutes?: number | null;
   sourceUrl?: string | null;
+  pantryNames: Set<string>;
 };
 
 export default function RecipeCard({
@@ -44,6 +45,7 @@ export default function RecipeCard({
   prepMinutes = null,
   cookMinutes = null,
   sourceUrl = null,
+  pantryNames,
 }: RecipeCardProps) {
   const dietTags = Array.isArray(dietary) ? dietary.filter(Boolean) : [];
   const router = useRouter();
@@ -147,7 +149,20 @@ export default function RecipeCard({
               <Card.Text className="text-muted small line-clamp-2 mb-0">
                 <span className="fw-semibold">Ingredients:</span>
                 {' '}
-                {ingredients.join(', ')}
+                {ingredients.map((ing, i) => {
+                  const key = `${ing}-${i}`;
+                  const hasItem = pantryNames.has(ing.toLowerCase());
+
+                  return (
+                    <span
+                      key={key}
+                      style={{ color: hasItem ? 'green' : 'red' }}
+                    >
+                      {ing}
+                      {i < ingredients.length - 1 ? ', ' : ''}
+                    </span>
+                  );
+                })}
               </Card.Text>
             )}
           </div>
