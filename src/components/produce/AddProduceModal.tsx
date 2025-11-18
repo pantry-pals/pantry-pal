@@ -83,7 +83,7 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
       type: '',
       location: '',
       storage: '',
-      quantity: 0,
+      quantity: undefined,
       unit: '',
       expiration: null,
       owner: produce?.owner ?? '',
@@ -279,10 +279,11 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   onChange={async (e) => {
                     const { value } = e.target;
                     setSelectedLocation(value);
-                    setSelectedStorage(''); // clear storage when location changes
                     if (value === 'Add Location') {
                       setValue('location', '');
                       setStorageOptions([]);
+                      setSelectedStorage('Add Storage'); // force user to add storage
+                      setValue('storage', '');
                     } else {
                       setValue('location', value);
                       await fetchStorage(value); // fetch storages for that location

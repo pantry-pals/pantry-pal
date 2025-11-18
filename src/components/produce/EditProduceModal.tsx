@@ -53,8 +53,13 @@ interface EditProduceModalProps {
 export default function EditProduceModal({ show, onHide, produce }: EditProduceModalProps) {
   const router = useRouter();
 
-  const [locations, setLocations] = useState<string[]>([]);
-  const [storageOptions, setStorageOptions] = useState<string[]>([]);
+  const [locations, setLocations] = useState<string[]>(
+    () => (produce.location?.name ? [produce.location.name] : []),
+  );
+
+  const [storageOptions, setStorageOptions] = useState<string[]>(
+    () => (produce.storage?.name ? [produce.storage.name] : []),
+  );
 
   const [selectedLocation, setSelectedLocation] = useState(produce.location?.name || '');
   const [selectedStorage, setSelectedStorage] = useState(produce.storage?.name || '');
@@ -94,8 +99,11 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
         `/api/produce/${produce.id}/storage?owner=${produce.owner}&location=${encodeURIComponent(location)}`,
       );
       if (!res.ok) return;
-      const data = await res.json();
-      setStorageOptions(data);
+      const data: string[] = await res.json();
+      setStorageOptions((prev) => {
+        const merged = Array.from(new Set([...prev, ...data]));
+        return merged;
+      });
 
       // Optional: auto-select if only one storage is found
       if (data.length === 1) {
@@ -118,8 +126,11 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
       const fetchLocations = async () => {
         const res = await fetch(`/api/produce/${produce.id}/locations?owner=${produce.owner}`);
         if (!res.ok) return;
-        const data = await res.json();
-        setLocations(data);
+        const data: string[] = await res.json();
+        setLocations((prev) => {
+          const merged = Array.from(new Set([...prev, ...data]));
+          return merged;
+        });
       };
       fetchLocations();
 
@@ -207,10 +218,11 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                   onChange={async (e) => {
                     const { value } = e.target;
                     setSelectedLocation(value);
-                    setSelectedStorage('');
                     if (value === 'Add Location') {
                       setValue('location', '');
                       setStorageOptions([]);
+                      setSelectedStorage('Add Storage'); // force user to add storage
+                      setValue('storage', '');
                     } else {
                       setValue('location', value);
                       await fetchStorage(value); // fetch storages for selected location
