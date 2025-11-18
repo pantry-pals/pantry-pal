@@ -27,12 +27,13 @@ interface ShoppingList {
 interface ViewShoppingListModalProps {
   show: boolean;
   onHide: () => void;
-  shoppingList?: ShoppingList; // 👈 make optional for safety
+  shoppingList?: ShoppingList; // optional for safety
 }
 
 const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListModalProps) => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
 
   // Update items when the shopping list changes
   useEffect(() => {
@@ -65,19 +66,28 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
     });
   };
 
-  // 🧠 If no list data, render nothing to avoid errors
+  const handleDeleteItem = async (itemId: number) => {
+    try {
+      setDeletingItemId(itemId);
+      await fetch(`/api/shopping-list-item/${itemId}`, { method: 'DELETE' });
+      setItems((prev) => prev.filter((i) => i.id !== itemId));
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
+
   if (!shoppingList) return null;
 
   return (
     <>
-      {/* Main View Shopping List Modal */}
       <Modal show={show} onHide={onHide} centered size="lg">
         <Modal.Header className="justify-content-center">
           <Modal.Title>{shoppingList?.name ?? 'Shopping List'}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
-          {/* Items Table */}
           {items.length > 0 ? (
             <Row>
               <Col>
@@ -89,6 +99,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                       <th>Unit</th>
                       <th>Price</th>
                       <th>Restock When</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -122,6 +133,16 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                             />
                           )}
                         </td>
+                        <td>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDeleteItem(item.id)}
+                            disabled={deletingItemId === item.id}
+                          >
+                            {deletingItemId === item.id ? 'Deleting...' : 'Delete'}
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -136,7 +157,6 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
             </Row>
           )}
 
-          {/* Footer Buttons */}
           <Row className="pt-4">
             <Col className="text-center">
               <Button
@@ -148,7 +168,6 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 + Add Item
               </Button>
             </Col>
-
             <Col className="text-center">
               <Button onClick={onHide} variant="secondary" className="btn-submit">
                 Close
@@ -158,7 +177,6 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         </Modal.Body>
       </Modal>
 
-      {/* ✅ AddToShoppingListModal rendered as a sibling, NOT inside the modal */}
       <AddToShoppingListModal
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
