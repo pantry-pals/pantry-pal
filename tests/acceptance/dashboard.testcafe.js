@@ -28,7 +28,7 @@ const signOut = async () => {
 // ----------
 // FIXTURE
 // ----------
-fixture('Shopping List Page Acceptance Tests')
+fixture('Dashboard Acceptance Tests')
     .page(baseUrl);
 
 // ----------
