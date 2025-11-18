@@ -4,10 +4,11 @@
 /* eslint-disable no-alert */
 
 import Link from 'next/link';
-import { Card, Image, Badge, Button } from 'react-bootstrap';
+import { Card, Image, Badge, Button, Row, Col } from 'react-bootstrap';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import EditRecipeModal from '@/components/recipes/EditRecipeModal';
+import { PencilSquare, Trash } from 'react-bootstrap-icons';
 
 export type RecipeCardProps = {
   id: number;
@@ -84,6 +85,17 @@ export default function RecipeCard({
         className={`recipe-card h-100 d-flex flex-column shadow-sm position-relative ${
           !editMode ? 'clickable-card' : ''
         }`}
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          router.push(`/recipes/${id}`);
+        }}
+        onKeyDown={(e) => {
+          if (!editMode && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            router.push(`/recipes/${id}`);
+          }
+        }}
       >
         <div className="position-relative">
           <Image
@@ -99,7 +111,8 @@ export default function RecipeCard({
             <Card.Title className="recipe-title line-clamp-2">
               <Link
                 href={`/recipes/${id}`}
-                className="stretched-link text-decoration-none text-reset"
+                className="text-decoration-none text-reset"
+                onClick={(e) => e.stopPropagation()}
               >
                 {title}
               </Link>
@@ -145,24 +158,33 @@ export default function RecipeCard({
               We only show the "Edit" button if we are in editMode.
             */}
             {editMode && canEdit && (
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => setShowEdit(true)}
-              >
-                Edit Recipe
-              </Button>
-            )}
-
-            {editMode && canEdit && (
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-                disabled={loading}
-                className="w-100"
-              >
-                {loading ? 'Deleting…' : 'Delete'}
-              </Button>
+              <Row>
+                <Col xs={6}>
+                  <Button
+                    variant="primary"
+                    className="btn-edit"
+                    onClick={(e) => {
+                      e.stopPropagation(); // don’t trigger card’s onClick
+                      setShowEdit(true);
+                    }}
+                  >
+                    <PencilSquare color="white" size={18} />
+                  </Button>
+                </Col>
+                <Col xs={6}>
+                  <Button
+                    variant="danger"
+                    onClick={(e) => {
+                      e.stopPropagation(); // 🔑 don’t trigger card’s onClick
+                      handleDelete();
+                    }}
+                    disabled={loading}
+                    className="btn-delete"
+                  >
+                    {loading ? 'Deleting…' : <Trash color="white" size={18} />}
+                  </Button>
+                </Col>
+              </Row>
             )}
           </div>
         </Card.Body>
