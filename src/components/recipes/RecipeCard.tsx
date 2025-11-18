@@ -151,7 +151,7 @@ export default function RecipeCard({
 
                 <div className="mt-1 d-flex flex-wrap gap-2">
                   {ingredients.map((ing) => {
-                    const key = `${id}-${ing}`; // ✔ stable unique key
+                    const key = `${id}-${ing}`; // stable unique key
                     const hasItem = pantryNames.has(ing.toLowerCase());
 
                     return (
@@ -193,7 +193,7 @@ export default function RecipeCard({
                   <Button
                     variant="danger"
                     onClick={(e) => {
-                      e.stopPropagation(); // 🔑 don’t trigger card’s onClick
+                      e.stopPropagation(); // don’t trigger card’s onClick
                       handleDelete();
                     }}
                     disabled={loading}
