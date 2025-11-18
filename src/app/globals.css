@@ -150,3 +150,7 @@ footer a {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.clickable-card:hover {
+  cursor: pointer;
+}
