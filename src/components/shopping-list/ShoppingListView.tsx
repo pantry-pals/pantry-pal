@@ -52,11 +52,11 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
             sidePanel={false}
           />
         </Col>
-        <Col>
+        <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
           <Button
             onClick={() => setShowCreateList(true)}
             style={{ backgroundColor: 'var(--fern-green)' }}
-            className="btn-submit me-2"
+            className="btn-submit"
           >
             + New List
           </Button>
