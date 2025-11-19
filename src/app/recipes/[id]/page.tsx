@@ -16,7 +16,6 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   const recipe = await getRecipeById(id);
   if (!recipe) return notFound();
 
-  // Fetch user's pantry items
   const session = await getServerSession();
   const email = session?.user?.email ?? null;
 
