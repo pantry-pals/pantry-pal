@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { Container, Row, Col, Image, Badge, Button } from 'react-bootstrap';
+import { CheckCircleFill, XCircleFill } from 'react-bootstrap-icons';
 import { notFound } from 'next/navigation';
 import { getRecipeById } from '@/lib/recipes';
+import { getServerSession } from 'next-auth';
+import { getUserProduceByEmail } from '@/lib/dbActions';
 
 type PageProps = { params: { id: string } };
 export const dynamic = 'force-dynamic';
@@ -12,6 +15,18 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
   const recipe = await getRecipeById(id);
   if (!recipe) return notFound();
+
+  // Fetch user's pantry items
+  const session = await getServerSession();
+  const email = session?.user?.email ?? null;
+
+  let pantry: any[] = [];
+  if (email) {
+    pantry = await getUserProduceByEmail(email);
+  }
+
+  // Create a set of pantry item names (lowercase for case-insensitive matching)
+  const pantryNames = new Set(pantry.map((p) => p.name.toLowerCase()));
 
   const displayOwner = recipe.owner?.includes('admin@foo.com') ? ['Pantry Pals Team'] : recipe.owner;
 
@@ -244,11 +259,29 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     color: '#495057',
                   }}
                 >
-                  {(recipe.ingredients ?? []).map((ing) => (
-                    <li key={ing} style={{ marginBottom: '0.5rem' }}>
-                      {ing}
-                    </li>
-                  ))}
+                  {(recipe.ingredients ?? []).map((ing) => {
+                    const hasItem = pantryNames.has(ing.toLowerCase());
+                    return (
+                      <li key={ing} style={{ marginBottom: '0.5rem' }}>
+                        <div className="d-flex align-items-center gap-2">
+                          <span>{ing}</span>
+                          {hasItem ? (
+                            <CheckCircleFill
+                              color="#28a745"
+                              size={16}
+                              title="You have this in your pantry"
+                            />
+                          ) : (
+                            <XCircleFill
+                              color="#dc3545"
+                              size={16}
+                              title="You don't have this in your pantry"
+                            />
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
