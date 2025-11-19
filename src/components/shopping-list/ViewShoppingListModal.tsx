@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Col, Modal, Row, Table } from 'react-bootstrap';
 import AddToShoppingListModal from './AddToShoppingListModal';
+import { BagCheckFill } from 'react-bootstrap-icons';
 
 interface ShoppingListItem {
   id: number;
@@ -91,9 +92,12 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
           {items.length > 0 ? (
             <Row>
               <Col>
-                <Table striped bordered hover size="sm" responsive>
+                <Table striped bordered hover size="sm" responsive className="text-center">
                   <thead>
                     <tr>
+                      <th>
+                        <BagCheckFill color="black" size={18} />
+                      </th>
                       <th>Item</th>
                       <th>Quantity</th>
                       <th>Unit</th>
@@ -105,6 +109,9 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                   <tbody>
                     {items.map((item) => (
                       <tr key={item.id}>
+                        <td>
+                          <input type="checkbox" aria-label={`Select ${item.name}`} />
+                        </td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
                         <td>{item.unit || '-'}</td>
