@@ -163,7 +163,10 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 variant="success"
                 style={{ backgroundColor: 'var(--fern-green)' }}
                 className="btn-submit"
-                onClick={() => setShowAddModal(true)}
+                onClick={() => {
+                  onHide();  
+                  setShowAddModal(true);
+                }}
               >
                 + Add Item
               </Button>
@@ -180,9 +183,9 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
       <AddToShoppingListModal
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
-        shoppingLists={[shoppingList]}
-        sidePanel
-      />
+        shoppingLists={[shoppingList]} 
+        sidePanel={false}     
+        />
     </>
   );
 };
