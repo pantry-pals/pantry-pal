@@ -268,14 +268,24 @@ export async function addLocation(location: { name: string; owner: string }) {
  * Adds a new shopping list.
  */
 export async function addShoppingList(data: { name: string; owner: string }) {
-  const list = await prisma.shoppingList.create({
-    data: {
-      name: data.name,
-      owner: data.owner,
-    },
+  const name = data.name.trim();
+  const owner = data.owner.trim();
+
+  if (!name) {
+    throw new Error('List name cannot be empty.');
+  }
+
+  const existing = await prisma.shoppingList.findFirst({
+    where: { name, owner },
   });
-  console.log('✅ Created shopping list:', list);
-  return list;
+
+  if (existing) {
+    throw new Error('A list with this name already exists.');
+  }
+
+  await prisma.shoppingList.create({
+    data: { name, owner },
+  });
 }
 
 /**
