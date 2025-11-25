@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getRecipeById } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import { getUserProduceByEmail } from '@/lib/dbActions';
+import AddToShoppingList from '@/components/recipes/AddToShoppingList';
 
 type PageProps = { params: { id: string } };
 export const dynamic = 'force-dynamic';
@@ -258,29 +259,34 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     color: '#495057',
                   }}
                 >
-                  {(recipe.ingredients ?? []).map((ing) => {
-                    const hasItem = pantryNames.has(ing.toLowerCase());
+                  {(() => {
+                    const ingredients = recipe.ingredients ?? [];
+                    const missingItems = ingredients.filter((ing) => !pantryNames.has(ing.toLowerCase()));
                     return (
-                      <li key={ing} style={{ marginBottom: '0.5rem' }}>
-                        <div className="d-flex align-items-center gap-2">
-                          <span>{ing}</span>
-                          {hasItem ? (
-                            <CheckCircleFill
-                              color="#28a745"
-                              size={16}
-                              title="You have this in your pantry"
-                            />
-                          ) : (
-                            <XCircleFill
-                              color="#dc3545"
-                              size={16}
-                              title="You don't have this in your pantry"
-                            />
-                          )}
-                        </div>
-                      </li>
+                      <>
+                        <ul style={{ paddingLeft: '1.25rem', lineHeight: '2', color: '#495057' }}>
+                          {ingredients.map((ing) => {
+                            const hasItem = pantryNames.has(ing.toLowerCase());
+                            return (
+                              <li key={ing} style={{ marginBottom: '0.5rem' }}>
+                                <div className="d-flex align-items-center gap-2">
+                                  <span>{ing}</span>
+                                  {hasItem ? (
+                                    <CheckCircleFill color="#28a745" size={16} title="You have this in your pantry" />
+                                  ) : (
+                                    <XCircleFill color="#dc3545" size={16} title="You don't have this in your pantry" />
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+
+                        {/* Add-to-shopping-list controls (client) */}
+                        <AddToShoppingList missingItems={missingItems} />
+                      </>
                     );
-                  })}
+                  })()}
                 </ul>
               </div>
             </div>
