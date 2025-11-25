@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
+import { useSession } from 'next-auth/react';
 import RecipeCard from './RecipeCard';
 import '../../styles/buttons.css';
 
@@ -17,10 +18,16 @@ type Props = {
 export default function RecipesClient({
   recipes,
   produce,
-  canAdd,
-  currentUserEmail,
-  isAdmin,
+  canAdd: serverCanAdd,
+  currentUserEmail: serverEmail,
+  isAdmin: serverIsAdmin,
 }: Props) {
+  const { data: session } = useSession();
+
+  const currentUserEmail = (session?.user?.email ?? serverEmail) || null;
+  const isAdmin = serverIsAdmin || currentUserEmail === 'admin@foo.com';
+  const canAdd = serverCanAdd || !!currentUserEmail;
+
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
