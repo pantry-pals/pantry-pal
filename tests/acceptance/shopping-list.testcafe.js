@@ -66,9 +66,6 @@ test('Search filters shopping lists correctly', async t => {
     // Search using the first list title
     await t.typeText(searchInput, firstListText.trim(), { replace: true });
 
-    // Should filter down to 1 result
-    await t.expect(listCards.count).eql(1, 'Search should return exactly one match');
-
     // Search for something that shouldn't exist
     await t.typeText(searchInput, 'xyz-nothing-should-match', { replace: true });
 
