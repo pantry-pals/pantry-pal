@@ -1,4 +1,5 @@
 import Hero from '@/components/landing/Hero';
+import Features from '@/components/landing/Features';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 const Home = () => (
   <main>
     <Hero />
+    <Features />
   </main>
 );
 
