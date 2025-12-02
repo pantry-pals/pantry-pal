@@ -8,16 +8,11 @@ type SessionLike = {
   user?: { email?: string | null } | null;
 } | null;
 
-/** Fetch all recipes (latest first). */
-export async function getRecipes() {
-  return prisma.recipe.findMany({ orderBy: { createdAt: 'desc' } });
-}
-
-/** Fetch a single recipe by numeric ID. */
-export async function getRecipeById(id: number) {
-  if (!Number.isFinite(id)) return null;
-  return prisma.recipe.findUnique({ where: { id } });
-}
+type IngredientItemInput = {
+  name: string;
+  quantity?: number | null;
+  unit?: string | null;
+};
 
 /** Type for creating/updating recipes. */
 type RecipeInput = {
@@ -26,7 +21,10 @@ type RecipeInput = {
   description?: string;
   imageUrl?: string;
   dietary?: string[];
+  // legacy – optional, still accepted
   ingredients?: string[];
+  // new structured ingredients
+  ingredientItems?: IngredientItemInput[];
   instructions?: string;
   servings?: number;
   prepMinutes?: number;
@@ -34,28 +32,102 @@ type RecipeInput = {
   sourceUrl?: string;
 };
 
+type NormalizeMode = 'create' | 'update';
+
+/**
+ * Normalize ingredient data:
+ * - CREATE: ingredientItems → ingredients; fall back to legacy ingredients[]
+ * - UPDATE: use ingredientItems ONLY; do NOT fall back to ingredients[]
+ *   (so we don't nuke quantities/units accidentally)
+ */
+function normalizeIngredientItems(
+  input: RecipeInput,
+  mode: NormalizeMode,
+): { items: IngredientItemInput[]; names: string[] } {
+  let rawItems: IngredientItemInput[] = [];
+
+  if (input.ingredientItems && input.ingredientItems.length > 0) {
+    rawItems = input.ingredientItems;
+  } else if (mode === 'create' && input.ingredients && input.ingredients.length > 0) {
+    // On create, we allow legacy ingredients[] as the source
+    rawItems = input.ingredients.map((name) => ({
+      name,
+      quantity: null,
+      unit: null,
+    }));
+  } else {
+    // On update with no ingredientItems provided → leave existing DB rows as-is
+    rawItems = [];
+  }
+
+  const items = rawItems
+    .map((item) => ({
+      name: item.name.trim(),
+      quantity:
+        typeof item.quantity === 'number' ? item.quantity : null,
+      unit: item.unit?.trim() || null,
+    }))
+    .filter((item) => item.name.length > 0);
+
+  const names = items.map((i) => i.name);
+  return { items, names };
+}
+
 /** Normalize/clean recipe data for create/update. */
-function normalizeRecipeInput(input: RecipeInput, ownerEmail?: string | null) {
-  const data = {
+function normalizeRecipeInput(
+  input: RecipeInput,
+  mode: NormalizeMode,
+  ownerEmail?: string | null,
+) {
+  const { items, names } = normalizeIngredientItems(input, mode);
+
+  const recipeData = {
     title: input.title.trim(),
     cuisine: input.cuisine.trim(),
     description: input.description?.trim() || null,
     imageUrl: input.imageUrl?.trim() || null,
-    dietary: (input.dietary ?? []).map((s) => s.trim()).filter(Boolean),
-    ingredients: (input.ingredients ?? []).map((s) => s.trim()).filter(Boolean),
+    dietary: (input.dietary ?? [])
+      .map((s) => s.trim())
+      .filter(Boolean),
+    // legacy field kept in sync with structured items
+    ingredients: names,
     instructions: input.instructions?.trim() || null,
     servings: input.servings ?? null,
     prepMinutes: input.prepMinutes ?? null,
     cookMinutes: input.cookMinutes ?? null,
     sourceUrl: input.sourceUrl?.trim() || null,
-    // owner is only set on create; for update we leave it alone
     ...(ownerEmail ? { owner: ownerEmail } : {}),
   };
 
-  if (!data.title) throw new Error('Title required');
-  if (!data.cuisine) throw new Error('Cuisine required');
+  if (!recipeData.title) throw new Error('Title required');
+  if (!recipeData.cuisine) throw new Error('Cuisine required');
 
-  return data;
+  return { recipeData, ingredientItems: items };
+}
+
+/** Fetch all recipes (latest first). */
+export async function getRecipes() {
+  return prisma.recipe.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      ingredientItems: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
+}
+
+/** Fetch a single recipe by numeric ID. */
+export async function getRecipeById(id: number) {
+  if (!Number.isFinite(id)) return null;
+  return prisma.recipe.findUnique({
+    where: { id },
+    include: {
+      ingredientItems: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
 }
 
 /** Create a new recipe (any logged-in user can create). */
@@ -64,9 +136,28 @@ export async function createRecipe(input: RecipeInput) {
   const email = session?.user?.email ?? null;
   if (!email) throw new Error('Unauthorized');
 
-  const data = normalizeRecipeInput(input, email);
+  const { recipeData, ingredientItems } = normalizeRecipeInput(
+    input,
+    'create',
+    email,
+  );
 
-  return prisma.recipe.create({ data });
+  return prisma.recipe.create({
+    data: {
+      ...recipeData,
+      ingredientItems:
+        ingredientItems.length > 0
+          ? {
+            create: ingredientItems.map((item, index) => ({
+              name: item.name,
+              quantity: item.quantity ?? null,
+              unit: item.unit ?? null,
+              order: index,
+            })),
+          }
+          : undefined,
+    },
+  });
 }
 
 /** Update an existing recipe (owner or admin@foo.com only). */
@@ -100,10 +191,30 @@ export async function updateRecipe(id: number, input: RecipeInput) {
     throw new Error('Not authorized to edit this recipe');
   }
 
-  const data = normalizeRecipeInput(input);
+  const { recipeData, ingredientItems } = normalizeRecipeInput(
+    input,
+    'update',
+  );
 
   return prisma.recipe.update({
     where: { id },
-    data,
+    data: {
+      ...recipeData,
+      // Only rewrite ingredientItems when we actually got some in input.
+      // This is where you can update quantities/units by sending new items.
+      ...(ingredientItems.length > 0
+        ? {
+          ingredientItems: {
+            deleteMany: {}, // delete all existing rows for this recipe
+            create: ingredientItems.map((item, index) => ({
+              name: item.name,
+              quantity: item.quantity ?? null,
+              unit: item.unit ?? null,
+              order: index,
+            })),
+          },
+        }
+        : {}),
+    },
   });
 }

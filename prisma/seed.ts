@@ -123,55 +123,101 @@ async function main() {
 
   // Seed Recipe
   if ((config as any).defaultRecipes?.length) {
-    type RecipeSeed = {
-      title: string;
-      cuisine: string;
-      description?: string;
-      imageUrl?: string;
-      dietary?: string[];
-      ingredients?: string[];
-      owner: string;
-      instructions?: string;
-      servings?: number;
-      prepMinutes?: number;
-      cookMinutes?: number;
-      sourceUrl?: string;
-    };
+  type IngredientItemSeed = {
+    name: string;
+    quantity: number | null;
+    unit: string | null;
+  };
 
-    for (const r of (config as any).defaultRecipes as RecipeSeed[]) {
-      console.log(`  upsert recipe: ${r.title} (${r.owner})`);
-      await prisma.recipe.upsert({
-        where: { title_owner: { title: r.title, owner: r.owner } },
-        update: {
-          cuisine: r.cuisine,
-          description: r.description ?? null,
-          imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
-          dietary: r.dietary ?? [],
-          ingredients: r.ingredients ?? [],
-          // NEW fields
-          instructions: r.instructions ?? null,
-          servings: r.servings ?? null,
-          prepMinutes: r.prepMinutes ?? null,
-          cookMinutes: r.cookMinutes ?? null,
-          sourceUrl: r.sourceUrl ?? null,
-        },
-        create: {
-          title: r.title,
-          cuisine: r.cuisine,
-          description: r.description ?? null,
-          imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
-          dietary: r.dietary ?? [],
-          ingredients: r.ingredients ?? [],
-          owner: r.owner,
-          // NEW fields
-          instructions: r.instructions ?? null,
-          servings: r.servings ?? null,
-          prepMinutes: r.prepMinutes ?? null,
-          cookMinutes: r.cookMinutes ?? null,
-          sourceUrl: r.sourceUrl ?? null,
-        },
-      });
+  type RecipeSeed = {
+    title: string;
+    cuisine: string;
+    description?: string;
+    imageUrl?: string;
+    dietary?: string[];
+    ingredients?: string[]; // legacy
+    ingredientItems?: IngredientItemSeed[]; // new structured ingredients
+    owner: string;
+    instructions?: string;
+    servings?: number;
+    prepMinutes?: number;
+    cookMinutes?: number;
+    sourceUrl?: string;
+  };
+
+  console.log('  Seeding recipes...');
+
+  for (const r of (config as any).defaultRecipes as RecipeSeed[]) {
+    console.log(`  upsert recipe: ${r.title} (${r.owner})`);
+
+    // ---- Ingredient source selection (no inner functions) ----
+    let items: IngredientItemSeed[] = [];
+
+    if (r.ingredientItems && r.ingredientItems.length > 0) {
+      items = r.ingredientItems;
+    } else if (r.ingredients && r.ingredients.length > 0) {
+      items = r.ingredients.map((name) => ({
+        name,
+        quantity: null,
+        unit: null,
+      }));
     }
+
+    const ingredientNames = items.map((i) => i.name);
+
+    // ---- Upsert Recipe (keeps legacy string[] synced) ----
+    const recipe = await prisma.recipe.upsert({
+      where: { title_owner: { title: r.title, owner: r.owner } },
+      update: {
+        cuisine: r.cuisine,
+        description: r.description ?? null,
+        imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
+        dietary: r.dietary ?? [],
+        ingredients: ingredientNames, // sync legacy
+        instructions: r.instructions ?? null,
+        servings: r.servings ?? null,
+        prepMinutes: r.prepMinutes ?? null,
+        cookMinutes: r.cookMinutes ?? null,
+        sourceUrl: r.sourceUrl ?? null,
+      },
+      create: {
+        title: r.title,
+        cuisine: r.cuisine,
+        description: r.description ?? null,
+        imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
+        dietary: r.dietary ?? [],
+        ingredients: ingredientNames, // sync legacy
+        owner: r.owner,
+        instructions: r.instructions ?? null,
+        servings: r.servings ?? null,
+        prepMinutes: r.prepMinutes ?? null,
+        cookMinutes: r.cookMinutes ?? null,
+        sourceUrl: r.sourceUrl ?? null,
+      },
+    });
+
+    // ---- Handle ingredient rows (no continue) ----
+    if (items.length > 0) {
+      await prisma.recipeIngredient.deleteMany({
+        where: { recipeId: recipe.id },
+      });
+
+      for (let index = 0; index < items.length; index += 1) {
+        const item = items[index];
+
+        await prisma.recipeIngredient.create({
+          data: {
+            recipeId: recipe.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            order: index,
+          },
+        });
+      }
+    }
+    // If items.length === 0 → do nothing (no ingredient deletion)
+  }
   }
 
   console.log('Seeding complete!');
