@@ -26,9 +26,16 @@ interface Props {
   onHide: () => void;
   shoppingLists: SL[];
   sidePanel: boolean;
+  prefillName?: string;
 }
 
-const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false }: Props) => {
+const AddToShoppingListModal = ({
+  show,
+  onHide,
+  shoppingLists,
+  sidePanel = false,
+  prefillName = '',
+}: Props) => {
   const router = useRouter();
   const { data: session } = useSession();
   const owner = session?.user?.email;
@@ -41,7 +48,7 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
   } = useForm<AddItemValues>({
     resolver: yupResolver(AddShoppingListItemSchema),
     defaultValues: {
-      name: '',
+      name: prefillName || '',
       quantity: 0,
       unit: '',
       price: 0,
@@ -86,10 +93,8 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
     }
   };
 
-  // ✅ Define the form once — reuse for both Modal & Offcanvas
   const formContent = (
     <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-      {/* Row 1: Item name + Quantity + Unit */}
       <Row className="mb-3">
         <Col xs={6}>
           <Form.Group>
@@ -109,9 +114,7 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
             <Form.Label>Qty</Form.Label>
             <Form.Control
               type="number"
-              step={1}
               min={1}
-              placeholder="e.g., 2"
               {...register('quantity')}
               className={`${errors.quantity ? 'is-invalid' : ''}`}
             />
@@ -122,16 +125,11 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
         <Col xs={3}>
           <Form.Group>
             <Form.Label>Unit</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="pcs, lbs..."
-              {...register('unit')}
-            />
+            <Form.Control type="text" {...register('unit')} />
           </Form.Group>
         </Col>
       </Row>
 
-      {/* Row 2: Price + List selection */}
       <Row className="mb-3">
         <Col xs={5}>
           <Form.Group>
@@ -142,7 +140,6 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="e.g., 3.49"
                 {...register('price', { valueAsNumber: true })}
                 className={`${errors.price ? 'is-invalid' : ''}`}
               />
@@ -157,13 +154,10 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
             <Form.Select
               {...register('shoppingListId', { valueAsNumber: true })}
               defaultValue={shoppingLists[0]?.id ?? ''}
-              className={`${errors.shoppingListId ? 'is-invalid' : ''}`}
             >
               <option value="">Choose a list…</option>
-              {shoppingLists.map((sl) => (
-                <option key={sl.id} value={sl.id}>
-                  {sl.name}
-                </option>
+              {shoppingLists.map(sl => (
+                <option key={sl.id} value={sl.id}>{sl.name}</option>
               ))}
             </Form.Select>
             <div className="invalid-feedback">{errors.shoppingListId?.message}</div>
@@ -171,7 +165,6 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
         </Col>
       </Row>
 
-      {/* Buttons */}
       <Row className="pt-3">
         <Col>
           <Button type="submit" className="btn-submit" disabled={isSubmitting}>
@@ -179,12 +172,7 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
           </Button>
         </Col>
         <Col>
-          <Button
-            type="button"
-            onClick={() => reset()}
-            variant="warning"
-            className="btn-reset"
-          >
+          <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">
             Reset
           </Button>
         </Col>
@@ -192,9 +180,7 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
     </Form>
   );
 
-  // ✅ Render modal OR side panel depending on prop
   return !sidePanel ? (
-  // 👇 Normal centered modal
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header className="justify-content-center">
         <Modal.Title>Add Shopping List Item</Modal.Title>
@@ -202,7 +188,6 @@ const AddToShoppingListModal = ({ show, onHide, shoppingLists, sidePanel = false
       <Modal.Body>{formContent}</Modal.Body>
     </Modal>
   ) : (
-  // 👇 Side Offcanvas
     <Offcanvas show={show} onHide={onHide} placement="end" backdrop={false}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Add Shopping List Item</Offcanvas.Title>
