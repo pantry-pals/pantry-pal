@@ -125,7 +125,6 @@ model Recipe {
   imageUrl        String?
   cuisine         String
   dietary         String[]   // e.g., ["Vegan","Gluten-Free"]
-  ingredients     String[]   // e.g., ["onion","tomato","basil"]
   ingredientItems RecipeIngredient[]
   owner           String?
 

@@ -32,16 +32,10 @@ export default async function RecipeDetailPage({ params }: PageProps) {
     ? ['Pantry Pals Team']
     : recipe.owner;
 
-  // 🔹 Normalize to ingredientItems with fallback to ingredients: string[]
-  const ingredientItems = recipe.ingredientItems && recipe.ingredientItems.length > 0
-    ? recipe.ingredientItems
-    : (recipe.ingredients ?? []).map((name) => ({
-      name,
-      quantity: null,
-      unit: null,
-    }));
+  // ✅ Only use ingredientItems from the relation
+  const ingredientItems = recipe.ingredientItems ?? [];
 
-  // 🔹 Missing item names (for AddToShoppingList, still string[])
+  // Missing item names (for AddToShoppingList)
   const missingItemNames = ingredientItems
     .filter((item) => !pantryNames.has(item.name.toLowerCase()))
     .map((item) => item.name);
@@ -295,7 +289,10 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     const label = parts.join(' ');
 
                     return (
-                      <li key={`${item.name}-${item.unit ?? ''}`} style={{ marginBottom: '0.5rem' }}>
+                      <li
+                        key={`${item.name}-${item.unit ?? ''}`}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
                         <div className="d-flex align-items-center gap-2">
                           <span>{label}</span>
                           {hasItem ? (
