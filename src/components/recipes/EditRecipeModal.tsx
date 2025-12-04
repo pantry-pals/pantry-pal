@@ -199,6 +199,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Title *</Form.Label>
                 <Form.Control
                   value={title}
+                  placeholder="e.g., Spaghetti Bolognese"
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
@@ -209,6 +210,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Cuisine *</Form.Label>
                 <Form.Control
                   value={cuisine}
+                  placeholder="e.g., Italian, Mexican, Chinese"
                   onChange={(e) => setCuisine(e.target.value)}
                   required
                 />
@@ -220,6 +222,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
             <Form.Label>Description</Form.Label>
             <Form.Control
               as="textarea"
+              placeholder="A brief description of the recipe"
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -322,6 +325,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Servings</Form.Label>
                 <Form.Control
                   type="number"
+                  placeholder="e.g., 2, 4, 6"
                   min={1}
                   value={servings}
                   onChange={(e) => setServings(
@@ -335,6 +339,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Prep (minutes)</Form.Label>
                 <Form.Control
                   type="number"
+                  placeholder="e.g., 15, 20, 25"
                   min={0}
                   value={prepMinutes}
                   onChange={(e) => setPrepMinutes(
@@ -348,6 +353,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Cook (minutes)</Form.Label>
                 <Form.Control
                   type="number"
+                  placeholder="e.g., 15, 30, 45"
                   min={0}
                   value={cookMinutes}
                   onChange={(e) => setCookMinutes(
