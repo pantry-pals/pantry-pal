@@ -31,7 +31,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [dietary, setDietary] = useState(''); // comma-separated
-  const [ingredients, setIngredients] = useState(''); // comma-separated
+  const [ingredientText, setIngredientText] = useState(''); // multiline "qty unit name"
 
   // new fields
   const [instructions, setInstructions] = useState('');
@@ -50,7 +50,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
     setDescription('');
     setImageUrl('');
     setDietary('');
-    setIngredients('');
+    setIngredientText('');
     setInstructions('');
     setServings('');
     setPrepMinutes('');
@@ -64,14 +64,50 @@ export default function AddRecipeModal({ show, onHide }: Props) {
       e.preventDefault();
       setErr(null);
 
+      // Parse ingredientText → ingredientItems (same logic as EditRecipeModal)
+      const normalizedIngredientItems = ingredientText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => {
+          const parts = line.split(/\s+/);
+
+          const qty = Number(parts[0]);
+          const hasNumericQty = !Number.isNaN(qty);
+
+          if (hasNumericQty && parts.length >= 3) {
+            const quantity = qty;
+            const unit = parts[1];
+            const name = parts.slice(2).join(' ');
+
+            return {
+              name,
+              quantity,
+              unit,
+              order: index,
+            };
+          }
+
+          // fallback: entire line is name only
+          return {
+            name: line,
+            quantity: null,
+            unit: null,
+            order: index,
+          };
+        });
+
       try {
         await createRecipe({
           title,
           cuisine,
           description,
           imageUrl,
-          dietary: dietary.split(',').map(s => s.trim()).filter(Boolean),
-          ingredients: ingredients.split(',').map(s => s.trim()).filter(Boolean),
+          dietary: dietary
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+          ingredientItems: normalizedIngredientItems,
           instructions,
           servings: servings === '' ? undefined : Number(servings),
           prepMinutes: prepMinutes === '' ? undefined : Number(prepMinutes),
@@ -94,7 +130,7 @@ export default function AddRecipeModal({ show, onHide }: Props) {
       description,
       imageUrl,
       dietary,
-      ingredients,
+      ingredientText,
       instructions,
       servings,
       prepMinutes,
@@ -120,20 +156,33 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Title *</Form.Label>
-                <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} required />
+                <Form.Control
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Cuisine *</Form.Label>
-                <Form.Control value={cuisine} onChange={(e) => setCuisine(e.target.value)} required />
+                <Form.Control
+                  value={cuisine}
+                  onChange={(e) => setCuisine(e.target.value)}
+                  required
+                />
               </Form.Group>
             </Col>
           </Row>
 
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Form.Control
+              as="textarea"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </Form.Group>
 
           <Row>
@@ -165,7 +214,11 @@ export default function AddRecipeModal({ show, onHide }: Props) {
                     <RBImage
                       src={imageUrl}
                       alt={imageAlt || 'Preview'}
-                      style={{ maxHeight: 140, borderRadius: 8, objectFit: 'cover' }}
+                      style={{
+                        maxHeight: 140,
+                        borderRadius: 8,
+                        objectFit: 'cover',
+                      }}
                       thumbnail
                     />
                   </div>
@@ -185,12 +238,26 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             </Col>
           </Row>
 
+          {/* INGREDIENT TEXTAREA – same UX as edit modal */}
           <Form.Group className="mb-3">
-            <Form.Label>Ingredients (comma-separated)</Form.Label>
+            <Form.Label className="mb-0">Ingredients</Form.Label>
+            <Form.Text className="d-block ps-3 mb-2 text-muted">
+              Enter one ingredient per line, in the format:
+              <br />
+              <code>quantity unit name</code>
+              <br />
+              Examples:
+              <br />
+              <code>1 cup sugar</code>
+              <br />
+              <code>2 tbsp olive oil</code>
+            </Form.Text>
             <Form.Control
-              placeholder="onion, tomato, basil"
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
+              as="textarea"
+              rows={4}
+              placeholder={'1 cup onion\n2 pcs tomatoes\n1 tsp basil'}
+              value={ingredientText}
+              onChange={(e) => setIngredientText(e.target.value)}
             />
           </Form.Group>
 
@@ -203,7 +270,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
             />
-            <Form.Text className="text-muted">Line breaks will be preserved on the recipe page.</Form.Text>
+            <Form.Text className="text-muted">
+              Line breaks will be preserved on the recipe page.
+            </Form.Text>
           </Form.Group>
 
           <Row>
@@ -214,7 +283,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
                   type="number"
                   min={1}
                   value={servings}
-                  onChange={(e) => setServings(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={(e) => setServings(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
                 />
               </Form.Group>
             </Col>
@@ -225,7 +296,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
                   type="number"
                   min={0}
                   value={prepMinutes}
-                  onChange={(e) => setPrepMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={(e) => setPrepMinutes(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
                 />
               </Form.Group>
             </Col>
@@ -236,7 +309,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
                   type="number"
                   min={0}
                   value={cookMinutes}
-                  onChange={(e) => setCookMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={(e) => setCookMinutes(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )}
                 />
               </Form.Group>
             </Col>
@@ -256,7 +331,9 @@ export default function AddRecipeModal({ show, onHide }: Props) {
             <Button type="submit" className="btn-add" disabled={isPending}>
               {isPending ? 'Saving…' : 'Submit'}
             </Button>
-            <Button variant="secondary" type="button" onClick={onHide}>Cancel</Button>
+            <Button variant="secondary" type="button" onClick={onHide}>
+              Cancel
+            </Button>
           </div>
         </Form>
       </Modal.Body>

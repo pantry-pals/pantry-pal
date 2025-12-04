@@ -25,8 +25,14 @@ type EditRecipeModalProps = {
     cuisine: string;
     description: string;
     imageUrl: string;
-    dietary: string[]; // array in DB
-    ingredients: string[]; // array in DB
+    dietary: string[];
+    ingredientItems: {
+      id?: number;
+      name: string;
+      quantity: number | null;
+      unit: string | null;
+      order?: number | null;
+    }[];
     instructions?: string | null;
     servings?: number | null;
     prepMinutes?: number | null;
@@ -46,13 +52,18 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
   const [description, setDescription] = useState(recipe.description || '');
   const [imageUrl, setImageUrl] = useState(recipe.imageUrl || '');
   const [dietary, setDietary] = useState((recipe.dietary ?? []).join(', '));
-  const [ingredients, setIngredients] = useState(
-    (recipe.ingredients ?? []).join(', '),
+
+  // ingredientText: one ingredient per line: "qty unit name"
+  const [ingredientText, setIngredientText] = useState(
+    (recipe.ingredientItems ?? [])
+      .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`
+        .trim()
+        .replace(/\s+/g, ' '))
+      .join('\n'),
   );
+
   const [instructions, setInstructions] = useState(recipe.instructions || '');
-  const [servings, setServings] = useState<number | ''>(
-    recipe.servings ?? '',
-  );
+  const [servings, setServings] = useState<number | ''>(recipe.servings ?? '');
   const [prepMinutes, setPrepMinutes] = useState<number | ''>(
     recipe.prepMinutes ?? '',
   );
@@ -72,7 +83,13 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
     setDescription(recipe.description || '');
     setImageUrl(recipe.imageUrl || '');
     setDietary((recipe.dietary ?? []).join(', '));
-    setIngredients((recipe.ingredients ?? []).join(', '));
+    setIngredientText(
+      (recipe.ingredientItems ?? [])
+        .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`
+          .trim()
+          .replace(/\s+/g, ' '))
+        .join('\n'),
+    );
     setInstructions(recipe.instructions || '');
     setServings(recipe.servings ?? '');
     setPrepMinutes(recipe.prepMinutes ?? '');
@@ -85,22 +102,58 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
       e.preventDefault();
       setErr(null);
 
+      // Parse ingredientText → ingredientItems
+      const normalizedIngredientItems = ingredientText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => {
+          const parts = line.split(/\s+/);
+
+          // first token numeric → treat as quantity
+          const qty = Number(parts[0]);
+          const hasNumericQty = !Number.isNaN(qty);
+
+          if (hasNumericQty && parts.length >= 3) {
+            const quantity = qty;
+            const unit = parts[1];
+            const name = parts.slice(2).join(' ');
+
+            return {
+              name,
+              quantity,
+              unit,
+              order: index,
+            };
+          }
+
+          // fallback: entire line is just name
+          return {
+            name: line,
+            quantity: null,
+            unit: null,
+            order: index,
+          };
+        });
+
       try {
         await updateRecipe(recipe.id, {
           title,
           cuisine,
           description,
           imageUrl,
-          dietary: dietary.split(',').map((s) => s.trim()).filter(Boolean),
-          ingredients: ingredients
+          dietary: dietary
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
+          // 🔥 new structured ingredients
+          ingredientItems: normalizedIngredientItems,
           instructions,
           servings: servings === '' ? undefined : Number(servings),
           prepMinutes:
             prepMinutes === '' ? undefined : Number(prepMinutes),
-          cookMinutes: cookMinutes === '' ? undefined : Number(cookMinutes),
+          cookMinutes:
+            cookMinutes === '' ? undefined : Number(cookMinutes),
           sourceUrl: sourceUrl || undefined,
         });
 
@@ -119,7 +172,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
       description,
       imageUrl,
       dietary,
-      ingredients,
+      ingredientText,
       instructions,
       servings,
       prepMinutes,
@@ -226,12 +279,26 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
             </Col>
           </Row>
 
+          {/* INGREDIENT TEXTAREA */}
           <Form.Group className="mb-3">
-            <Form.Label>Ingredients (comma-separated)</Form.Label>
+            <Form.Label className="mb-0">Ingredients</Form.Label>
+            <Form.Text className="d-block ps-3 mb-2 text-muted">
+              Enter one ingredient per line, in the format:
+              <br />
+              <code>quantity unit name</code>
+              <br />
+              Examples:
+              <br />
+              <code>1 cup sugar</code>
+              <br />
+              <code>2 tbsp olive oil</code>
+            </Form.Text>
             <Form.Control
-              placeholder="onion, tomato, basil"
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
+              as="textarea"
+              rows={4}
+              placeholder={'1 cup onion\n2 pcs tomatoes\n1 tsp basil'}
+              value={ingredientText}
+              onChange={(e) => setIngredientText(e.target.value)}
             />
           </Form.Group>
 

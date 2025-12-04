@@ -8,22 +8,21 @@ type SessionLike = {
   user?: { email?: string | null } | null;
 } | null;
 
-type IngredientItemInput = {
+export type IngredientItemInput = {
   name: string;
   quantity?: number | null;
   unit?: string | null;
+  order?: number | null;
 };
 
 /** Type for creating/updating recipes. */
-type RecipeInput = {
+export type RecipeInput = {
   title: string;
   cuisine: string;
   description?: string;
   imageUrl?: string;
   dietary?: string[];
-  // legacy – optional, still accepted
-  ingredients?: string[];
-  // new structured ingredients
+  // 🔥 Only structured ingredients now
   ingredientItems?: IngredientItemInput[];
   instructions?: string;
   servings?: number;
@@ -32,55 +31,42 @@ type RecipeInput = {
   sourceUrl?: string;
 };
 
-type NormalizeMode = 'create' | 'update';
-
 /**
- * Normalize ingredient data:
- * - CREATE: ingredientItems → ingredients; fall back to legacy ingredients[]
- * - UPDATE: use ingredientItems ONLY; do NOT fall back to ingredients[]
- *   (so we don't nuke quantities/units accidentally)
+ * Normalize ingredientItems:
+ * - trim names/units
+ * - coerce quantity to number|null
+ * - drop empty names
  */
 function normalizeIngredientItems(
   input: RecipeInput,
-  mode: NormalizeMode,
-): { items: IngredientItemInput[]; names: string[] } {
-  let rawItems: IngredientItemInput[] = [];
+): IngredientItemInput[] {
+  const rawItems = input.ingredientItems ?? [];
 
-  if (input.ingredientItems && input.ingredientItems.length > 0) {
-    rawItems = input.ingredientItems;
-  } else if (mode === 'create' && input.ingredients && input.ingredients.length > 0) {
-    // On create, we allow legacy ingredients[] as the source
-    rawItems = input.ingredients.map((name) => ({
-      name,
-      quantity: null,
-      unit: null,
-    }));
-  } else {
-    // On update with no ingredientItems provided → leave existing DB rows as-is
-    rawItems = [];
-  }
+  return rawItems
+    .map((item, index) => {
+      const name = item.name.trim();
+      const unit = item.unit?.trim() || null;
 
-  const items = rawItems
-    .map((item) => ({
-      name: item.name.trim(),
-      quantity:
-        typeof item.quantity === 'number' ? item.quantity : null,
-      unit: item.unit?.trim() || null,
-    }))
+      let quantity: number | null = null;
+      if (typeof item.quantity === 'number' && !Number.isNaN(item.quantity)) {
+        quantity = item.quantity;
+      }
+
+      return {
+        name,
+        quantity,
+        unit,
+        order: item.order ?? index,
+      };
+    })
     .filter((item) => item.name.length > 0);
-
-  const names = items.map((i) => i.name);
-  return { items, names };
 }
 
-/** Normalize/clean recipe data for create/update. */
+/** Normalize/clean recipe scalar data (no ingredients here). */
 function normalizeRecipeInput(
   input: RecipeInput,
-  mode: NormalizeMode,
   ownerEmail?: string | null,
 ) {
-  const { items, names } = normalizeIngredientItems(input, mode);
-
   const recipeData = {
     title: input.title.trim(),
     cuisine: input.cuisine.trim(),
@@ -89,8 +75,6 @@ function normalizeRecipeInput(
     dietary: (input.dietary ?? [])
       .map((s) => s.trim())
       .filter(Boolean),
-    // legacy field kept in sync with structured items
-    ingredients: names,
     instructions: input.instructions?.trim() || null,
     servings: input.servings ?? null,
     prepMinutes: input.prepMinutes ?? null,
@@ -102,7 +86,10 @@ function normalizeRecipeInput(
   if (!recipeData.title) throw new Error('Title required');
   if (!recipeData.cuisine) throw new Error('Cuisine required');
 
-  return { recipeData, ingredientItems: items };
+  // return both the scalar data and normalized items
+  const ingredientItems = normalizeIngredientItems(input);
+
+  return { recipeData, ingredientItems };
 }
 
 /** Fetch all recipes (latest first). */
@@ -138,7 +125,6 @@ export async function createRecipe(input: RecipeInput) {
 
   const { recipeData, ingredientItems } = normalizeRecipeInput(
     input,
-    'create',
     email,
   );
 
@@ -148,11 +134,11 @@ export async function createRecipe(input: RecipeInput) {
       ingredientItems:
         ingredientItems.length > 0
           ? {
-            create: ingredientItems.map((item, index) => ({
+            create: ingredientItems.map((item) => ({
               name: item.name,
               quantity: item.quantity ?? null,
               unit: item.unit ?? null,
-              order: index,
+              order: item.order ?? 0,
             })),
           }
           : undefined,
@@ -193,28 +179,31 @@ export async function updateRecipe(id: number, input: RecipeInput) {
 
   const { recipeData, ingredientItems } = normalizeRecipeInput(
     input,
-    'update',
+    /* ownerEmail */ undefined,
   );
+
+  // If ingredientItems is empty, we leave existing ingredient rows as-is.
+  // If ingredientItems has items, we replace them completely.
+  if (ingredientItems.length === 0) {
+    return prisma.recipe.update({
+      where: { id },
+      data: recipeData,
+    });
+  }
 
   return prisma.recipe.update({
     where: { id },
     data: {
       ...recipeData,
-      // Only rewrite ingredientItems when we actually got some in input.
-      // This is where you can update quantities/units by sending new items.
-      ...(ingredientItems.length > 0
-        ? {
-          ingredientItems: {
-            deleteMany: {}, // delete all existing rows for this recipe
-            create: ingredientItems.map((item, index) => ({
-              name: item.name,
-              quantity: item.quantity ?? null,
-              unit: item.unit ?? null,
-              order: index,
-            })),
-          },
-        }
-        : {}),
+      ingredientItems: {
+        deleteMany: {}, // delete all existing rows for this recipe
+        create: ingredientItems.map((item) => ({
+          name: item.name,
+          quantity: item.quantity ?? null,
+          unit: item.unit ?? null,
+          order: item.order ?? 0,
+        })),
+      },
     },
   });
 }
