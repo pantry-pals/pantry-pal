@@ -32,7 +32,6 @@ export default function Hero() {
                 alt="Pantry Pals Logo"
                 width={420}
                 height={420}
-                style={{ backgroundColor: 'white' }}
                 priority
                 className="img-fluid rounded shadow-lg"
               />

@@ -10,13 +10,6 @@ import { useState } from 'react';
 import EditRecipeModal from '@/components/recipes/EditRecipeModal';
 import { PencilSquare, Trash } from 'react-bootstrap-icons';
 
-export type IngredientItemCard = {
-  id?: number;
-  name: string;
-  quantity: number | null;
-  unit: string | null;
-};
-
 export type RecipeCardProps = {
   id: number;
   title: string;
@@ -24,7 +17,7 @@ export type RecipeCardProps = {
   imageUrl?: string | null;
   cuisine: string;
   dietary: string[];
-  ingredientItems: IngredientItemCard[]; // ← REQUIRED NOW
+  ingredients: string[];
   owner: string | string[];
   canEdit: boolean;
   editMode: boolean;
@@ -43,7 +36,7 @@ export default function RecipeCard({
   imageUrl = null,
   cuisine,
   dietary,
-  ingredientItems,
+  ingredients,
   owner,
   canEdit,
   editMode,
@@ -96,7 +89,9 @@ export default function RecipeCard({
         }`}
         role="button"
         tabIndex={0}
-        onClick={() => router.push(`/recipes/${id}`)}
+        onClick={() => {
+          router.push(`/recipes/${id}`);
+        }}
         onKeyDown={(e) => {
           if (!editMode && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
@@ -125,7 +120,7 @@ export default function RecipeCard({
               </Link>
             </Card.Title>
 
-            {/* Cuisine + Dietary badges */}
+            {/* Cuisine + Dietary badges in white body */}
             <div>
               <Badge bg="secondary" pill className="me-2 mb-2">
                 {cuisine}
@@ -150,23 +145,23 @@ export default function RecipeCard({
               </Card.Text>
             )}
 
-            {/* INGREDIENT ITEMS */}
-            {ingredientItems.length > 0 && (
+            {ingredients?.length > 0 && (
               <div className="mt-2">
                 <span className="fw-semibold">Ingredients:</span>
 
                 <div className="mt-1 d-flex flex-wrap gap-2">
-                  {ingredientItems.map((item) => {
-                    const hasItem = pantryNames.has(item.name.toLowerCase());
+                  {ingredients.map((ing) => {
+                    const key = `${id}-${ing}`; // stable unique key
+                    const hasItem = pantryNames.has(ing.toLowerCase());
 
                     return (
                       <Badge
-                        key={`${id}-${item.id ?? item.name}`}
+                        key={key}
                         pill
-                        bg={hasItem ? 'success' : 'danger'}
+                        bg={hasItem ? 'success' : 'danger'} // green = available, red = missing
                         className="px-2 py-1"
                       >
-                        {item.name}
+                        {ing}
                       </Badge>
                     );
                   })}
@@ -176,6 +171,10 @@ export default function RecipeCard({
           </div>
 
           <div className="mt-3 d-flex flex-column gap-2">
+            {/* This logic is now changed.
+              The "View Recipe" button is gone because the card is clickable.
+              We only show the "Edit" button if we are in editMode.
+            */}
             {editMode && canEdit && (
               <Row>
                 <Col xs={6}>
@@ -183,7 +182,7 @@ export default function RecipeCard({
                     variant="primary"
                     className="btn-edit"
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation(); // don’t trigger card’s onClick
                       setShowEdit(true);
                     }}
                   >
@@ -194,7 +193,7 @@ export default function RecipeCard({
                   <Button
                     variant="danger"
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation(); // don’t trigger card’s onClick
                       handleDelete();
                     }}
                     disabled={loading}
@@ -220,7 +219,7 @@ export default function RecipeCard({
             description: description ?? '',
             imageUrl: imageUrl ?? '',
             dietary,
-            ingredientItems,
+            ingredients,
             instructions: instructions ?? '',
             servings: servings ?? undefined,
             prepMinutes: prepMinutes ?? undefined,

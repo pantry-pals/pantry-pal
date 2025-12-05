@@ -49,9 +49,7 @@ export const AddLocationSchema = Yup.object({
 
 export const AddShoppingListSchema = Yup.object({
   name: Yup.string().required('List name is required'),
-  owner: Yup.string()
-    .required('You must be signed in to create a list')
-    .min(1),
+  owner: Yup.string().required('Owner is required'),
 });
 
 export const EditShoppingListSchema = Yup.object({

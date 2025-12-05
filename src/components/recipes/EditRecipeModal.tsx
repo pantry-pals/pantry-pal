@@ -25,14 +25,8 @@ type EditRecipeModalProps = {
     cuisine: string;
     description: string;
     imageUrl: string;
-    dietary: string[];
-    ingredientItems: {
-      id?: number;
-      name: string;
-      quantity: number | null;
-      unit: string | null;
-      order?: number | null;
-    }[];
+    dietary: string[]; // array in DB
+    ingredients: string[]; // array in DB
     instructions?: string | null;
     servings?: number | null;
     prepMinutes?: number | null;
@@ -52,18 +46,13 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
   const [description, setDescription] = useState(recipe.description || '');
   const [imageUrl, setImageUrl] = useState(recipe.imageUrl || '');
   const [dietary, setDietary] = useState((recipe.dietary ?? []).join(', '));
-
-  // ingredientText: one ingredient per line: "qty unit name"
-  const [ingredientText, setIngredientText] = useState(
-    (recipe.ingredientItems ?? [])
-      .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`
-        .trim()
-        .replace(/\s+/g, ' '))
-      .join('\n'),
+  const [ingredients, setIngredients] = useState(
+    (recipe.ingredients ?? []).join(', '),
   );
-
   const [instructions, setInstructions] = useState(recipe.instructions || '');
-  const [servings, setServings] = useState<number | ''>(recipe.servings ?? '');
+  const [servings, setServings] = useState<number | ''>(
+    recipe.servings ?? '',
+  );
   const [prepMinutes, setPrepMinutes] = useState<number | ''>(
     recipe.prepMinutes ?? '',
   );
@@ -83,13 +72,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
     setDescription(recipe.description || '');
     setImageUrl(recipe.imageUrl || '');
     setDietary((recipe.dietary ?? []).join(', '));
-    setIngredientText(
-      (recipe.ingredientItems ?? [])
-        .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`
-          .trim()
-          .replace(/\s+/g, ' '))
-        .join('\n'),
-    );
+    setIngredients((recipe.ingredients ?? []).join(', '));
     setInstructions(recipe.instructions || '');
     setServings(recipe.servings ?? '');
     setPrepMinutes(recipe.prepMinutes ?? '');
@@ -102,58 +85,22 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
       e.preventDefault();
       setErr(null);
 
-      // Parse ingredientText → ingredientItems
-      const normalizedIngredientItems = ingredientText
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line, index) => {
-          const parts = line.split(/\s+/);
-
-          // first token numeric → treat as quantity
-          const qty = Number(parts[0]);
-          const hasNumericQty = !Number.isNaN(qty);
-
-          if (hasNumericQty && parts.length >= 3) {
-            const quantity = qty;
-            const unit = parts[1];
-            const name = parts.slice(2).join(' ');
-
-            return {
-              name,
-              quantity,
-              unit,
-              order: index,
-            };
-          }
-
-          // fallback: entire line is just name
-          return {
-            name: line,
-            quantity: null,
-            unit: null,
-            order: index,
-          };
-        });
-
       try {
         await updateRecipe(recipe.id, {
           title,
           cuisine,
           description,
           imageUrl,
-          dietary: dietary
+          dietary: dietary.split(',').map((s) => s.trim()).filter(Boolean),
+          ingredients: ingredients
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
-          // 🔥 new structured ingredients
-          ingredientItems: normalizedIngredientItems,
           instructions,
           servings: servings === '' ? undefined : Number(servings),
           prepMinutes:
             prepMinutes === '' ? undefined : Number(prepMinutes),
-          cookMinutes:
-            cookMinutes === '' ? undefined : Number(cookMinutes),
+          cookMinutes: cookMinutes === '' ? undefined : Number(cookMinutes),
           sourceUrl: sourceUrl || undefined,
         });
 
@@ -172,7 +119,7 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
       description,
       imageUrl,
       dietary,
-      ingredientText,
+      ingredients,
       instructions,
       servings,
       prepMinutes,
@@ -199,7 +146,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Title *</Form.Label>
                 <Form.Control
                   value={title}
-                  placeholder="e.g., Spaghetti Bolognese"
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
@@ -210,7 +156,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Cuisine *</Form.Label>
                 <Form.Control
                   value={cuisine}
-                  placeholder="e.g., Italian, Mexican, Chinese"
                   onChange={(e) => setCuisine(e.target.value)}
                   required
                 />
@@ -222,7 +167,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
             <Form.Label>Description</Form.Label>
             <Form.Control
               as="textarea"
-              placeholder="A brief description of the recipe"
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -282,26 +226,12 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
             </Col>
           </Row>
 
-          {/* INGREDIENT TEXTAREA */}
           <Form.Group className="mb-3">
-            <Form.Label className="mb-0">Ingredients</Form.Label>
-            <Form.Text className="d-block ps-3 mb-2 text-muted">
-              Enter one ingredient per line, in the format:
-              <br />
-              <code>quantity unit name</code>
-              <br />
-              Examples:
-              <br />
-              <code>1 cup sugar</code>
-              <br />
-              <code>2 tbsp olive oil</code>
-            </Form.Text>
+            <Form.Label>Ingredients (comma-separated)</Form.Label>
             <Form.Control
-              as="textarea"
-              rows={4}
-              placeholder={'1 cup onion\n2 pcs tomatoes\n1 tsp basil'}
-              value={ingredientText}
-              onChange={(e) => setIngredientText(e.target.value)}
+              placeholder="onion, tomato, basil"
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
             />
           </Form.Group>
 
@@ -325,7 +255,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Servings</Form.Label>
                 <Form.Control
                   type="number"
-                  placeholder="e.g., 2, 4, 6"
                   min={1}
                   value={servings}
                   onChange={(e) => setServings(
@@ -339,7 +268,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Prep (minutes)</Form.Label>
                 <Form.Control
                   type="number"
-                  placeholder="e.g., 15, 20, 25"
                   min={0}
                   value={prepMinutes}
                   onChange={(e) => setPrepMinutes(
@@ -353,7 +281,6 @@ export default function EditRecipeModal({ show, onHide, recipe }: EditRecipeModa
                 <Form.Label>Cook (minutes)</Form.Label>
                 <Form.Control
                   type="number"
-                  placeholder="e.g., 15, 30, 45"
                   min={0}
                   value={cookMinutes}
                   onChange={(e) => setCookMinutes(

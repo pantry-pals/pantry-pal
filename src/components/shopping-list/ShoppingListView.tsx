@@ -3,9 +3,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
-import AddShoppingList from './AddShoppingList';
 import ShoppingListCard from './ShoppingListCard';
 import AddToShoppingListModal from './AddToShoppingListModal';
 
@@ -14,12 +12,9 @@ type ShoppingListViewProps = {
 };
 
 export default function ShoppingListView({ initialShoppingLists }: ShoppingListViewProps) {
-  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [show, setShow] = useState(false);
-  const [showCreateList, setShowCreateList] = useState(false);
 
-  console.log('showCreateList =', showCreateList);
   // eslint-disable-next-line max-len
   const filteredLists = initialShoppingLists.filter(
     (list) => list.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -50,20 +45,6 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
             onHide={() => setShow(false)}
             shoppingLists={initialShoppingLists}
             sidePanel={false}
-          />
-        </Col>
-        <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
-          <Button
-            onClick={() => setShowCreateList(true)}
-            style={{ backgroundColor: 'var(--fern-green)' }}
-            className="btn-submit"
-          >
-            + New List
-          </Button>
-          <AddShoppingList
-            show={showCreateList}
-            onHide={() => setShowCreateList(false)}
-            owner={session?.user?.email ?? ''}
           />
         </Col>
       </Row>

@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { getRecipeById } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import { getUserProduceByEmail } from '@/lib/dbActions';
-import AddToShoppingList from '@/components/recipes/AddToShoppingList';
 
 type PageProps = { params: { id: string } };
 export const dynamic = 'force-dynamic';
@@ -28,17 +27,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   // Create a set of pantry item names (lowercase for case-insensitive matching)
   const pantryNames = new Set(pantry.map((p) => p.name.toLowerCase()));
 
-  const displayOwner = recipe.owner?.includes('admin@foo.com')
-    ? ['Pantry Pals Team']
-    : recipe.owner;
-
-  // ✅ Only use ingredientItems from the relation
-  const ingredientItems = recipe.ingredientItems ?? [];
-
-  // Missing item names (for AddToShoppingList)
-  const missingItemNames = ingredientItems
-    .filter((item) => !pantryNames.has(item.name.toLowerCase()))
-    .map((item) => item.name);
+  const displayOwner = recipe.owner?.includes('admin@foo.com') ? ['Pantry Pals Team'] : recipe.owner;
 
   return (
     <main style={{ backgroundColor: '#f8f9fa' }}>
@@ -262,7 +251,6 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                 <h5 className="mb-3 fw-bold" style={{ color: '#2c3e50' }}>
                   Ingredients
                 </h5>
-
                 <ul
                   style={{
                     paddingLeft: '1.25rem',
@@ -270,31 +258,12 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     color: '#495057',
                   }}
                 >
-                  {ingredientItems.map((item) => {
-                    const hasItem = pantryNames.has(item.name.toLowerCase());
-
-                    const parts: string[] = [];
-                    if (item.quantity != null) {
-                      parts.push(
-                        Number.isInteger(item.quantity)
-                          ? String(item.quantity)
-                          : String(item.quantity),
-                      );
-                    }
-                    if (item.unit) {
-                      parts.push(item.unit);
-                    }
-                    parts.push(item.name);
-
-                    const label = parts.join(' ');
-
+                  {(recipe.ingredients ?? []).map((ing) => {
+                    const hasItem = pantryNames.has(ing.toLowerCase());
                     return (
-                      <li
-                        key={`${item.name}-${item.unit ?? ''}`}
-                        style={{ marginBottom: '0.5rem' }}
-                      >
+                      <li key={ing} style={{ marginBottom: '0.5rem' }}>
                         <div className="d-flex align-items-center gap-2">
-                          <span>{label}</span>
+                          <span>{ing}</span>
                           {hasItem ? (
                             <CheckCircleFill
                               color="#28a745"
@@ -313,9 +282,6 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     );
                   })}
                 </ul>
-
-                {/* Add-to-shopping-list controls (client) */}
-                <AddToShoppingList missingItems={missingItemNames} />
               </div>
             </div>
 
