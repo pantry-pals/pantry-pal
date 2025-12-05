@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Col, Modal, Row, Table } from 'react-bootstrap';
+import { BagCheckFill } from 'react-bootstrap-icons';
 import AddToShoppingListModal from './AddToShoppingListModal';
 
 interface ShoppingListItem {
@@ -34,11 +35,14 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   const [items, setItems] = useState<ShoppingListItem[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
+  const [checkedState, setCheckedState] = useState<Record<number, boolean>>({});
 
   // Update items when the shopping list changes
   useEffect(() => {
     if (shoppingList?.items) {
       setItems(shoppingList.items);
+      const saved = localStorage.getItem(`checkboxes-${shoppingList.id}`);
+      if (saved) setCheckedState(JSON.parse(saved));
     }
   }, [shoppingList]);
 
@@ -78,6 +82,18 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
     }
   };
 
+  const toggleCheckbox = (itemId: number) => {
+    setCheckedState(prev => {
+      const updated = { ...prev, [itemId]: !prev[itemId] };
+
+      if (shoppingList) {
+        localStorage.setItem(`checkboxes-${shoppingList.id}`, JSON.stringify(updated));
+      }
+
+      return updated;
+    });
+  };
+
   if (!shoppingList) return null;
 
   return (
@@ -91,9 +107,12 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
           {items.length > 0 ? (
             <Row>
               <Col>
-                <Table striped bordered hover size="sm" responsive>
+                <Table striped bordered hover size="sm" responsive className="text-center">
                   <thead>
                     <tr>
+                      <th>
+                        <BagCheckFill color="black" size={18} />
+                      </th>
                       <th>Item</th>
                       <th>Quantity</th>
                       <th>Unit</th>
@@ -105,6 +124,14 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                   <tbody>
                     {items.map((item) => (
                       <tr key={item.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={!!checkedState[item.id]}
+                            onChange={() => toggleCheckbox(item.id)}
+                            aria-label={`Select ${item.name}`}
+                          />
+                        </td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
                         <td>{item.unit || '-'}</td>
@@ -163,7 +190,10 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 variant="success"
                 style={{ backgroundColor: 'var(--fern-green)' }}
                 className="btn-submit"
-                onClick={() => setShowAddModal(true)}
+                onClick={() => {
+                  onHide();
+                  setShowAddModal(true);
+                }}
               >
                 + Add Item
               </Button>
@@ -181,7 +211,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
         shoppingLists={[shoppingList]}
-        sidePanel
+        sidePanel={false}
       />
     </>
   );

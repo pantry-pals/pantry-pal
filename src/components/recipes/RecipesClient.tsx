@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import AddRecipeModal from '@/components/recipes/AddRecipeModal';
+import { useSession } from 'next-auth/react';
 import RecipeCard from './RecipeCard';
 import '../../styles/buttons.css';
 
@@ -17,10 +18,16 @@ type Props = {
 export default function RecipesClient({
   recipes,
   produce,
-  canAdd,
-  currentUserEmail,
-  isAdmin,
+  canAdd: serverCanAdd,
+  currentUserEmail: serverEmail,
+  isAdmin: serverIsAdmin,
 }: Props) {
+  const { data: session } = useSession();
+
+  const currentUserEmail = (session?.user?.email ?? serverEmail) || null;
+  const isAdmin = serverIsAdmin || currentUserEmail === 'admin@foo.com';
+  const canAdd = serverCanAdd || !!currentUserEmail;
+
   const [showCanMake, setShowCanMake] = useState(false);
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
@@ -33,18 +40,27 @@ export default function RecipesClient({
 
   const canMakeFiltered = useMemo(() => {
     if (!showCanMake) return recipes;
-    return recipes.filter((r) => r.ingredients.every((ing: string) => pantryNames.has(ing.toLowerCase())));
+
+    return recipes.filter((r) => {
+      const items = r.ingredientItems ?? [];
+      if (items.length === 0) return false;
+
+      return items.every((i: any) => pantryNames.has(i.name.toLowerCase()));
+    });
   }, [recipes, showCanMake, pantryNames]);
 
   const filteredRecipes = useMemo(() => {
     const query = search.toLowerCase();
     if (!query) return canMakeFiltered;
-    return canMakeFiltered.filter(
-      (r) => r.title.toLowerCase().includes(query)
-        || r.cuisine.toLowerCase().includes(query)
-        || r.ingredients.some((ing: string) => ing.toLowerCase().includes(query))
-        || (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query)),
-    );
+
+    return canMakeFiltered.filter((r) => {
+      const titleMatch = r.title.toLowerCase().includes(query);
+      const cuisineMatch = r.cuisine.toLowerCase().includes(query);
+      const dietaryMatch = (r.dietary ?? []).some((tag: string) => tag.toLowerCase().includes(query));
+      const ingredientMatch = (r.ingredientItems ?? []).some((item: any) => item.name.toLowerCase().includes(query));
+
+      return titleMatch || cuisineMatch || dietaryMatch || ingredientMatch;
+    });
   }, [canMakeFiltered, search]);
 
   // Helper: can current user edit this recipe?
@@ -128,7 +144,7 @@ export default function RecipesClient({
                   imageUrl={r.imageUrl ?? undefined}
                   cuisine={r.cuisine}
                   dietary={r.dietary ?? []}
-                  ingredients={r.ingredients ?? []}
+                  ingredientItems={r.ingredientItems ?? []}
                   owner={owner}
                   canEdit={canEdit}
                   editMode={editMode}

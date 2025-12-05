@@ -208,20 +208,25 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
 
       <Modal.Body className="text-center">
         <Form onSubmit={handleSubmit(onSubmit)}>
-          {/* Barcode Scanner */}
-          <Row className="mb-3">
-            <Col xs={12} className="text-center">
-              <Button
-                type="button"
-                variant="info"
-                size="sm"
-                className="mb-2"
-                onClick={() => setShowScanner(true)}
+          {/* Barcode Scanner - Highlighted */}
+          <Row className="mb-4 justify-content-center">
+            <Col xs={12}>
+              <div
+                className="p-3 mb-3 border rounded bg-light text-center"
+                style={{ boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}
               >
-                Scan Barcode
-              </Button>
+                <p className="mb-2 fw-bold">Scan a barcode to auto-fill product info</p>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  onClick={() => setShowScanner(true)}
+                  style={{ fontSize: '1.1rem', padding: '0.75rem 1.5rem' }}
+                >
+                  Scan Barcode
+                </Button>
 
-              {showScanner && (
+                {showScanner && (
                 <BarcodeScanner
                   onDetected={async (code) => {
                     await fetchProductByBarcode(code);
@@ -229,7 +234,8 @@ export default function AddProduceModal({ show, onHide, produce }: AddProduceMod
                   }}
                   onClose={() => setShowScanner(false)}
                 />
-              )}
+                )}
+              </div>
             </Col>
           </Row>
 
