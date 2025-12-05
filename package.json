@@ -28,6 +28,7 @@
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
     "cookie": "^1.0.2",
+    "firebase": "^12.6.0",
     "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
     "multiselect-react-dropdown": "^2.0.25",
