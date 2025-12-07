@@ -26,7 +26,7 @@ interface Props {
   onHide: () => void;
   shoppingLists: SL[];
   sidePanel: boolean;
-  prefillName?: string;
+  prefillName: string;
 }
 
 const AddToShoppingListModal = ({
@@ -34,7 +34,7 @@ const AddToShoppingListModal = ({
   onHide,
   shoppingLists,
   sidePanel = false,
-  prefillName = '',
+  prefillName,
 }: Props) => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -48,7 +48,7 @@ const AddToShoppingListModal = ({
   } = useForm<AddItemValues>({
     resolver: yupResolver(AddShoppingListItemSchema),
     defaultValues: {
-      name: prefillName || '',
+      name: prefillName,
       quantity: 0,
       unit: '',
       price: 0,
@@ -57,11 +57,11 @@ const AddToShoppingListModal = ({
   });
 
   useEffect(() => {
-    if (!show) reset();
-  }, [show, reset]);
+    if (!show) reset({ name: prefillName });
+  }, [show, reset, prefillName]);
 
   const handleClose = () => {
-    reset();
+    reset({ name: prefillName });
     onHide();
   };
 
@@ -156,8 +156,10 @@ const AddToShoppingListModal = ({
               defaultValue={shoppingLists[0]?.id ?? ''}
             >
               <option value="">Choose a list…</option>
-              {shoppingLists.map(sl => (
-                <option key={sl.id} value={sl.id}>{sl.name}</option>
+              {shoppingLists.map((sl) => (
+                <option key={sl.id} value={sl.id}>
+                  {sl.name}
+                </option>
               ))}
             </Form.Select>
             <div className="invalid-feedback">{errors.shoppingListId?.message}</div>
@@ -172,7 +174,12 @@ const AddToShoppingListModal = ({
           </Button>
         </Col>
         <Col>
-          <Button type="button" onClick={() => reset()} variant="warning" className="btn-reset">
+          <Button
+            type="button"
+            onClick={() => reset({ name: prefillName })}
+            variant="warning"
+            className="btn-reset"
+          >
             Reset
           </Button>
         </Col>

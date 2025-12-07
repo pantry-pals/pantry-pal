@@ -47,6 +47,7 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
             onHide={() => setShow(false)}
             shoppingLists={initialShoppingLists}
             sidePanel={false}
+            prefillName=""
           />
         </Col>
 
