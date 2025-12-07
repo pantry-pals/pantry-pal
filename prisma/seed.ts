@@ -1,9 +1,19 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-await-in-loop */
 import { PrismaClient, Role } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
 
-const prisma = new PrismaClient();
+// Use the same adapter-based client config as your app
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+  log: ['query'], // optional, like in lib/prisma.ts
+});
 
 async function main() {
   console.log('Seeding the database');
@@ -113,13 +123,22 @@ async function main() {
 
   // Seed Recipe
   if ((config as any).defaultRecipes?.length) {
+    type IngredientItemSeed = {
+      name: string;
+      quantity: number | null;
+      unit: string | null;
+    };
+
     type RecipeSeed = {
       title: string;
       cuisine: string;
       description?: string;
       imageUrl?: string;
       dietary?: string[];
+      // legacy input still allowed, but only used to build ingredientItems
       ingredients?: string[];
+      // new structured ingredients
+      ingredientItems?: IngredientItemSeed[];
       owner: string;
       instructions?: string;
       servings?: number;
@@ -128,17 +147,33 @@ async function main() {
       sourceUrl?: string;
     };
 
+    console.log('  Seeding recipes...');
+
     for (const r of (config as any).defaultRecipes as RecipeSeed[]) {
       console.log(`  upsert recipe: ${r.title} (${r.owner})`);
-      await prisma.recipe.upsert({
+
+      // ---- Build ingredient items (from ingredientItems or legacy ingredients[]) ----
+      let items: IngredientItemSeed[] = [];
+
+      if (r.ingredientItems && r.ingredientItems.length > 0) {
+        items = r.ingredientItems;
+      } else if (r.ingredients && r.ingredients.length > 0) {
+        // Fallback so older config still works
+        items = r.ingredients.map((name) => ({
+          name,
+          quantity: null,
+          unit: null,
+        }));
+      }
+
+      // ---- Upsert Recipe (NO legacy ingredients field) ----
+      const recipe = await prisma.recipe.upsert({
         where: { title_owner: { title: r.title, owner: r.owner } },
         update: {
           cuisine: r.cuisine,
           description: r.description ?? null,
           imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
           dietary: r.dietary ?? [],
-          ingredients: r.ingredients ?? [],
-          // NEW fields
           instructions: r.instructions ?? null,
           servings: r.servings ?? null,
           prepMinutes: r.prepMinutes ?? null,
@@ -151,9 +186,7 @@ async function main() {
           description: r.description ?? null,
           imageUrl: r.imageUrl && r.imageUrl.length > 0 ? r.imageUrl : null,
           dietary: r.dietary ?? [],
-          ingredients: r.ingredients ?? [],
           owner: r.owner,
-          // NEW fields
           instructions: r.instructions ?? null,
           servings: r.servings ?? null,
           prepMinutes: r.prepMinutes ?? null,
@@ -161,6 +194,28 @@ async function main() {
           sourceUrl: r.sourceUrl ?? null,
         },
       });
+
+      // ---- Handle ingredient rows (recipeIngredient / ingredientItems) ----
+      if (items.length > 0) {
+        await prisma.recipeIngredient.deleteMany({
+          where: { recipeId: recipe.id },
+        });
+
+        for (let index = 0; index < items.length; index += 1) {
+          const item = items[index];
+
+          await prisma.recipeIngredient.create({
+            data: {
+              recipeId: recipe.id,
+              name: item.name,
+              quantity: item.quantity,
+              unit: item.unit,
+              order: index,
+            },
+          });
+        }
+      }
+      // If items.length === 0 → do nothing (no ingredient deletion)
     }
   }
 
@@ -174,4 +229,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-  
