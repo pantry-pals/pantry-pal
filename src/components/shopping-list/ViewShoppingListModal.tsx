@@ -212,6 +212,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         onHide={() => setShowAddModal(false)}
         shoppingLists={[shoppingList]}
         sidePanel={false}
+        prefillName=""
       />
     </>
   );
