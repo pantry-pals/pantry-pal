@@ -109,7 +109,6 @@ export default function RecipeCard({
             src={imageUrl || 'https://placehold.co/800x450?text=Recipe'}
             alt={title}
             className="w-100 recipe-card-img"
-            fluid
           />
         </div>
 
