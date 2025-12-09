@@ -2,31 +2,96 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 
+type IncomingItem =
+  | string
+  | {
+    name?: string;
+    quantity?: number | string | null;
+    unit?: string | null;
+  };
+
+type NormalizedItem = {
+  name: string;
+  quantity: number;
+  unit: string | null;
+};
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession();
     const email = session?.user?.email ?? null;
 
     if (!email) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 },
+      );
     }
 
     const body = await request.json();
-    let items: string[] = [];
 
+    let rawItems: IncomingItem[] = [];
+
+    // Bulk: body.items (can be strings OR objects)
     if (Array.isArray(body.items)) {
-      items = body.items.map((i: any) => String(i).trim()).filter(Boolean);
+      rawItems = body.items;
+    // Single: body.name (+ optional quantity/unit)
     } else if (body.name) {
-      items = [String(body.name).trim()];
+      rawItems = [body];
     } else {
-      return NextResponse.json({ error: 'No items provided' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No items provided' },
+        { status: 400 },
+      );
     }
 
-    if (!items.length) {
-      return NextResponse.json({ error: 'No valid items to add' }, { status: 400 });
+    // Normalize into { name, quantity, unit }
+    const normalizedItems: NormalizedItem[] = rawItems
+      .map((item) => {
+        // Allow legacy string form
+        if (typeof item === 'string') {
+          const name = item.trim();
+          if (!name) return null;
+          return {
+            name,
+            quantity: 1, // default quantity
+            unit: null,
+          };
+        }
+
+        const name = String(item.name ?? '').trim();
+        if (!name) return null;
+
+        const rawQty = item.quantity;
+        let quantity: number;
+
+        if (rawQty == null || rawQty === '') {
+          quantity = 1; // default 1 if not provided
+        } else {
+          const num = Number(rawQty);
+          quantity = Number.isFinite(num) && num > 0 ? num : 1;
+        }
+
+        const unit = typeof item.unit === 'string' && item.unit.trim().length > 0
+          ? item.unit.trim()
+          : null;
+
+        return {
+          name,
+          quantity,
+          unit,
+        };
+      })
+      .filter((v): v is NormalizedItem => v !== null);
+
+    if (normalizedItems.length === 0) {
+      return NextResponse.json(
+        { error: 'No valid items to add' },
+        { status: 400 },
+      );
     }
 
-    // Find or create shopping list
+    // Find or create shopping list for this user
     let shoppingList = await prisma.shoppingList.findFirst({
       where: { owner: email },
       orderBy: { createdAt: 'desc' },
@@ -38,7 +103,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // Fetch all existing item names once
+    // Fetch existing items (by name) for this list once
     const existingItems = await prisma.shoppingListItem.findMany({
       where: { shoppingListId: shoppingList.id },
       select: { name: true },
@@ -46,29 +111,30 @@ export async function POST(request: Request) {
 
     const existingNames = new Set(existingItems.map((i) => i.name));
 
-    // Filter out duplicates and invalid strings
-    const uniqueNamesToInsert = items
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0 && !existingNames.has(n));
+    // Filter out duplicates by name
+    const itemsToInsert = normalizedItems.filter(
+      (item) => !existingNames.has(item.name),
+    );
 
-    if (uniqueNamesToInsert.length === 0) {
+    if (itemsToInsert.length === 0) {
       return NextResponse.json({ success: true, created: [] });
     }
 
-    // Insert all at once
+    // Insert all at once, carrying quantity & unit
     await prisma.shoppingListItem.createMany({
-      data: uniqueNamesToInsert.map((name) => ({
+      data: itemsToInsert.map((item) => ({
         shoppingListId: shoppingList.id,
-        name,
-        quantity: 1,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
       })),
     });
 
-    // Fetch newly created items to return their IDs
+    // Fetch newly created items to return ids + names
     const createdItems = await prisma.shoppingListItem.findMany({
       where: {
         shoppingListId: shoppingList.id,
-        name: { in: uniqueNamesToInsert },
+        name: { in: itemsToInsert.map((i) => i.name) },
       },
       select: { id: true, name: true },
     });
@@ -76,6 +142,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, created: createdItems });
   } catch (error) {
     console.error('Error adding shopping list items:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }

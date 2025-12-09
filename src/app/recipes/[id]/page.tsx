@@ -32,13 +32,13 @@ export default async function RecipeDetailPage({ params }: PageProps) {
     ? ['Pantry Pals Team']
     : recipe.owner;
 
-  // ✅ Only use ingredientItems from the relation
+  // Only use ingredientItems from the relation
   const ingredientItems = recipe.ingredientItems ?? [];
 
   // Missing item names (for AddToShoppingList)
-  const missingItemNames = ingredientItems
-    .filter((item) => !pantryNames.has(item.name.toLowerCase()))
-    .map((item) => item.name);
+  const missingItems = ingredientItems.filter(
+    (item) => !pantryNames.has(item.name.toLowerCase()),
+  );
 
   return (
     <main style={{ backgroundColor: '#f8f9fa' }}>
@@ -290,7 +290,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
                     return (
                       <li
-                        key={`${item.name}-${item.unit ?? ''}`}
+                        key={item.id ?? `${item.name}-${item.unit ?? ''}`}
                         style={{ marginBottom: '0.5rem' }}
                       >
                         <div className="d-flex align-items-center gap-2">
@@ -315,7 +315,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                 </ul>
 
                 {/* Add-to-shopping-list controls (client) */}
-                <AddToShoppingList missingItems={missingItemNames} />
+                <AddToShoppingList missingItems={missingItems} />
               </div>
             </div>
 

@@ -3,42 +3,73 @@
 import React, { useState, useCallback } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 
+export type MissingItem = {
+  name: string;
+  quantity?: number | null;
+  unit?: string | null;
+};
+
 type Props = {
-  missingItems: string[];
+  // now expects full ingredient items, not just strings
+  missingItems: MissingItem[];
 };
 
 export default function AddToShoppingList({ missingItems }: Props) {
+  // keyed by item name (lowercased)
   const [adding, setAdding] = useState<Record<string, boolean>>({});
   const [added, setAdded] = useState<Record<string, boolean>>({});
   const [addingAll, setAddingAll] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const addOne = useCallback(async (item: string) => {
-    setAdding((s) => ({ ...s, [item]: true }));
+  const keyFor = (item: MissingItem) => item.name.toLowerCase();
+
+  const formatItemLabel = (item: MissingItem) => {
+    const parts: string[] = [];
+    if (item.quantity != null) {
+      parts.push(
+        Number.isInteger(item.quantity)
+          ? String(item.quantity)
+          : String(item.quantity),
+      );
+    }
+    if (item.unit) {
+      parts.push(item.unit);
+    }
+    parts.push(item.name);
+    return parts.join(' ');
+  };
+
+  const addOne = useCallback(async (item: MissingItem) => {
+    const key = keyFor(item);
+    setAdding((s) => ({ ...s, [key]: true }));
     setMessage(null);
 
     try {
       const res = await fetch('/api/shopping-list-item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: item }),
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity ?? null,
+          unit: item.unit ?? null,
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Failed to add');
 
-      setAdded((s) => ({ ...s, [item]: true }));
-      setMessage(`Added "${item}" to your shopping list.`);
+      setAdded((s) => ({ ...s, [key]: true }));
+      setMessage(`Added "${formatItemLabel(item)}" to your shopping list.`);
     } catch (err: any) {
       console.error(err);
       setMessage(err?.message ?? 'Failed to add item');
     } finally {
-      setAdding((s) => ({ ...s, [item]: false }));
+      setAdding((s) => ({ ...s, [key]: false }));
     }
   }, []);
 
   const addAll = useCallback(async () => {
-    const itemsToAdd = missingItems.filter((i) => !added[i]);
+    const itemsToAdd = missingItems.filter((i) => !added[keyFor(i)]);
 
     if (!itemsToAdd.length) {
       setMessage('All missing items are already added.');
@@ -52,16 +83,26 @@ export default function AddToShoppingList({ missingItems }: Props) {
       const res = await fetch('/api/shopping-list-item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: itemsToAdd }),
+        body: JSON.stringify({
+          items: itemsToAdd.map((i) => ({
+            name: i.name,
+            quantity: i.quantity ?? null,
+            unit: i.unit ?? null,
+          })),
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Failed to add');
 
-      const createdNames = (data.created ?? []).map((c: any) => c.name as string);
-      const updates: Record<string, boolean> = {};
+      const createdNames: string[] = (data.created ?? []).map(
+        (c: any) => c.name as string,
+      );
 
-      createdNames.forEach((n: any) => (updates[n] = true));
+      const updates: Record<string, boolean> = {};
+      createdNames.forEach((n) => {
+        updates[n.toLowerCase()] = true;
+      });
 
       setAdded((s) => ({ ...s, ...updates }));
       setMessage(`Added ${createdNames.length} item(s) to your shopping list.`);
@@ -73,10 +114,11 @@ export default function AddToShoppingList({ missingItems }: Props) {
     }
   }, [missingItems, added]);
 
-  const renderButtonLabel = (item: string) => {
-    if (adding[item]) return <Spinner animation="border" size="sm" />;
-    if (added[item]) return 'Added ✓';
-    return `Add ${item}`;
+  const renderButtonLabel = (item: MissingItem) => {
+    const key = keyFor(item);
+    if (adding[key]) return <Spinner animation="border" size="sm" />;
+    if (added[key]) return 'Added ✓';
+    return `Add ${formatItemLabel(item)}`;
   };
 
   if (!missingItems?.length) return null;
@@ -104,19 +146,26 @@ export default function AddToShoppingList({ missingItems }: Props) {
       </div>
 
       <div className="d-flex flex-wrap gap-2">
-        {missingItems.map((item) => (
-          <div key={item} className="d-flex align-items-center gap-2">
-            <Button
-              size="sm"
-              variant={added[item] ? 'success' : 'outline-primary'}
-              onClick={() => addOne(item)}
-              disabled={adding[item] || !!added[item]}
-              title={added[item] ? 'Already added' : `Add ${item} to shopping list`}
-            >
-              {renderButtonLabel(item)}
-            </Button>
-          </div>
-        ))}
+        {missingItems.map((item) => {
+          const key = keyFor(item);
+          return (
+            <div key={key} className="d-flex align-items-center gap-2">
+              <Button
+                size="sm"
+                variant={added[key] ? 'success' : 'outline-primary'}
+                onClick={() => addOne(item)}
+                disabled={adding[key] || !!added[key]}
+                title={
+                  added[key]
+                    ? 'Already added'
+                    : `Add ${formatItemLabel(item)} to shopping list`
+                }
+              >
+                {renderButtonLabel(item)}
+              </Button>
+            </div>
+          );
+        })}
       </div>
 
       {message && (
