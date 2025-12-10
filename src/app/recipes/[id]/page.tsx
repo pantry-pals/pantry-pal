@@ -6,6 +6,8 @@ import { getRecipeById } from '@/lib/recipes';
 import { getServerSession } from 'next-auth';
 import { getUserProduceByEmail } from '@/lib/dbActions';
 import AddToShoppingList from '@/components/recipes/AddToShoppingList';
+import UploadDishButton from '@/components/recipes/UploadDishButton';
+import ViewDishImagesButton from '@/components/recipes/ViewDishImagesButton';
 
 type PageProps = { params: { id: string } };
 export const dynamic = 'force-dynamic';
@@ -28,17 +30,13 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   // Create a set of pantry item names (lowercase for case-insensitive matching)
   const pantryNames = new Set(pantry.map((p) => p.name.toLowerCase()));
 
-  const displayOwner = recipe.owner?.includes('admin@foo.com')
-    ? ['Pantry Pals Team']
-    : recipe.owner;
+  const displayOwner = recipe.owner?.includes('admin@foo.com') ? ['Pantry Pals Team'] : recipe.owner;
 
   // Only use ingredientItems from the relation
   const ingredientItems = recipe.ingredientItems ?? [];
 
   // Missing item names (for AddToShoppingList)
-  const missingItems = ingredientItems.filter(
-    (item) => !pantryNames.has(item.name.toLowerCase()),
-  );
+  const missingItems = ingredientItems.filter((item) => !pantryNames.has(item.name.toLowerCase()));
 
   return (
     <main style={{ backgroundColor: '#f8f9fa' }}>
@@ -235,6 +233,14 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                 View Original Recipe →
               </Button>
             )}
+
+            <div className="mt-3">
+              <UploadDishButton recipeId={recipe.id} recipeTitle={recipe.title} userEmail={email} />
+            </div>
+
+            <div className="mt-3">
+              <ViewDishImagesButton recipeId={recipe.id} recipeTitle={recipe.title} />
+            </div>
           </Col>
 
           {/* Content Section */}
@@ -275,11 +281,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
                     const parts: string[] = [];
                     if (item.quantity != null) {
-                      parts.push(
-                        Number.isInteger(item.quantity)
-                          ? String(item.quantity)
-                          : String(item.quantity),
-                      );
+                      parts.push(Number.isInteger(item.quantity) ? String(item.quantity) : String(item.quantity));
                     }
                     if (item.unit) {
                       parts.push(item.unit);
@@ -289,24 +291,13 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     const label = parts.join(' ');
 
                     return (
-                      <li
-                        key={item.id ?? `${item.name}-${item.unit ?? ''}`}
-                        style={{ marginBottom: '0.5rem' }}
-                      >
+                      <li key={item.id ?? `${item.name}-${item.unit ?? ''}`} style={{ marginBottom: '0.5rem' }}>
                         <div className="d-flex align-items-center gap-2">
                           <span>{label}</span>
                           {hasItem ? (
-                            <CheckCircleFill
-                              color="#28a745"
-                              size={16}
-                              title="You have this in your pantry"
-                            />
+                            <CheckCircleFill color="#28a745" size={16} title="You have this in your pantry" />
                           ) : (
-                            <XCircleFill
-                              color="#dc3545"
-                              size={16}
-                              title="You don't have this in your pantry"
-                            />
+                            <XCircleFill color="#dc3545" size={16} title="You don't have this in your pantry" />
                           )}
                         </div>
                       </li>
