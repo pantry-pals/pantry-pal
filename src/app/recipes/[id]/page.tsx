@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth';
 import { getUserProduceByEmail } from '@/lib/dbActions';
 import AddToShoppingList from '@/components/recipes/AddToShoppingList';
 import UploadDishButton from '@/components/recipes/UploadDishButton';
+import ViewDishImagesButton from '@/components/recipes/ViewDishImagesButton';
 
 type PageProps = { params: { id: string } };
 export const dynamic = 'force-dynamic';
@@ -235,6 +236,10 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
             <div className="mt-3">
               <UploadDishButton recipeId={recipe.id} recipeTitle={recipe.title} userEmail={email} />
+            </div>
+
+            <div className="mt-3">
+              <ViewDishImagesButton recipeId={recipe.id} recipeTitle={recipe.title} />
             </div>
           </Col>
 
