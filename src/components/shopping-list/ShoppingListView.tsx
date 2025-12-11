@@ -24,8 +24,11 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
   return (
     <>
       {/* Search + Buttons Row */}
-      <Row className="mb-4 align-items-center">
-        <Col xs={12} md={8} className="mb-2 mb-md-0">
+      <Row
+        className="mb-4 d-flex justify-content-center align-items-center text-center"
+        style={{ minHeight: '60px' }}
+      >
+        <Col xs={12} md={6} lg={4} className="mb-2">
           <Form.Control
             type="text"
             placeholder="Search shopping lists..."
@@ -34,10 +37,16 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
           />
         </Col>
 
-        <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
+        <Col xs="auto" className="mb-2">
           <Button
             onClick={() => setShow(true)}
-            style={{ backgroundColor: 'var(--fern-green)' }}
+            style={{
+              backgroundColor: 'var(--fern-green)',
+              height: '34px',
+              padding: '4px 12px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
             className="btn-submit"
           >
             + Add Item to List
@@ -51,14 +60,21 @@ export default function ShoppingListView({ initialShoppingLists }: ShoppingListV
           />
         </Col>
 
-        <Col xs={12} md="auto" className="mt-2 mt-md-0 text-md-end">
+        <Col xs="auto" className="mb-2">
           <Button
             onClick={() => setShowCreateList(true)}
-            style={{ backgroundColor: 'var(--fern-green)' }}
+            style={{
+              backgroundColor: 'var(--fern-green)',
+              height: '34px',
+              padding: '4px 12px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
             className="btn-submit"
           >
             + New List
           </Button>
+
           <AddShoppingList
             show={showCreateList}
             onHide={() => setShowCreateList(false)}
