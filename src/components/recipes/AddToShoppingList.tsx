@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
+import '../../styles/buttons.css';
 
 export type MissingItem = {
   name: string;
@@ -152,7 +153,7 @@ export default function AddToShoppingList({ missingItems }: Props) {
             <div key={key} className="d-flex align-items-center gap-2">
               <Button
                 size="sm"
-                variant={added[key] ? 'success' : 'outline-primary'}
+                variant={added[key] ? 'success' : ' dish-btn-secondary'}
                 onClick={() => addOne(item)}
                 disabled={adding[key] || !!added[key]}
                 title={

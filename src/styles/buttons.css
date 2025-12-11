@@ -147,3 +147,30 @@
 .location-tab:hover .delete-btn {
   opacity: 1; /* show on hover */
 }
+
+.dish-btn-primary {
+  background-color: #198754;
+  border: #198754;
+  color: white;
+}
+
+.dish-btn-primary:hover {
+  background-color: var(--fern-green);
+}
+
+.dish-btn-secondary {
+  background-color: transparent;
+  color: #d4af37;
+  border: #d4af37 solid 1px;
+}
+
+.dish-btn-secondary:hover {
+  background-color: #d4af37;
+  border: #d4af37 solid 1px;
+  color: white;
+}
+
+.dish-btn-added {
+  background-color: #d4af37 !important;
+  color: white !important;
+}
