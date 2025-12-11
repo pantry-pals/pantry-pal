@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Images } from 'react-bootstrap-icons';
 import DishImagesModal from './DishImagesModal';
+import '../../styles/buttons.css';
 
 type Props = {
   recipeId: number;
@@ -16,9 +17,8 @@ export default function ViewDishImagesButton({ recipeId, recipeTitle }: Props) {
   return (
     <>
       <Button
-        variant="outline-primary"
         size="lg"
-        className="w-100 d-flex align-items-center justify-content-center gap-2"
+        className="w-100 d-flex align-items-center justify-content-center gap-2 dish-btn-secondary"
         style={{
           fontWeight: 600,
           padding: '0.75rem 1.5rem',

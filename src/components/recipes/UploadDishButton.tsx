@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { CameraFill } from 'react-bootstrap-icons';
 import DishImageUploadModal from './DishImageUploadModal';
+import '../../styles/buttons.css';
 
 type Props = {
   recipeId: number;
@@ -17,9 +18,8 @@ export default function UploadDishButton({ recipeId, recipeTitle, userEmail }: P
   return (
     <>
       <Button
-        variant="primary"
         size="lg"
-        className="w-100 d-flex align-items-center justify-content-center gap-2"
+        className="w-100 d-flex align-items-center justify-content-center gap-2 dish-btn-primary"
         style={{
           fontWeight: 600,
           padding: '0.75rem 1.5rem',
