@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { Button, Col, Modal, Row, Table } from 'react-bootstrap';
 import { BagCheckFill } from 'react-bootstrap-icons';
 import AddToShoppingListModal from './AddToShoppingListModal';
+import EditShoppingListItemModal from './EditShoppingListItemModal';
 
 interface ShoppingListItem {
   id: number;
@@ -36,6 +37,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   const [showAddModal, setShowAddModal] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
   const [checkedState, setCheckedState] = useState<Record<number, boolean>>({});
+  const [editingItem, setEditingItem] = useState<ShoppingListItem | null>(null);
 
   // Update items when the shopping list changes
   useEffect(() => {
@@ -160,7 +162,15 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                             />
                           )}
                         </td>
-                        <td>
+                        <td className="d-flex gap-2 justify-content-center">
+                          <Button
+                            variant="edit"
+                            size="sm"
+                            onClick={() => setEditingItem(item)}
+                          >
+                            Edit
+                          </Button>
+
                           <Button
                             variant="danger"
                             size="sm"
@@ -214,6 +224,13 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         sidePanel={false}
         prefillName=""
       />
+      {editingItem && (
+      <EditShoppingListItemModal
+        show={!!editingItem}
+        onHide={() => setEditingItem(null)}
+        item={editingItem}
+      />
+      )}
     </>
   );
 };

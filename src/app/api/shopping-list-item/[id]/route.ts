@@ -48,3 +48,30 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    const id = Number(params.id);
+    const body = await request.json();
+
+    const updatedItem = await prisma.shoppingListItem.update({
+      where: { id },
+      data: {
+        name: body.name,
+        quantity: body.quantity,
+        unit: body.unit || null,
+        price: body.price ?? null,
+        restockTrigger: body.restockTrigger ?? null,
+        customThreshold: body.customThreshold ?? null,
+      },
+    });
+
+    return NextResponse.json(updatedItem, { status: 200 });
+  } catch (error: any) {
+    console.error('Error updating item:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

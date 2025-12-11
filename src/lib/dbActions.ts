@@ -345,12 +345,30 @@ export async function addShoppingListItem(data: {
 /**
  * Edits a shopping list item.
  */
-export async function editShoppingListItem(item: Prisma.ShoppingListItemUpdateInput & { id: number }) {
+export async function editShoppingListItem(
+  item: {
+    id: number;
+    name?: string;
+    quantity?: number;
+    unit?: string | null;
+    price?: number | null;
+    restockTrigger?: string | null;
+    customThreshold?: number | null;
+  },
+) {
   const updatedItem = await prisma.shoppingListItem.update({
     where: { id: item.id },
     data: {
-      quantity: item.quantity,
-      price: item.price,
+      ...(item.name !== undefined && { name: item.name }),
+      ...(item.quantity !== undefined && { quantity: item.quantity }),
+      ...(item.unit !== undefined && { unit: item.unit }),
+      ...(item.price !== undefined && { price: item.price }),
+      ...(item.restockTrigger !== undefined && {
+        restockTrigger: item.restockTrigger,
+      }),
+      ...(item.customThreshold !== undefined && {
+        customThreshold: item.customThreshold,
+      }),
     },
   });
 
