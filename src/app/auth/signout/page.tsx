@@ -20,8 +20,7 @@ export default function SignOutPage() {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     // Do not redirect automatically, let router handle it
-    await signOut({ redirect: false });
-    router.push('/');
+    await signOut({ callbackUrl: '/' });
     setIsSigningOut(false);
   };
 
@@ -52,7 +51,7 @@ export default function SignOutPage() {
               backgroundColor: 'var(--sage)',
               color: 'var(--brunswick-green)',
             }}
-            onClick={() => router.push('/list')}
+            onClick={() => router.push('/dashboard')}
             disabled={isSigningOut}
           >
             Cancel
