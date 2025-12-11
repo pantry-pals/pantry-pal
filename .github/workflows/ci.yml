@@ -37,4 +37,3 @@ jobs:
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: npm run test-acceptance-ci
-
