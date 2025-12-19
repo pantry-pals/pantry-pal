@@ -1,14 +1,55 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
-  const body = await req.json();
+export async function POST(req: Request) {
+  try {
+    const { name, quantity, unit, owner } = await req.json();
 
-  const updated = await prisma.shoppingList.update({
-    where: { id },
-    data: { name: body.name },
-  });
+    if (!name || !owner) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
 
-  return NextResponse.json(updated);
+    // Get or create default shopping list
+    const shoppingList = await prisma.shoppingList.upsert({
+      where: {
+        name_owner: {
+          name: 'Auto Restock',
+          owner,
+        },
+      },
+      update: {},
+      create: {
+        name: 'Auto Restock',
+        owner,
+      },
+    });
+
+    // Prevent duplicates
+    const existing = await prisma.shoppingListItem.findFirst({
+      where: {
+        shoppingListId: shoppingList.id,
+        name,
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json({ message: 'Item already exists' }, { status: 200 });
+    }
+
+    // Add item
+    const item = await prisma.shoppingListItem.create({
+      data: {
+        shoppingListId: shoppingList.id,
+        name,
+        quantity: Number(quantity) || 1,
+        unit: unit || '',
+        price: null,
+      },
+    });
+
+    return NextResponse.json(item);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: 'Failed to add item' }, { status: 500 });
+  }
 }
