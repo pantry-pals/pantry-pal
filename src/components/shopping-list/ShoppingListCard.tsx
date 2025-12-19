@@ -50,10 +50,11 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
 
   const totalItems = shoppingList.items?.length || 0;
 
-  const totalCost = shoppingList.items?.reduce((sum: number, item: any) => {
-    const price = item.price ? parseFloat(item.price.toString()) : 0;
-    return sum + price * item.quantity;
-  }, 0) || 0;
+  const totalCost =
+    shoppingList.items?.reduce((sum: number, item: any) => {
+      const price = item.price ? parseFloat(item.price.toString()) : 0;
+      return sum + price * item.quantity;
+    }, 0) || 0;
 
   return (
     <Card className="h-100 mb-3 image-shadow">
@@ -61,10 +62,7 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
         className="d-flex align-items-center"
         style={{ height: '48px', paddingTop: '0px', paddingBottom: '0px' }}
       >
-        <Card.Title
-          className="d-flex align-items-center"
-          style={{ margin: 0, gap: '6px' }}
-        >
+        <Card.Title className="d-flex align-items-center" style={{ margin: 0, gap: '6px' }}>
           {!editing ? (
             <>
               <span>{name}</span>
@@ -113,44 +111,27 @@ export default function ShoppingListCard({ shoppingList }: ShoppingListCardProps
       <Card.Body className="bg-light">
         <ListGroup variant="flush">
           <ListGroup.Item className="bg-light">
-            <strong>Date Created:</strong>
-            {' '}
-            {formatDate(shoppingList.createdAt)}
+            <strong>Date Created:</strong> {formatDate(shoppingList.createdAt)}
           </ListGroup.Item>
           <ListGroup.Item className="bg-light">
-            <strong>Total Items:</strong>
-            {' '}
-            <Badge bg="primary">{totalItems}</Badge>
+            <strong>Total Items:</strong> <Badge bg="primary">{totalItems}</Badge>
           </ListGroup.Item>
           <ListGroup.Item className="bg-light">
-            <strong>Estimated Cost:</strong>
-            {' '}
-            $
-            {totalCost.toFixed(2)}
+            <strong>Estimated Cost:</strong> ${totalCost.toFixed(2)}
           </ListGroup.Item>
         </ListGroup>
       </Card.Body>
 
-      <Card.Footer className="d-flex">
-        <Button className="me-2 editbutton" onClick={() => setShowViewModal(true)}>
+      <Card.Footer className="d-flex justify-content-between align-items-center">
+        <Button className="btn-submit" size="sm" onClick={() => setShowViewModal(true)}>
           View
         </Button>
-
-        <Button
-          variant="danger"
-          className="d-flex align-items-center justify-content-center"
-          onClick={() => setShowDeleteModal(true)}
-          style={{ width: '40px', height: '40px', padding: 0 }}
-        >
-          <Trash color="white" size={18} />
+        <Button variant="danger" size="sm" className="btn-delete" onClick={() => setShowDeleteModal(true)}>
+          <Trash size={16} />
         </Button>
       </Card.Footer>
 
-      <ViewShoppingListModal
-        show={showViewModal}
-        onHide={() => setShowViewModal(false)}
-        shoppingList={shoppingList}
-      />
+      <ViewShoppingListModal show={showViewModal} onHide={() => setShowViewModal(false)} shoppingList={shoppingList} />
 
       <DeleteShoppingListModal
         show={showDeleteModal}

@@ -18,7 +18,7 @@ export default async function RecipeListPage() {
   let pantry: any[] = [];
   if (email) pantry = await getUserProduceByEmail(email);
 
-  const recipes = await getRecipes();
+  const recipes: any[] = [];
 
   return (
     <main>

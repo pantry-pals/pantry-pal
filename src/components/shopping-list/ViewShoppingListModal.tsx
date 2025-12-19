@@ -6,7 +6,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Col, Modal, Row, Table } from 'react-bootstrap';
-import { BagCheckFill } from 'react-bootstrap-icons';
 import AddToShoppingListModal from './AddToShoppingListModal';
 import EditShoppingListItemModal from './EditShoppingListItemModal';
 
@@ -49,9 +48,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   }, [shoppingList]);
 
   const handleRestockChange = async (itemId: number, restockTrigger: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, restockTrigger } : item)),
-    );
+    setItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, restockTrigger } : item)));
 
     await fetch(`/api/shopping-list-item/${itemId}/restock`, {
       method: 'PATCH',
@@ -61,9 +58,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   };
 
   const handleThresholdChange = async (itemId: number, customThreshold: number) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, customThreshold } : item)),
-    );
+    setItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, customThreshold } : item)));
 
     await fetch(`/api/shopping-list-item/${itemId}/restock`, {
       method: 'PATCH',
@@ -85,7 +80,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
   };
 
   const toggleCheckbox = (itemId: number) => {
-    setCheckedState(prev => {
+    setCheckedState((prev) => {
       const updated = { ...prev, [itemId]: !prev[itemId] };
 
       if (shoppingList) {
@@ -112,68 +107,30 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
                 <Table striped bordered hover size="sm" responsive className="text-center">
                   <thead>
                     <tr>
-                      <th>
-                        <BagCheckFill color="black" size={18} />
-                      </th>
                       <th>Item</th>
-                      <th>Quantity</th>
+                      <th>Qty</th>
                       <th>Unit</th>
                       <th>Price</th>
-                      <th>Restock When</th>
-                      <th>Actions</th>
+                      <th style={{ width: 160 }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((item) => (
                       <tr key={item.id}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={!!checkedState[item.id]}
-                            onChange={() => toggleCheckbox(item.id)}
-                            aria-label={`Select ${item.name}`}
-                          />
-                        </td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
                         <td>{item.unit || '-'}</td>
                         <td>{item.price ? `$${Number(item.price).toFixed(2)}` : 'N/A'}</td>
-                        <td>
-                          <select
-                            value={item.restockTrigger || 'empty'}
-                            onChange={(e) => handleRestockChange(item.id, e.target.value)}
-                            className="form-select form-select-sm"
-                          >
-                            <option value="empty">When empty</option>
-                            <option value="half">When half gone</option>
-                            <option value="custom">Custom % left</option>
-                          </select>
-
-                          {item.restockTrigger === 'custom' && (
-                            <input
-                              type="number"
-                              min="1"
-                              max="100"
-                              value={item.customThreshold || ''}
-                              onChange={(e) =>
-                                handleThresholdChange(item.id, parseFloat(e.target.value))}
-                              className="form-control form-control-sm mt-1"
-                              placeholder="% left"
-                            />
-                          )}
-                        </td>
                         <td className="d-flex gap-2 justify-content-center">
-                          <Button
-                            variant="edit"
-                            size="sm"
-                            onClick={() => setEditingItem(item)}
-                          >
+                          <Button className="btn-submit" size="sm" type="button" onClick={() => setEditingItem(item)}>
                             Edit
                           </Button>
 
                           <Button
                             variant="danger"
                             size="sm"
+                            className="btn-delete"
+                            type="button"
                             onClick={() => handleDeleteItem(item.id)}
                             disabled={deletingItemId === item.id}
                           >
@@ -225,11 +182,7 @@ const ViewShoppingListModal = ({ show, onHide, shoppingList }: ViewShoppingListM
         prefillName=""
       />
       {editingItem && (
-      <EditShoppingListItemModal
-        show={!!editingItem}
-        onHide={() => setEditingItem(null)}
-        item={editingItem}
-      />
+        <EditShoppingListItemModal show={!!editingItem} onHide={() => setEditingItem(null)} item={editingItem} />
       )}
     </>
   );
