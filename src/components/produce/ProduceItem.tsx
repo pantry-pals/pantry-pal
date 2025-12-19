@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-one-expression-per-line */
+import swal from 'sweetalert';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { PencilSquare, Trash } from 'react-bootstrap-icons';
@@ -49,6 +50,36 @@ const ProduceItem = ({
         <td>
           <Button variant="danger" className="btn-delete" onClick={() => setShowDeleteModal(true)}>
             <Trash color="white" size={18} />
+          </Button>
+        </td>
+
+        <td>
+          <Button
+            variant="success"
+            size="sm"
+            className="btn-submit"
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/shopping-list-item', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name,
+                    quantity: Number(quantity),
+                    unit,
+                    owner,
+                  }),
+                });
+
+                if (!res.ok) throw new Error();
+
+                swal('Added', `${name} added to your shopping list`, 'success', { timer: 2000 });
+              } catch (err) {
+                swal('Error', 'Failed to add item to shopping list', 'error');
+              }
+            }}
+          >
+            +
           </Button>
         </td>
       </tr>

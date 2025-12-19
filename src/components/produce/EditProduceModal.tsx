@@ -1,15 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  Col,
-  Form,
-  Modal,
-  Row,
-  InputGroup,
-  Image as RBImage,
-} from 'react-bootstrap';
+import { Button, Col, Form, Modal, Row, InputGroup, Image as RBImage } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import swal from 'sweetalert';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,18 +23,15 @@ function mapProduceToFormValues(produce: ProduceRelations) {
     owner: produce.owner,
     image: produce.image ?? '',
     restockThreshold: produce.restockThreshold ?? null,
-    expiration: produce.expiration
-      ? produce.expiration.toISOString().split('T')[0]
-      : null,
+    expiration: produce.expiration ? produce.expiration.toISOString().split('T')[0] : null,
     location: produce.location?.name || '',
     storage: produce.storage?.name || '',
   };
 }
 
-type ProduceValues =
-  Omit<InferType<typeof EditProduceSchema>, 'expiration'> & {
-    expiration: string | null;
-  };
+type ProduceValues = Omit<InferType<typeof EditProduceSchema>, 'expiration'> & {
+  expiration: string | null;
+};
 
 interface EditProduceModalProps {
   show: boolean;
@@ -53,29 +42,23 @@ interface EditProduceModalProps {
 export default function EditProduceModal({ show, onHide, produce }: EditProduceModalProps) {
   const router = useRouter();
 
-  const [locations, setLocations] = useState<string[]>(
-    () => (produce.location?.name ? [produce.location.name] : []),
-  );
+  const [locations, setLocations] = useState<string[]>(() => (produce.location?.name ? [produce.location.name] : []));
 
-  const [storageOptions, setStorageOptions] = useState<string[]>(
-    () => (produce.storage?.name ? [produce.storage.name] : []),
+  const [storageOptions, setStorageOptions] = useState<string[]>(() =>
+    produce.storage?.name ? [produce.storage.name] : [],
   );
 
   const [selectedLocation, setSelectedLocation] = useState(produce.location?.name || '');
   const [selectedStorage, setSelectedStorage] = useState(produce.storage?.name || '');
 
-  const unitOptions = useMemo(
-    () => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'],
-    [],
-  );
+  const unitOptions = useMemo(() => ['kg', 'g', 'lb', 'oz', 'pcs', 'ml', 'l', 'Other'], []);
 
-  const [unitChoice, setUnitChoice] = useState(
-    unitOptions.includes(produce.unit) ? produce.unit : 'Other',
-  );
+  const [unitChoice, setUnitChoice] = useState(unitOptions.includes(produce.unit) ? produce.unit : 'Other');
 
   // Image picker modal state
   const [showPicker, setShowPicker] = useState(false);
   const [imageAlt, setImageAlt] = useState('');
+  const [addingToList, setAddingToList] = useState(false);
 
   // RHF setup
   const {
@@ -84,6 +67,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
     reset,
     setValue,
     watch,
+    getValues,
     formState: { errors },
   } = useForm<ProduceValues>({
     resolver: yupResolver(EditProduceSchema) as any,
@@ -152,15 +136,42 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
         ...data,
         expiration: data.expiration ? new Date(data.expiration) : null,
         image: data.image === '' ? null : data.image,
-        restockThreshold: data.restockThreshold
-          ? Number(data.restockThreshold)
-          : 0,
+        restockThreshold: data.restockThreshold ? Number(data.restockThreshold) : 0,
       });
       swal('Success', 'Your item has been updated', 'success', { timer: 2000 });
       handleClose();
       router.refresh();
     } catch (err) {
       swal('Error', 'Failed to update item', 'error');
+    }
+  };
+
+  const handleAddToShoppingList = async () => {
+    try {
+      setAddingToList(true);
+
+      const values = getValues(); // ⭐ read current form values
+
+      const res = await fetch('/api/shopping-list-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: values.name,
+          quantity: values.quantity,
+          unit: values.unit,
+          owner: values.owner, // or produce.owner if you prefer
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to add item');
+      }
+
+      swal('Added', 'Item added to your shopping list', 'success', { timer: 2000 });
+    } catch (err) {
+      swal('Error', 'Could not add item to shopping list', 'error');
+    } finally {
+      setAddingToList(false);
     }
   };
 
@@ -179,29 +190,15 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('name')}
-                  placeholder="e.g., Chicken"
-                  isInvalid={!!errors.name}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.name?.message}
-                </Form.Control.Feedback>
+                <Form.Control type="text" {...register('name')} placeholder="e.g., Chicken" isInvalid={!!errors.name} />
+                <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0 required-field">Type</Form.Label>
-                <Form.Control
-                  type="text"
-                  {...register('type')}
-                  placeholder="e.g., Meat"
-                  isInvalid={!!errors.type}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.type?.message}
-                </Form.Control.Feedback>
+                <Form.Control type="text" {...register('type')} placeholder="e.g., Meat" isInvalid={!!errors.type} />
+                <Form.Control.Feedback type="invalid">{errors.type?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -315,9 +312,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                   placeholder="e.g., 1, 1.5"
                   isInvalid={!!errors.quantity}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.quantity?.message}
-                </Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.quantity?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col xs={6}>
@@ -347,9 +342,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                     isInvalid={!!errors.unit}
                   />
                 )}
-                <Form.Control.Feedback type="invalid">
-                  {errors.unit?.message}
-                </Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.unit?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -366,9 +359,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                   placeholder="e.g., 0.5"
                   isInvalid={!!errors.restockThreshold}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.restockThreshold?.message}
-                </Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.restockThreshold?.message}</Form.Control.Feedback>
                 <Form.Text className="text-muted">
                   When quantity falls below this value, the item will be added to your shopping list.
                 </Form.Text>
@@ -381,14 +372,8 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
             <Col xs={6}>
               <Form.Group>
                 <Form.Label className="mb-0">Expiration Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  {...register('expiration')}
-                  isInvalid={!!errors.expiration}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.expiration?.message}
-                </Form.Control.Feedback>
+                <Form.Control type="date" {...register('expiration')} isInvalid={!!errors.expiration} />
+                <Form.Control.Feedback type="invalid">{errors.expiration?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -396,12 +381,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
               <Form.Group>
                 <Form.Label className="mb-0">Image</Form.Label>
                 <InputGroup>
-                  <Form.Control
-                    type="text"
-                    {...register('image')}
-                    placeholder="Image URL"
-                    isInvalid={!!errors.image}
-                  />
+                  <Form.Control type="text" {...register('image')} placeholder="Image URL" isInvalid={!!errors.image} />
                   <Button
                     variant="outline-secondary"
                     type="button"
@@ -411,9 +391,7 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
                     Pick
                   </Button>
                 </InputGroup>
-                <Form.Control.Feedback type="invalid">
-                  {errors.image?.message}
-                </Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.image?.message}</Form.Control.Feedback>
 
                 {imageVal && (
                   <div className="mt-2">
@@ -437,19 +415,19 @@ export default function EditProduceModal({ show, onHide, produce }: EditProduceM
 
           {/* Buttons */}
           <Row className="d-flex justify-content-between mt-4">
-            <Col xs={6}>
+            <Col xs={4}>
               <Button type="submit" className="btn-submit">
                 Save Changes
               </Button>
             </Col>
-            <Col xs={6}>
-              <Button
-                type="button"
-                variant="warning"
-                onClick={() => reset()}
-                className="btn-reset"
-              >
+            <Col xs={4} className="d-flex justify-content-center">
+              <Button type="button" variant="warning" onClick={() => reset()} className="btn-reset">
                 Reset
+              </Button>
+            </Col>
+            <Col xs={4} className="d-flex justify-content-end">
+              <Button type="button" className="btn-submit" onClick={handleAddToShoppingList} disabled={addingToList}>
+                {addingToList ? 'Adding…' : 'Add to Shopping List'}
               </Button>
             </Col>
           </Row>
