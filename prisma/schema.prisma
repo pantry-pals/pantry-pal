@@ -1,38 +1,151 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String
-  role          Role     @default(USER)
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                     Int                     @id @default(autoincrement())
+  email                  String                  @unique
+  password               String
+  role                   Role                    @default(USER)
+  emailVerified          Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  emailVerificationCodes EmailVerificationCode[]
+  passwordResetTokens    PasswordResetToken[]
+}
+
+model EmailVerificationCode {
+  id        Int      @id @default(autoincrement())
+  code      String
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Produce {
+  id               Int       @id @default(autoincrement())
+  name             String
+  type             String
+  quantity         Float
+  expiration       DateTime?
+  owner            String
+  image            String?
+  unit             String
+  restockThreshold Float?
+  customThreshold  Float?
+  restockTrigger   String    @default("empty")
+  locationId       Int
+  storageId        Int
+  location         Location  @relation(fields: [locationId], references: [id])
+  storage          Storage   @relation(fields: [storageId], references: [id])
+
+  @@unique([name, owner])
+}
+
+model Location {
+  id        Int       @id @default(autoincrement())
+  name      String
+  owner     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  produces  Produce[]
+  storages  Storage[]
+
+  @@unique([name, owner])
+}
+
+model Storage {
+  id         Int       @id @default(autoincrement())
+  name       String
+  locationId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  produces   Produce[]
+  location   Location  @relation(fields: [locationId], references: [id])
+
+  @@unique([name, locationId])
+}
+
+model ShoppingList {
+  id        Int                @id @default(autoincrement())
+  name      String
+  owner     String
+  createdAt DateTime           @default(now())
+  items     ShoppingListItem[]
+
+  @@unique([name, owner])
+}
+
+model ShoppingListItem {
+  id              Int          @id @default(autoincrement())
+  shoppingListId  Int
+  quantity        Float
+  price           Decimal?     @db.Decimal(10, 2)
+  customThreshold Float?
+  restockTrigger  String?
+  name            String
+  unit            String?
+  shoppingList    ShoppingList @relation(fields: [shoppingListId], references: [id])
+
+  @@unique([shoppingListId, name])
+}
+
+model Recipe {
+  id              Int                @id @default(autoincrement())
+  title           String
+  description     String?
+  imageUrl        String?
+  cuisine         String
+  dietary         String[]
+  owner           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  cookMinutes     Int?
+  instructions    String?
+  prepMinutes     Int?
+  servings        Int?
+  sourceUrl       String?
+  ingredientItems RecipeIngredient[]
+
+  @@unique([title, owner], name: "title_owner")
+  @@index([title])
+  @@index([cuisine])
+}
+
+model RecipeIngredient {
+  id       Int     @id @default(autoincrement())
+  recipeId Int
+  name     String
+  quantity Float?
+  unit     String?
+  order    Int?
+  recipe   Recipe  @relation(fields: [recipeId], references: [id])
+
+  @@index([recipeId])
 }
 
 enum Role {
   USER
   ADMIN
-}
-
-enum Condition {
-  excellent
-  good
-  fair
-  poor
-}
-
-model Stuff {
-  id        Int       @id @default(autoincrement())
-  name      String
-  quantity  Int
-  condition Condition @default(good)
-  owner     String
 }

@@ -1,36 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { hash } from 'bcrypt';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { message: 'Missing required fields' },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json(
-        { message: 'User already exists' },
-        { status: 409 },
-      );
+      return NextResponse.json({ message: 'User already exists' }, { status: 409 });
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hash(password, 10);
 
-    // Create user with default role of USER and emailVerified set to false
+    // Create user
     const user = await prisma.user.create({
       data: {
         email,
@@ -41,14 +30,11 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: 'User created', userId: user.id },
+      { message: 'User created successfully', userId: user.id },
       { status: 201 },
     );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 },
-    );
+    console.error('Error creating user:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

@@ -21,6 +21,7 @@
     "react/jsx-props-no-spreading": "off",
     "react/one-expression-per-line": "off",
     "react/react-in-jsx-scope": "off",
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "jsx-a11y/label-has-associated-control": "off"
   }
 }

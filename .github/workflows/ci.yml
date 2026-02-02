@@ -1,29 +1,39 @@
-name: ci-nextjs-application-template
+name: pantry-pals
+
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+
       - name: Run ESLint
         run: npm run lint
-    # - name: Run Playwright tests
-    # run: npx playwright test
-    # - uses: actions/upload-artifact@v4
-    # if: always()
-    # with:
-    # name: playwright-report
-    # path: playwright-report/
-    # retention-days: 30
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # CURRENTLY DISABLED DUE TO CHROME ISSUES
+      # - name: Run TestCafe Acceptance Tests
+      #   env:
+      #     NEXTAUTH_URL: "http://localhost:3000"
+      #     NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      #     GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      #     GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+      #     UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      #   run: npm run test-acceptance-ci
