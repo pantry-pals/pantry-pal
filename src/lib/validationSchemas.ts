@@ -18,6 +18,7 @@ export const AddProduceSchema = Yup.object({
     .transform((curr, orig) => (orig === '' ? null : curr))
     .min(0, 'Threshold cannot be negative')
     .notRequired(),
+  commonItemId: Yup.number().nullable().notRequired(),
 });
 
 export const EditProduceSchema = Yup.object({
@@ -34,12 +35,12 @@ export const EditProduceSchema = Yup.object({
     .notRequired(),
   owner: Yup.string().required(),
   image: Yup.string().nullable().notRequired(),
-
   restockThreshold: Yup.number()
     .nullable()
     .transform((curr, orig) => (orig === '' ? null : curr))
     .min(0, 'Threshold cannot be negative')
     .notRequired(),
+  commonItemId: Yup.number().nullable().notRequired(),
 });
 
 export const AddLocationSchema = Yup.object({
@@ -69,8 +70,14 @@ export const AddShoppingListItemSchema = Yup.object({
   unit: Yup.string().optional(),
   price: Yup.number()
     .typeError('Price must be a number')
-    .optional()
-    .transform((_, val) => (val !== '' ? Number(val) : null)),
+    .nullable()
+    .transform((curr, orig) => {
+      // Allow empty -> null, and guard against NaN from RHF coercion.
+      if (orig === '' || orig === null || typeof orig === 'undefined') return null;
+      return Number.isNaN(curr) ? null : curr;
+    })
+    .min(0, 'Price cannot be negative')
+    .notRequired(),
   shoppingListId: Yup.number()
     .typeError('A shopping list must be selected')
     .required('Shopping list is required'),
@@ -92,4 +99,15 @@ export const EditShoppingListItemSchema = Yup.object({
     .transform((curr, orig) => (orig === '' ? null : curr))
     .min(0, 'Threshold cannot be negative')
     .notRequired(),
+});
+
+export const CommonItemSchema = Yup.object({
+  owner: Yup.string().required('Owner is required'),
+  name: Yup.string().trim().required('Common item name is required'),
+  displayUnit: Yup.string().trim().required('Display unit is required'),
+  normalizedQuantityPerUnit: Yup.number()
+    .typeError('Normalized quantity is required')
+    .positive('Normalized quantity must be greater than 0')
+    .required('Normalized quantity is required'),
+  normalizedUnit: Yup.string().required('Normalized unit is required'),
 });
