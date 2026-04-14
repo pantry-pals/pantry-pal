@@ -1,12 +1,14 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import swal from 'sweetalert';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { PencilSquare, Trash } from 'react-bootstrap-icons';
+import { PencilSquare, Trash, PlusLg } from 'react-bootstrap-icons';
 import { ProduceRelations } from '@/types/ProduceRelations';
+import { formatQuantityForDisplay } from '@/lib/fractions';
+import { getPantryDisplayAmount } from '@/lib/displayUnits';
 import EditProduceModal from './EditProduceModal';
 import '../../styles/buttons.css';
 import DeleteProduceModal from './DeleteProduceModal';
+import AddToMultipleShoppingListsModal from '../shopping-list/AddToMultipleShoppingListsModal';
 
 /* eslint-disable react/require-default-props */
 const ProduceItem = ({
@@ -17,45 +19,35 @@ const ProduceItem = ({
   type,
   location,
   storage,
+  locationId,
+  storageId,
   expiration,
   owner,
   image,
   restockThreshold = 1,
-}: ProduceRelations & { restockThreshold?: number }) => {
+  customThreshold,
+  restockTrigger,
+  commonItemId,
+  commonItem,
+  displayQuantity,
+  displayUnit,
+  shoppingLists,
+}: ProduceRelations & {
+  restockThreshold?: number;
+  shoppingLists: { id: number; name: string; isCompleted?: boolean }[];
+}) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [addingToList, setAddingToList] = useState(false);
+  const [showAddListsModal, setShowAddListsModal] = useState(false);
 
   const safeRestock = restockThreshold ?? 1;
 
-  const handleAddToShoppingList = async () => {
-    if (addingToList) return;
-    try {
-      setAddingToList(true);
-
-      const res = await fetch('/api/shopping-list-item', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          owner,
-          name,
-          quantity: Number(quantity),
-          unit: unit ?? '',
-        }),
-      });
-
-      if (!res.ok) {
-        const msg = await res.text().catch(() => '');
-        throw new Error(msg || 'Failed');
-      }
-
-      swal('Added', `${name} added to your shopping list`, 'success', { timer: 2000 });
-    } catch (e) {
-      swal('Error', 'Failed to add item to shopping list', 'error');
-    } finally {
-      setAddingToList(false);
-    }
-  };
+  const display = getPantryDisplayAmount({
+    quantity,
+    unit,
+    displayQuantity,
+    displayUnit,
+  });
 
   return (
     <>
@@ -67,10 +59,10 @@ const ProduceItem = ({
           {(typeof location === 'object' ? location?.name : location) || 'N/A'}
         </td>
         <td>
-          {quantity.toString()}
-          {unit ? ` ${unit}` : ''}
+          {formatQuantityForDisplay(display.quantity)}
+          {display.unit ? ` ${display.unit}` : ''}
         </td>
-        <td>{safeRestock}</td>
+        <td>{formatQuantityForDisplay(safeRestock)}</td>
         <td>{expiration ? new Date(expiration).toISOString().split('T')[0] : 'N/A'}</td>
         <td>
           <Button className="btn-edit" onClick={() => setShowEditModal(true)}>
@@ -83,19 +75,12 @@ const ProduceItem = ({
           </Button>
         </td>
         <td>
-          <Button
-            variant="success"
-            size="sm"
-            className="btn-submit"
-            onClick={handleAddToShoppingList}
-            disabled={addingToList}
-          >
-            {addingToList ? 'Adding…' : 'Add'}
+          <Button className="btn-edit" onClick={() => setShowAddListsModal(true)}>
+            <PlusLg color="white" size={18} />
           </Button>
         </td>
       </tr>
 
-      {/* Edit modal */}
       <EditProduceModal
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
@@ -107,14 +92,21 @@ const ProduceItem = ({
           type,
           location,
           storage,
+          locationId,
+          storageId,
           expiration,
           owner,
           image,
           restockThreshold: safeRestock,
+          customThreshold: customThreshold ?? null,
+          restockTrigger,
+          commonItemId: commonItemId ?? null,
+          displayQuantity,
+          displayUnit,
+          commonItem: commonItem ?? null,
         }}
       />
 
-      {/* Delete modal */}
       <DeleteProduceModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
@@ -126,11 +118,26 @@ const ProduceItem = ({
           type,
           location,
           storage,
+          locationId,
+          storageId,
           expiration,
           owner,
           image,
           restockThreshold: safeRestock,
+          customThreshold: customThreshold ?? null,
+          restockTrigger,
+          commonItemId: commonItemId ?? null,
+          displayQuantity,
+          displayUnit,
+          commonItem: commonItem ?? null,
         }}
+      />
+
+      <AddToMultipleShoppingListsModal
+        show={showAddListsModal}
+        onHide={() => setShowAddListsModal(false)}
+        shoppingLists={shoppingLists}
+        item={{ name, quantity: Number(quantity), unit: unit ?? null }}
       />
     </>
   );
